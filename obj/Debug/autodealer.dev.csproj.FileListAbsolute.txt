@@ -58,3 +58,4 @@ C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\obj\Debug\autodealer.dev
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\obj\Debug\autodealer.dev.csproj.CopyComplete
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\obj\Debug\autodealer.dev.dll
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\obj\Debug\autodealer.dev.pdb
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\obj\Debug\autodealer.dev.csproj.AssemblyReference.cache
