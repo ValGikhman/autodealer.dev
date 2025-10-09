@@ -59,3 +59,15 @@ C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\obj\Debug\autodealer.dev
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\obj\Debug\autodealer.dev.dll
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\obj\Debug\autodealer.dev.pdb
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\obj\Debug\autodealer.dev.csproj.AssemblyReference.cache
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Services.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Net.Http.Formatting.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Web.Http.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Web.Http.WebHost.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Common.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Services.pdb
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Services.dll.config
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Net.Http.Formatting.xml
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Web.Http.xml
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Web.Http.WebHost.xml
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Common.pdb
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Common.dll.config

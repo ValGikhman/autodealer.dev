@@ -9,6 +9,7 @@ namespace autodealer.dev {
     public class RouteConfig {
         public static void RegisterRoutes(RouteCollection routes) {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+            routes.IgnoreRoute("api/{*pathInfo}"); // <— important in mixed MVC + Web API apps
 
             routes.MapRoute(
                 name: "Default",
