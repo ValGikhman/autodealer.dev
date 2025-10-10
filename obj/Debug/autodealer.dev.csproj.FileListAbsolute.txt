@@ -71,3 +71,15 @@ C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Web.Http.xml
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Web.Http.WebHost.xml
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Common.pdb
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Common.dll.config
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Unity.Container.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Unity.Mvc5.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Threading.Tasks.Extensions.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Unity.Container.pdb
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Unity.Mvc.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Unity.WebApi.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\WebActivatorEx.dll
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Threading.Tasks.Extensions.xml
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Unity.Mvc.pdb
+C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Unity.Mvc.xml
