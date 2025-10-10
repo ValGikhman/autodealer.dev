@@ -11,6 +11,7 @@ namespace autodealer.dev {
     public class MvcApplication : System.Web.HttpApplication {
         protected void Application_Start() {
             GlobalConfiguration.Configure(WebApiConfig.Register); // <— must be here, and BEFORE MVC routes
+            UnityConfig.RegisterComponents();
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
