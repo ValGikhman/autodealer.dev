@@ -13,7 +13,7 @@ namespace autodealer.dev.Controllers {
             return Ok();
         }
 
-        [HttpGet, Route("{vin")]
+        [HttpGet, Route("{vin}")]
         public IHttpActionResult Get([FromUri] string vin) {
             return Ok();
         }
