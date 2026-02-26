@@ -10,12 +10,9 @@ namespace autodealer.dev.Controllers {
 
         [HttpGet, Route("")]
         public IHttpActionResult Get() {
-            return Ok();
-        }
-
-        [HttpGet, Route("{vin}")]
-        public IHttpActionResult Get([FromUri] string vin) {
-            return Ok();
+            var service = new InventoryService();
+            var rows = service.GetAll();
+            return Ok(rows);
         }
     }
 }
