@@ -1,4 +1,5 @@
-﻿using Services;
+﻿using Common;
+using Services;
 using System;
 using System.Configuration;
 using System.Web.Http;
@@ -11,8 +12,14 @@ namespace autodealer.dev.Controllers {
         [HttpGet, Route("")]
         public IHttpActionResult Get() {
             var service = new InventoryService();
-            var rows = service.GetAll();
-            return Ok(rows);
+            var vehicles = service.GetAll();
+
+            var response = new InventoryResponse
+            {
+                InventoryDate = DateTime.UtcNow,
+                Vehicles = vehicles
+            };
+            return Ok(response);
         }
     }
 }
