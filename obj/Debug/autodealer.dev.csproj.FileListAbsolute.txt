@@ -83,13 +83,3 @@ C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\WebActivatorEx.dll
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Threading.Tasks.Extensions.xml
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Unity.Mvc.pdb
 C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\Unity.Mvc.xml
-C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Text.Json.dll
-C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Memory.dll
-C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.ValueTuple.dll
-C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Numerics.Vectors.dll
-C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Buffers.dll
-C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Text.Json.xml
-C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Memory.xml
-C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.ValueTuple.xml
-C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Numerics.Vectors.xml
-C:\Users\valen\source\repos\GTXAutoGroup\autodealer.dev\bin\System.Buffers.xml
