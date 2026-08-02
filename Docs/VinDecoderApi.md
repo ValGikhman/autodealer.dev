@@ -32,6 +32,127 @@ Cache-Control: no-store
 The response is an embeddable HTML fragment containing scoped CSS. It is not a
 complete document with `html`, `head`, or `body` elements.
 
+## JSON and XML endpoints
+
+Use the format-specific endpoints when vehicle data will be processed by an
+application instead of rendered directly:
+
+```http
+GET /api/service/vin/{vin}/json
+GET /api/service/vin/{vin}/xml
+```
+
+Both endpoints use the same response object and include:
+
+- The normalized VIN.
+- The UTC decode timestamp.
+- The complete DataOne response, including every style, repeated record,
+  element, and attribute.
+
+### JSON request
+
+```bash
+curl --fail-with-body \
+  --header "Accept: application/json" \
+  "https://localhost:44398/api/service/vin/1HGCM82633A004352/json"
+```
+
+Example response shape:
+
+```json
+{
+  "vin": "1HGCM82633A004352",
+  "decodedAtUtc": "2026-08-02T14:30:00.0000000Z",
+  "data": {
+    "decoder_messages": {
+      "service_provider": "DataOne Software"
+    },
+    "query_responses": {
+      "query_response": {
+        "us_market_data": {
+          "us_styles": {
+            "@count": "2",
+            "style": [
+              { "@name": "LX", "basic_data": {} },
+              { "@name": "EX", "basic_data": {} }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+XML attributes use an `@` prefix in JSON. Repeated XML elements are represented
+as JSON arrays.
+
+Browser example:
+
+```javascript
+const vin = "1HGCM82633A004352";
+const response = await fetch(
+    `/api/service/vin/${encodeURIComponent(vin)}/json`,
+    { headers: { Accept: "application/json" }, cache: "no-store" }
+);
+
+const result = await response.json();
+if (!response.ok) throw new Error(result.message || "VIN decode failed.");
+
+console.log(result.vin);
+console.log(result.decodedAtUtc);
+console.log(result.data);
+```
+
+### XML request
+
+```bash
+curl --fail-with-body \
+  --header "Accept: application/xml" \
+  "https://localhost:44398/api/service/vin/1HGCM82633A004352/xml"
+```
+
+Example response shape:
+
+```xml
+<vin_decode_response>
+  <vin>1HGCM82633A004352</vin>
+  <decoded_at_utc>2026-08-02T14:30:00.0000000Z</decoded_at_utc>
+  <data>
+    <decoded_data>
+      <decoder_messages>...</decoder_messages>
+      <query_responses>...</query_responses>
+    </decoded_data>
+  </data>
+</vin_decode_response>
+```
+
+C# deserialization can use `XDocument` when the complete, evolving DataOne
+schema needs to be retained:
+
+```csharp
+using System.Net.Http;
+using System.Xml.Linq;
+
+var xml = await httpClient.GetStringAsync(
+    baseUrl + "/api/service/vin/1HGCM82633A004352/xml");
+var response = XDocument.Parse(xml);
+var dataOne = response.Root.Element("data").Element("decoded_data");
+```
+
+Successful JSON and XML responses use `application/json` and `application/xml`
+respectively. Errors use the requested endpoint's format as well:
+
+```json
+{ "message": "VIN must contain exactly 17 letters or digits and cannot contain I, O, or Q." }
+```
+
+```xml
+<error>
+  <message>VIN must contain exactly 17 letters or digits and cannot contain I, O, or Q.</message>
+</error>
+```
+
 ## VIN validation
 
 A VIN must:
@@ -284,4 +405,3 @@ environment or a protected configuration provider.
 - The existing raw endpoint, `GET /api/service/{vin}`, remains available for
   backward compatibility. The `/html` endpoint is the recommended endpoint for
   rendering vehicle details.
-
