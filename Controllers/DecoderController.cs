@@ -62,5 +62,64 @@ namespace autodealer.dev.Controllers {
                 return Content(HttpStatusCode.BadGateway, new { message = "The VIN decoder is temporarily unavailable." });
             }
         }
+
+        /// <summary>
+        /// Decodes a VIN and returns the complete DataOne response as JSON.
+        /// </summary>
+        [HttpGet, Route("vin/{vin}/json")]
+        public IHttpActionResult GetJson([FromUri] string vin) {
+            return GetStructuredResponse(vin, "json");
+        }
+
+        /// <summary>
+        /// Decodes a VIN and returns the complete DataOne response as XML.
+        /// </summary>
+        [HttpGet, Route("vin/{vin}/xml")]
+        public IHttpActionResult GetXml([FromUri] string vin) {
+            return GetStructuredResponse(vin, "xml");
+        }
+
+        private IHttpActionResult GetStructuredResponse(string vin, string format) {
+            if (VinDecoderService == null)
+                return CreateStructuredError(format, HttpStatusCode.InternalServerError, "VinDecoderService is not configured.");
+
+            try {
+                var normalizedVin = (vin ?? string.Empty).Trim().ToUpperInvariant();
+                if (!Regex.IsMatch(normalizedVin, "^[A-HJ-NPR-Z0-9]{17}$"))
+                    return CreateStructuredError(format, HttpStatusCode.BadRequest, "VIN must contain exactly 17 letters or digits and cannot contain I, O, or Q.");
+
+                var dataOneXml = VinDecoderService.DecodeVin(normalizedVin, dataOneApiKey, dataOneSecretApiKey);
+                var result = VinDecodeApiResponse.Create(normalizedVin, dataOneXml);
+                var isJson = string.Equals(format, "json", StringComparison.OrdinalIgnoreCase);
+                var body = isJson
+                    ? result.ToJsonObject().ToString(Newtonsoft.Json.Formatting.Indented)
+                    : result.ToXmlDocument().ToString();
+                var response = new HttpResponseMessage(HttpStatusCode.OK) {
+                    Content = new StringContent(body, Encoding.UTF8, isJson ? "application/json" : "application/xml")
+                };
+                response.Headers.CacheControl = new CacheControlHeaderValue { NoStore = true };
+                return ResponseMessage(response);
+            }
+            catch (VinDecodeResponseException ex) {
+                return CreateStructuredError(format, (HttpStatusCode)422, ex.Message);
+            }
+            catch (Exception) {
+                return CreateStructuredError(format, HttpStatusCode.BadGateway, "The VIN decoder is temporarily unavailable.");
+            }
+        }
+
+        private IHttpActionResult CreateStructuredError(string format, HttpStatusCode statusCode, string message) {
+            var isJson = string.Equals(format, "json", StringComparison.OrdinalIgnoreCase);
+            var body = isJson
+                ? new Newtonsoft.Json.Linq.JObject { ["message"] = message }.ToString(Newtonsoft.Json.Formatting.Indented)
+                : new System.Xml.Linq.XDocument(
+                    new System.Xml.Linq.XElement("error",
+                        new System.Xml.Linq.XElement("message", message))).ToString();
+            var response = new HttpResponseMessage(statusCode) {
+                Content = new StringContent(body, Encoding.UTF8, isJson ? "application/json" : "application/xml")
+            };
+            response.Headers.CacheControl = new CacheControlHeaderValue { NoStore = true };
+            return ResponseMessage(response);
+        }
     }
 }
