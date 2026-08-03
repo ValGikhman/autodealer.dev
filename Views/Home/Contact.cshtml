@@ -1,17 +1,6 @@
-﻿@{
-    ViewBag.Title = "Contact";
-}
-<h2>@ViewBag.Title.</h2>
-<h3>@ViewBag.Message</h3>
-
-<address>
-    One Microsoft Way<br />
-    Redmond, WA 98052-6399<br />
-    <abbr title="Phone">P:</abbr>
-    425.555.0100
-</address>
-
-<address>
-    <strong>Support:</strong>   <a href="mailto:Support@example.com">Support@example.com</a><br />
-    <strong>Marketing:</strong> <a href="mailto:Marketing@example.com">Marketing@example.com</a>
-</address>
+@{ ViewBag.Title = "Contact"; ViewBag.BodyClass = "content-page"; }
+<section class="page-hero content-hero"><div class="shell"><span class="eyebrow">CONTACT</span><h1>Let&rsquo;s build your<br /><em>dealer experience.</em></h1><p>Tell us what you are integrating, how many rooftops you support, or where you need help. We will route you to the right person.</p></div></section>
+<section class="section content-section"><div class="shell contact-grid">
+    <a class="contact-card" href="mailto:hello@autodealer.dev"><span class="contact-index">01 / SALES</span><h2>Plan a platform rollout.</h2><p>Discuss dealer websites, inventory workflows, pricing, and multi-location needs.</p><strong>hello@autodealer.dev <i>&rarr;</i></strong></a>
+    <a class="contact-card" href="mailto:support@autodealer.dev"><span class="contact-index">02 / SUPPORT</span><h2>Get integration help.</h2><p>Share an endpoint, request ID, or API response and our team can help investigate.</p><strong>support@autodealer.dev <i>&rarr;</i></strong></a>
+</div></section>

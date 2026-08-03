@@ -1,13 +1,2 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Error</title>
-</head>
-<body>
-    <hgroup>
-        <h1>Error.</h1>
-        <h2>An error occurred while processing your request.</h2>
-    </hgroup>
-</body>
-</html>
+@{ ViewBag.Title = "Something went wrong"; ViewBag.BodyClass = "content-page error-page"; }
+<section class="page-hero error-hero"><div class="shell narrow"><span class="eyebrow">SYSTEM STATUS / ERROR</span><h1>That request hit<br /><em>a roadblock.</em></h1><p>An unexpected error occurred while processing the request. Try again, or return to the main site.</p><div class="button-row centered-row"><a class="button button-primary" href="@Url.Action("Index", "Home")">Return home &rarr;</a><a class="button button-secondary" href="mailto:support@autodealer.dev">Contact support</a></div></div></section>

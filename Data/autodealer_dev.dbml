@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Database Name="GTX" EntityNamespace="autodealer.dev.Data" ContextNamespace="autodealer.dev.Data" Class="AutoDealerDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Table Name="dbo.ApiKeys" Member="ApiKeys">
+    <Type Name="ApiKey">
+      <Column Name="ApiKeyId" Type="System.Int64" DbType="BigInt NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="ClientId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="SubscriptionId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="KeyId" Type="System.String" DbType="VarChar(64) NOT NULL" CanBeNull="false" />
+      <Column Name="SecretHash" Type="System.Data.Linq.Binary" DbType="Binary(32) NOT NULL" CanBeNull="false" />
+      <Column Name="KeyPrefix" Type="System.String" DbType="VarChar(20) NOT NULL" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="NVarChar(80) NOT NULL" CanBeNull="false" />
+      <Column Name="Scopes" Type="System.String" DbType="VarChar(500) NOT NULL" CanBeNull="false" />
+      <Column Name="Status" Type="System.String" DbType="VarChar(20) NOT NULL" CanBeNull="false" />
+      <Column Name="LastUsedUtc" Type="System.DateTime" DbType="DateTime2(3)" CanBeNull="true" />
+      <Column Name="ExpiresUtc" Type="System.DateTime" DbType="DateTime2(3)" CanBeNull="true" />
+      <Column Name="RevokedUtc" Type="System.DateTime" DbType="DateTime2(3)" CanBeNull="true" />
+      <Column Name="CreatedUtc" Type="System.DateTime" DbType="DateTime2(3) NOT NULL" CanBeNull="false" />
+      <Association Name="FK_ApiKeys_Client" Member="Client" ThisKey="ClientId" OtherKey="ClientId" Type="Client" IsForeignKey="true" />
+      <Association Name="FK_ApiKeys_Subscription" Member="Subscription" ThisKey="SubscriptionId" OtherKey="SubscriptionId" Type="Subscription" IsForeignKey="true" />
+      <Association Name="FK_ApiUsageLog_Key" Member="ApiUsageLogs" ThisKey="ApiKeyId" OtherKey="ApiKeyId" Type="ApiUsageLog" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.ApiUsageDaily" Member="ApiUsageDailies">
+    <Type Name="ApiUsageDaily">
+      <Column Name="UsageDate" Type="System.DateTime" DbType="Date NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="ClientId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="SubscriptionId" Type="System.Int64" DbType="BigInt NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="RequestCount" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ErrorCount" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="TotalDurationMs" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Association Name="FK_ApiUsageDaily_Client" Member="Client" ThisKey="ClientId" OtherKey="ClientId" Type="Client" IsForeignKey="true" />
+      <Association Name="FK_ApiUsageDaily_Subscription" Member="Subscription" ThisKey="SubscriptionId" OtherKey="SubscriptionId" Type="Subscription" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.ApiUsageLog" Member="ApiUsageLogs">
+    <Type Name="ApiUsageLog">
+      <Column Name="RequestId" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="ApiKeyId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="ClientId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="SubscriptionId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="Endpoint" Type="System.String" DbType="NVarChar(300) NOT NULL" CanBeNull="false" />
+      <Column Name="HttpMethod" Type="System.String" DbType="VarChar(10) NOT NULL" CanBeNull="false" />
+      <Column Name="StatusCode" Type="System.Int16" DbType="SmallInt" CanBeNull="true" />
+      <Column Name="DurationMs" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="IpAddress" Type="System.String" DbType="VarChar(64)" CanBeNull="true" />
+      <Column Name="UserAgent" Type="System.String" DbType="NVarChar(300)" CanBeNull="true" />
+      <Column Name="RequestedUtc" Type="System.DateTime" DbType="DateTime2(3) NOT NULL" CanBeNull="false" />
+      <Column Name="CompletedUtc" Type="System.DateTime" DbType="DateTime2(3)" CanBeNull="true" />
+      <Association Name="FK_ApiUsageLog_Client" Member="Client" ThisKey="ClientId" OtherKey="ClientId" Type="Client" IsForeignKey="true" />
+      <Association Name="FK_ApiUsageLog_Key" Member="ApiKey" ThisKey="ApiKeyId" OtherKey="ApiKeyId" Type="ApiKey" IsForeignKey="true" />
+      <Association Name="FK_ApiUsageLog_Subscription" Member="Subscription" ThisKey="SubscriptionId" OtherKey="SubscriptionId" Type="Subscription" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.ClientCredentials" Member="ClientCredentials">
+    <Type Name="ClientCredential">
+      <Column Name="ClientId" Type="System.Int64" DbType="BigInt NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="PasswordHash" Type="System.Data.Linq.Binary" DbType="VarBinary(64) NOT NULL" CanBeNull="false" />
+      <Column Name="PasswordSalt" Type="System.Data.Linq.Binary" DbType="VarBinary(64) NOT NULL" CanBeNull="false" />
+      <Column Name="PasswordIterations" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="PasswordAlgorithm" Type="System.String" DbType="VarChar(32) NOT NULL" CanBeNull="false" />
+      <Column Name="PasswordChangedUtc" Type="System.DateTime" DbType="DateTime2(3) NOT NULL" CanBeNull="false" />
+      <Column Name="FailedLoginCount" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="LockedUntilUtc" Type="System.DateTime" DbType="DateTime2(3)" CanBeNull="true" />
+      <Association Name="FK_ClientCredentials_Client" Member="Client" ThisKey="ClientId" OtherKey="ClientId" Type="Client" IsForeignKey="true" DeleteOnNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Clients" Member="Clients">
+    <Type Name="Client">
+      <Column Name="ClientId" Type="System.Int64" DbType="BigInt NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="ClientNumber" Type="System.String" DbType="VarChar(32) NOT NULL" CanBeNull="false" />
+      <Column Name="BusinessName" Type="System.String" DbType="NVarChar(160) NOT NULL" CanBeNull="false" />
+      <Column Name="FirstName" Type="System.String" DbType="NVarChar(80) NOT NULL" CanBeNull="false" />
+      <Column Name="LastName" Type="System.String" DbType="NVarChar(80) NOT NULL" CanBeNull="false" />
+      <Column Name="Email" Type="System.String" DbType="NVarChar(254) NOT NULL" CanBeNull="false" />
+      <Column Name="Phone" Type="System.String" DbType="NVarChar(32)" CanBeNull="true" />
+      <Column Name="Status" Type="System.String" DbType="VarChar(20) NOT NULL" CanBeNull="false" />
+      <Column Name="EmailVerifiedUtc" Type="System.DateTime" DbType="DateTime2(3)" CanBeNull="true" />
+      <Column Name="CreatedUtc" Type="System.DateTime" DbType="DateTime2(3) NOT NULL" CanBeNull="false" />
+      <Column Name="UpdatedUtc" Type="System.DateTime" DbType="DateTime2(3) NOT NULL" CanBeNull="false" />
+      <Column Name="RowVersion" Type="System.Data.Linq.Binary" DbType="rowversion NOT NULL" CanBeNull="false" IsVersion="true" />
+      <Association Name="FK_ApiKeys_Client" Member="ApiKeys" ThisKey="ClientId" OtherKey="ClientId" Type="ApiKey" DeleteRule="NO ACTION" />
+      <Association Name="FK_ApiUsageDaily_Client" Member="ApiUsageDailies" ThisKey="ClientId" OtherKey="ClientId" Type="ApiUsageDaily" DeleteRule="NO ACTION" />
+      <Association Name="FK_ApiUsageLog_Client" Member="ApiUsageLogs" ThisKey="ClientId" OtherKey="ClientId" Type="ApiUsageLog" DeleteRule="NO ACTION" />
+      <Association Name="FK_ClientCredentials_Client" Member="ClientCredential" ThisKey="ClientId" OtherKey="ClientId" Type="ClientCredential" Cardinality="One" DeleteRule="CASCADE" />
+      <Association Name="FK_PaymentProfiles_Client" Member="PaymentProfiles" ThisKey="ClientId" OtherKey="ClientId" Type="PaymentProfile" DeleteRule="CASCADE" />
+      <Association Name="FK_Subscriptions_Client" Member="Subscriptions" ThisKey="ClientId" OtherKey="ClientId" Type="Subscription" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.PaymentProfiles" Member="PaymentProfiles">
+    <Type Name="PaymentProfile">
+      <Column Name="PaymentProfileId" Type="System.Int64" DbType="BigInt NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="ClientId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="Provider" Type="System.String" DbType="VarChar(32) NOT NULL" CanBeNull="false" />
+      <Column Name="ProviderCustomerId" Type="System.String" DbType="NVarChar(200)" CanBeNull="true" />
+      <Column Name="ProviderPaymentMethodId" Type="System.String" DbType="NVarChar(200) NOT NULL" CanBeNull="false" />
+      <Column Name="CardBrand" Type="System.String" DbType="VarChar(30)" CanBeNull="true" />
+      <Column Name="CardLast4" Type="System.String" DbType="Char(4)" CanBeNull="true" />
+      <Column Name="ExpMonth" Type="System.Byte" DbType="TinyInt" CanBeNull="true" />
+      <Column Name="ExpYear" Type="System.Int16" DbType="SmallInt" CanBeNull="true" />
+      <Column Name="IsDefault" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreatedUtc" Type="System.DateTime" DbType="DateTime2(3) NOT NULL" CanBeNull="false" />
+      <Association Name="FK_PaymentProfiles_Client" Member="Client" ThisKey="ClientId" OtherKey="ClientId" Type="Client" IsForeignKey="true" DeleteOnNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Plans" Member="Plans">
+    <Type Name="Plan">
+      <Column Name="PlanId" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="PlanCode" Type="System.String" DbType="VarChar(32) NOT NULL" CanBeNull="false" />
+      <Column Name="DisplayName" Type="System.String" DbType="NVarChar(80) NOT NULL" CanBeNull="false" />
+      <Column Name="MonthlyPrice" Type="System.Decimal" DbType="Decimal(10,2)" CanBeNull="true" />
+      <Column Name="MonthlyRequestQuota" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="MaxApiKeys" Type="System.Int16" DbType="SmallInt NOT NULL" CanBeNull="false" />
+      <Column Name="IsActive" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="CreatedUtc" Type="System.DateTime" DbType="DateTime2(3) NOT NULL" CanBeNull="false" />
+      <Association Name="FK_Subscriptions_Plan" Member="Subscriptions" ThisKey="PlanId" OtherKey="PlanId" Type="Subscription" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Subscriptions" Member="Subscriptions">
+    <Type Name="Subscription">
+      <Column Name="SubscriptionId" Type="System.Int64" DbType="BigInt NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="ClientId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
+      <Column Name="PlanId" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="Status" Type="System.String" DbType="VarChar(20) NOT NULL" CanBeNull="false" />
+      <Column Name="CurrentPeriodStartUtc" Type="System.DateTime" DbType="DateTime2(3) NOT NULL" CanBeNull="false" />
+      <Column Name="CurrentPeriodEndUtc" Type="System.DateTime" DbType="DateTime2(3) NOT NULL" CanBeNull="false" />
+      <Column Name="CancelAtPeriodEnd" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="ProviderSubscriptionId" Type="System.String" DbType="NVarChar(200)" CanBeNull="true" />
+      <Column Name="CreatedUtc" Type="System.DateTime" DbType="DateTime2(3) NOT NULL" CanBeNull="false" />
+      <Column Name="UpdatedUtc" Type="System.DateTime" DbType="DateTime2(3) NOT NULL" CanBeNull="false" />
+      <Association Name="FK_ApiKeys_Subscription" Member="ApiKeys" ThisKey="SubscriptionId" OtherKey="SubscriptionId" Type="ApiKey" DeleteRule="NO ACTION" />
+      <Association Name="FK_ApiUsageDaily_Subscription" Member="ApiUsageDailies" ThisKey="SubscriptionId" OtherKey="SubscriptionId" Type="ApiUsageDaily" DeleteRule="NO ACTION" />
+      <Association Name="FK_ApiUsageLog_Subscription" Member="ApiUsageLogs" ThisKey="SubscriptionId" OtherKey="SubscriptionId" Type="ApiUsageLog" DeleteRule="NO ACTION" />
+      <Association Name="FK_Subscriptions_Client" Member="Client" ThisKey="ClientId" OtherKey="ClientId" Type="Client" IsForeignKey="true" />
+      <Association Name="FK_Subscriptions_Plan" Member="Plan" ThisKey="PlanId" OtherKey="PlanId" Type="Plan" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Function Name="dbo.usp_ApiAuthenticateAndBeginRequest" Method="Usp_ApiAuthenticateAndBeginRequest" HasMultipleResults="true">
+    <Parameter Name="KeyId" Parameter="keyId" Type="System.String" DbType="VarChar(64)" />
+    <Parameter Name="SecretHash" Parameter="secretHash" Type="System.Data.Linq.Binary" DbType="Binary(32)" />
+    <Parameter Name="RequiredScope" Parameter="requiredScope" Type="System.String" DbType="VarChar(64)" />
+    <Parameter Name="Endpoint" Parameter="endpoint" Type="System.String" DbType="NVarChar(300)" />
+    <Parameter Name="HttpMethod" Parameter="httpMethod" Type="System.String" DbType="VarChar(10)" />
+    <Parameter Name="IpAddress" Parameter="ipAddress" Type="System.String" DbType="VarChar(64)" />
+    <Parameter Name="UserAgent" Parameter="userAgent" Type="System.String" DbType="NVarChar(300)" />
+    <ElementType Name="Usp_ApiAuthenticateAndBeginRequestResult">
+      <Column Name="ResultCode" Type="System.String" DbType="VarChar(15)" CanBeNull="true" />
+      <Column Name="RequestId" Type="System.Guid" DbType="UniqueIdentifier" CanBeNull="true" />
+      <Column Name="ClientNumber" Type="System.String" DbType="VarChar(32)" CanBeNull="true" />
+      <Column Name="Scopes" Type="System.String" DbType="VarChar(500)" CanBeNull="true" />
+      <Column Name="MonthlyQuota" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="MonthlyUsage" Type="System.Int32" DbType="Int" CanBeNull="true" />
+    </ElementType>
+  </Function>
+  <Function Name="dbo.usp_ApiCompleteRequest" Method="Usp_ApiCompleteRequest">
+    <Parameter Name="RequestId" Parameter="requestId" Type="System.Guid" DbType="UniqueIdentifier" />
+    <Parameter Name="StatusCode" Parameter="statusCode" Type="System.Int16" DbType="SmallInt" />
+    <Parameter Name="DurationMs" Parameter="durationMs" Type="System.Int32" DbType="Int" />
+    <Return Type="System.Int32" DbType="Int" />
+  </Function>
+</Database>

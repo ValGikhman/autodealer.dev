@@ -15,11 +15,14 @@ namespace autodealer.dev.Controllers {
     public class DecoderController : ApiController {
 
         public IVinDecoderService VinDecoderService { get; set; }
-        public readonly string dataOneApiKey = ConfigurationManager.AppSettings["DataOne:AccessKey"];
-        public readonly string dataOneSecretApiKey = ConfigurationManager.AppSettings["DataOne:SecretAccessKey"];
+        public readonly string dataOneApiKey;
+        public readonly string dataOneSecretApiKey;
 
         public DecoderController(IVinDecoderService vinDecoderService) {
             VinDecoderService = vinDecoderService;
+            var credentials = DataOneCredentials.Load();
+            dataOneApiKey = credentials.AccessKey;
+            dataOneSecretApiKey = credentials.SecretAccessKey;
         }
 
         [HttpGet, Route("{vin:regex(^[A-HJ-NPR-Z0-9]{17}$)}")]
@@ -42,10 +45,15 @@ namespace autodealer.dev.Controllers {
             if (VinDecoderService == null)
                 return InternalServerError(new InvalidOperationException("VinDecoderService is not configured."));
 
+            DemoQuotaResult demoQuota = null;
             try {
                 var normalizedVin = (vin ?? string.Empty).Trim().ToUpperInvariant();
                 if (!Regex.IsMatch(normalizedVin, "^[A-HJ-NPR-Z0-9]{17}$"))
                     return BadRequest("VIN must contain exactly 17 letters or digits and cannot contain I, O, or Q.");
+
+                demoQuota = DemoApiAccess.Take(Request, normalizedVin);
+                if (demoQuota != null && !demoQuota.Allowed)
+                    return CreateApiError("json", (HttpStatusCode)429, "The five-VIN demo limit has been reached. Create an account for continued access.", demoQuota);
 
                 var dataOneXml = VinDecoderService.DecodeVin(normalizedVin, dataOneApiKey, dataOneSecretApiKey);
                 var html = VinDecodeHtmlRenderer.Render(dataOneXml, normalizedVin);
@@ -53,13 +61,14 @@ namespace autodealer.dev.Controllers {
                     Content = new StringContent(html, Encoding.UTF8, "text/html")
                 };
                 response.Headers.CacheControl = new CacheControlHeaderValue { NoStore = true };
+                AddDemoHeaders(response, demoQuota);
                 return ResponseMessage(response);
             }
             catch (VinDecodeResponseException ex) {
-                return Content((HttpStatusCode)422, new { message = ex.Message });
+                return CreateApiError("json", (HttpStatusCode)422, ex.Message, demoQuota);
             }
             catch (Exception) {
-                return Content(HttpStatusCode.BadGateway, new { message = "The VIN decoder is temporarily unavailable." });
+                return CreateApiError("json", HttpStatusCode.BadGateway, "The VIN decoder is temporarily unavailable.", demoQuota);
             }
         }
 
@@ -81,12 +90,17 @@ namespace autodealer.dev.Controllers {
 
         private IHttpActionResult GetStructuredResponse(string vin, string format) {
             if (VinDecoderService == null)
-                return CreateStructuredError(format, HttpStatusCode.InternalServerError, "VinDecoderService is not configured.");
+                return CreateApiError(format, HttpStatusCode.InternalServerError, "VinDecoderService is not configured.", null);
 
+            DemoQuotaResult demoQuota = null;
             try {
                 var normalizedVin = (vin ?? string.Empty).Trim().ToUpperInvariant();
                 if (!Regex.IsMatch(normalizedVin, "^[A-HJ-NPR-Z0-9]{17}$"))
-                    return CreateStructuredError(format, HttpStatusCode.BadRequest, "VIN must contain exactly 17 letters or digits and cannot contain I, O, or Q.");
+                    return CreateApiError(format, HttpStatusCode.BadRequest, "VIN must contain exactly 17 letters or digits and cannot contain I, O, or Q.", null);
+
+                demoQuota = DemoApiAccess.Take(Request, normalizedVin);
+                if (demoQuota != null && !demoQuota.Allowed)
+                    return CreateApiError(format, (HttpStatusCode)429, "The five-VIN demo limit has been reached. Create an account for continued access.", demoQuota);
 
                 var dataOneXml = VinDecoderService.DecodeVin(normalizedVin, dataOneApiKey, dataOneSecretApiKey);
                 var result = VinDecodeApiResponse.Create(normalizedVin, dataOneXml);
@@ -98,17 +112,18 @@ namespace autodealer.dev.Controllers {
                     Content = new StringContent(body, Encoding.UTF8, isJson ? "application/json" : "application/xml")
                 };
                 response.Headers.CacheControl = new CacheControlHeaderValue { NoStore = true };
+                AddDemoHeaders(response, demoQuota);
                 return ResponseMessage(response);
             }
             catch (VinDecodeResponseException ex) {
-                return CreateStructuredError(format, (HttpStatusCode)422, ex.Message);
+                return CreateApiError(format, (HttpStatusCode)422, ex.Message, demoQuota);
             }
             catch (Exception) {
-                return CreateStructuredError(format, HttpStatusCode.BadGateway, "The VIN decoder is temporarily unavailable.");
+                return CreateApiError(format, HttpStatusCode.BadGateway, "The VIN decoder is temporarily unavailable.", demoQuota);
             }
         }
 
-        private IHttpActionResult CreateStructuredError(string format, HttpStatusCode statusCode, string message) {
+        private IHttpActionResult CreateApiError(string format, HttpStatusCode statusCode, string message, DemoQuotaResult demoQuota) {
             var isJson = string.Equals(format, "json", StringComparison.OrdinalIgnoreCase);
             var body = isJson
                 ? new Newtonsoft.Json.Linq.JObject { ["message"] = message }.ToString(Newtonsoft.Json.Formatting.Indented)
@@ -119,7 +134,14 @@ namespace autodealer.dev.Controllers {
                 Content = new StringContent(body, Encoding.UTF8, isJson ? "application/json" : "application/xml")
             };
             response.Headers.CacheControl = new CacheControlHeaderValue { NoStore = true };
+            AddDemoHeaders(response, demoQuota);
             return ResponseMessage(response);
+        }
+
+        private static void AddDemoHeaders(HttpResponseMessage response, DemoQuotaResult demoQuota) {
+            if (demoQuota == null) return;
+            response.Headers.TryAddWithoutValidation("X-Demo-Limit", demoQuota.Limit.ToString());
+            response.Headers.TryAddWithoutValidation("X-Demo-Remaining", demoQuota.Remaining.ToString());
         }
     }
 }

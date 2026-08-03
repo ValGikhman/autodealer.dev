@@ -59,6 +59,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\GTX\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
@@ -145,9 +147,25 @@
     <Compile Include="App_Start\UnityConfig.cs" />
     <Compile Include="App_Start\UnityMvcActivator.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
-    <Compile Include="Controllers\InventoryController.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\DocumentationController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\PricingController.cs" />
+    <Compile Include="Controllers\SolutionsController.cs" />
     <Compile Include="Controllers\DecoderController.cs" />
+    <Compile Include="Models\AccountRegistrationViewModel.cs" />
+    <Compile Include="Models\ApiKeyHandler.cs" />
+    <Compile Include="Models\DataOneCredentials.cs" />
+    <Compile Include="Models\DemoQuotaService.cs" />
+    <Compile Include="Data\autodealer_dev.designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>autodealer_dev.dbml</DependentUpon>
+    </Compile>
+    <Compile Include="Services\ClientAccountService.cs" />
+    <Compile Include="Services\IClientAccountService.cs" />
+    <Compile Include="Services\ICredentialEmailService.cs" />
+    <Compile Include="Services\SmtpCredentialEmailService.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -210,6 +228,30 @@
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Account\Register.cshtml" />
+    <Content Include="Views\Account\Login.cshtml" />
+    <Content Include="Views\Account\Dashboard.cshtml" />
+    <Content Include="Views\Account\Success.cshtml" />
+    <Content Include="Views\Documentation\Authentication.cshtml" />
+    <Content Include="Views\Documentation\Errors.cshtml" />
+    <Content Include="Views\Documentation\Index.cshtml" />
+    <Content Include="Views\Documentation\_DocsNav.cshtml" />
+    <Content Include="Views\Pricing\Index.cshtml" />
+    <Content Include="Views\Solutions\DigitalShowroom.cshtml" />
+    <Content Include="Views\Solutions\Index.cshtml" />
+    <Content Include="Views\Solutions\VinDecoder.cshtml" />
+    <Content Include="Content\images\vtec-dealer-showroom-ad-v2.png" />
+    <Content Include="Content\images\vtec-storefront-reference-v2.png" />
+    <Content Include="Content\images\vtec-vehicle-details-preview.png" />
+    <Content Include="Content\images\vin-html-api-response.png" />
+    <Content Include="Content\images\vin-html-api-promo-v2.png" />
+    <Content Include="Content\images\landing-showcase\dealer-inventory-grid.png" />
+    <Content Include="Content\images\landing-showcase\vehicle-details-gallery.png" />
+    <Content Include="Content\images\landing-showcase\vehicle-pricing-details.png" />
+    <Content Include="Content\images\landing-showcase\inventory-dashboard.png" />
+    <Content Include="Content\images\landing-showcase\inventory-import-history.png" />
+    <Content Include="Content\images\landing-showcase\inventory-admin-grid.png" />
+    <Content Include="Content\images\landing-showcase\vin-decoder-report.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -234,6 +276,13 @@
     <Content Include="Content\bootstrap-grid.css.map" />
     <None Include="packages.config" />
     <None Include="Docs\VinDecoderApi.md" />
+    <None Include="Docs\PlatformSetup.md" />
+    <None Include="Database\001_AutoDealerPlatform.sql" />
+    <None Include="Data\autodealer_dev.dbml">
+      <Generator>MSLinqToSQLGenerator</Generator>
+      <LastGenOutput>autodealer_dev.designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
     <Content Include="Scripts\bootstrap.min.js.map" />
     <Content Include="Scripts\bootstrap.js.map" />
     <Content Include="Scripts\bootstrap.esm.min.js.map" />

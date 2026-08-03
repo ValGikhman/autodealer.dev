@@ -1,14 +1,44 @@
-﻿@{
-    ViewBag.Title = "Home Page";
-}
-<h1><img src="~/images/2.png" width="300" height="300" /></h1>
-<p class="lead">Autodealer.DEV is web framework for building great auto dealer web apps.</p>
-
-<div class="row">
-    <div class="col-md-4">
-        <h2>Will be coming soon...</h2>
-        <p>
-            Autodealer.DEV gives you a powerful way to run your deaslership website.
-        </p>
+@{ ViewBag.Title = "Dealer APIs and digital solutions"; ViewBag.BodyClass = "home-page"; }
+<section class="hero home-hero">
+    <div class="shell hero-grid">
+        <div class="hero-copy">
+            <span class="eyebrow">AUTOMOTIVE INFRASTRUCTURE, SIMPLIFIED</span>
+            <h1>Build the dealership<br /><em>customers expect.</em></h1>
+            <p>Sell through APIs or launch the complete dealer platform: vehicle intelligence, live inventory, a customer website, and integrated dealer tools.</p>
+            <div class="hero-proof"><span>14-day trial</span><span>No card required</span><span>Credentials issued instantly</span></div>
+        </div>
+        <div class="landing-showcase" aria-label="Dealer platform gallery" aria-roledescription="carousel">
+            <div class="landing-showcase-slides">
+                <div class="landing-showcase-slide active" data-showcase-slide aria-hidden="false"><img src="@Url.Content("~/Content/images/landing-showcase/dealer-inventory-grid.png")" alt="Dealer website inventory search and vehicle cards" /><span>Customer inventory experience</span></div>
+                <div class="landing-showcase-slide" data-showcase-slide aria-hidden="true"><img src="@Url.Content("~/Content/images/landing-showcase/vehicle-details-gallery.png")" alt="Dealer website vehicle photo and lead actions" /><span>Vehicle detail conversion</span></div>
+                <div class="landing-showcase-slide" data-showcase-slide aria-hidden="true"><img src="@Url.Content("~/Content/images/landing-showcase/vehicle-pricing-details.png")" alt="Vehicle pricing and specification details" /><span>Transparent pricing and details</span></div>
+                <div class="landing-showcase-slide" data-showcase-slide aria-hidden="true"><img src="@Url.Content("~/Content/images/landing-showcase/inventory-dashboard.png")" alt="Dealer inventory analytics dashboard" /><span>Inventory intelligence</span></div>
+                <div class="landing-showcase-slide" data-showcase-slide aria-hidden="true"><img src="@Url.Content("~/Content/images/landing-showcase/inventory-import-history.png")" alt="Dealer inventory import history and vehicle statuses" /><span>Automated inventory operations</span></div>
+                <div class="landing-showcase-slide" data-showcase-slide aria-hidden="true"><img src="@Url.Content("~/Content/images/landing-showcase/inventory-admin-grid.png")" alt="Dealer inventory administration grid" /><span>Complete dealer control</span></div>
+                <div class="landing-showcase-slide" data-showcase-slide aria-hidden="true"><img src="@Url.Content("~/Content/images/landing-showcase/vin-decoder-report.png")" alt="VIN decoder with vehicle pricing and specification report" /><span>VIN-powered vehicle data</span></div>
+            </div>
+            <div class="landing-showcase-dots" aria-label="Choose picture">
+                @for (var slide = 0; slide < 7; slide++) { <button class="@(slide == 0 ? "active" : "")" type="button" data-showcase-dot="@slide" aria-label="Show picture @(slide + 1)" aria-pressed="@(slide == 0 ? "true" : "false")"></button> }
+            </div>
+        </div>
     </div>
-</div>
+</section>
+
+@section scripts {
+<script>
+$(function () {
+    var $showcase = $('.landing-showcase'), $slides = $showcase.find('[data-showcase-slide]'), $dots = $showcase.find('[data-showcase-dot]');
+    var current = 0, timer;
+    function showSlide(index) {
+        current = (index + $slides.length) % $slides.length;
+        $slides.removeClass('active').attr('aria-hidden', 'true').eq(current).addClass('active').attr('aria-hidden', 'false');
+        $dots.removeClass('active').attr('aria-pressed', 'false').eq(current).addClass('active').attr('aria-pressed', 'true');
+    }
+    function start() { window.clearInterval(timer); if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) timer = window.setInterval(function () { showSlide(current + 1); }, 4500); }
+    function restart() { window.clearInterval(timer); start(); }
+    $dots.on('click', function () { showSlide(Number($(this).data('showcase-dot'))); restart(); });
+    $showcase.on('mouseenter focusin', function () { window.clearInterval(timer); }).on('mouseleave focusout', start);
+    start();
+});
+</script>
+}

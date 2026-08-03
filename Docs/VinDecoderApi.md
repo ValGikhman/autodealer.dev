@@ -9,6 +9,15 @@ Bootstrap JavaScript, jQuery, icon font, or other client dependency is required.
 
 ## Endpoint
 
+When `ApiSecurity:Enabled` is `true`, every request must also send:
+
+```http
+Authorization: Bearer ad_live_KEY_ID.SECRET
+```
+
+The credential is issued during account creation and is displayed in full only
+once. Keep it in a server-side secret manager, never in browser JavaScript.
+
 ```http
 GET /api/service/vin/{vin}/html
 Accept: text/html

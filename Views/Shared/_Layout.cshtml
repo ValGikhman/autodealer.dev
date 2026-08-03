@@ -1,28 +1,61 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - AutoDealer.DEV - your dealership web solution</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111923" />
+    <meta name="description" content="Dealer-ready APIs for VIN decoding, inventory, websites, and automotive retail workflows." />
+    <title>@ViewBag.Title | AutoDealer.dev</title>
+    <link rel="icon" href="@Url.Content("~/favicon.ico")" />
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
-    <link href="~/Content/Site.css" rel="stylesheet" />
-    <script src="~/Scripts/bootstrap.min.js"></script>
 </head>
-<body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
+<body class="@ViewBag.BodyClass">
+    <header class="site-header">
+        <div class="shell nav-shell">
+            <a class="brand" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><span class="brand-mark">AD</span><span>autodealer<span>.dev</span></span></a>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
+            <nav class="site-nav" id="site-nav">
+                <a href="@Url.Action("Index", "Solutions")">Solutions</a>
+                <a href="@Url.Action("Index", "Documentation")">Documentation</a>
+                <a href="@Url.Action("Index", "Pricing")">Pricing</a>
+                @if (Request.IsAuthenticated) {
+                    <a class="nav-quiet" href="@Url.Action("Dashboard", "Account")">My account</a>
+                    using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { @class = "nav-logout" })) { @Html.AntiForgeryToken()<button type="submit">Sign out</button> }
+                } else {
+                    <a class="nav-quiet" href="@Url.Action("Login", "Account")">Sign in</a>
+                    <a class="button button-primary button-small" href="@Url.Action("Register", "Account")">Get an API key <span>&rarr;</span></a>
+                }
+            </nav>
         </div>
-    </div>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - AutoDealer.DEV</p>
-        </footer>
-    </div>
+    </header>
+
+    <main>@RenderBody()</main>
+
+    <footer class="site-footer">
+        <div class="shell footer-grid">
+            <div><a class="brand" href="@Url.Action("Index", "Home")"><span class="brand-mark">AD</span><span>autodealer<span>.dev</span></span></a></div>
+            <div><strong>PRODUCT</strong><a href="@Url.Action("VinDecoder", "Solutions")">VIN Decode</a><a href="@Url.Action("DigitalShowroom", "Solutions")">Dealer Website</a></div>
+            <div><strong>DEVELOPERS</strong><a href="@Url.Action("Index", "Documentation")">Quickstart</a><a href="@Url.Action("Authentication", "Documentation")">Authentication</a><a href="@Url.Action("Errors", "Documentation")">Errors &amp; limits</a></div>
+            <div><strong>COMPANY</strong><a href="@Url.Action("About", "Home")">About</a><a href="@Url.Action("Contact", "Home")">Contact</a><a href="@Url.Action("Index", "Pricing")">Pricing</a></div>
+        </div>
+        <div class="shell footer-bottom"><span>&copy; @DateTime.UtcNow.Year AutoDealer.dev. All rights reserved.</span><span>Built for dealers who build what&rsquo;s next.</span></div>
+    </footer>
 
     @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    <script>
+        if ($.validator && $.validator.unobtrusive) {
+            $.validator.addMethod('mustbetrue', function (value, element) { return element.checked; });
+            $.validator.unobtrusive.adapters.addBool('mustbetrue');
+        }
+        $(function () {
+            $('.nav-toggle').on('click', function () { var open = $(this).attr('aria-expanded') === 'true'; $(this).attr('aria-expanded', !open); $('#site-nav').toggleClass('open', !open); });
+            $('.site-nav a').on('click', function () { $('#site-nav').removeClass('open'); $('.nav-toggle').attr('aria-expanded', 'false'); });
+            $('[data-copy]').on('click', function () { var $button = $(this), text = $($button.data('copy')).text(); navigator.clipboard.writeText(text).then(function () { var old = $button.text(); $button.text('Copied'); setTimeout(function () { $button.text(old); }, 1400); }); });
+            $('[data-tab]').on('click', function () { var name = $(this).data('tab'); $('[data-tab]').removeClass('active'); $(this).addClass('active'); $('[data-code]').attr('hidden', true); $('[data-code="' + name + '"]').removeAttr('hidden'); });
+        });
+    </script>
     @RenderSection("scripts", required: false)
 </body>
 </html>

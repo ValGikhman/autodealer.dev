@@ -1,0 +1,74 @@
+# AutoDealer.dev platform setup
+
+## 1. Create the database
+
+Run `Database/001_AutoDealerPlatform.sql` in the target SQL Server database.
+The migration creates clients, password credentials, plans, subscriptions,
+tokenized payment profiles, API keys, detailed request logs, daily aggregates,
+indexes, constraints, and the atomic quota procedures.
+
+For local development, `AutoDealerPlatform` targets the `GTX` catalog on
+`VALS-PC`. Set deployment-specific connection strings through a release
+transform or a protected configuration provider. Do not commit production
+credentials.
+
+The application data model is `Data/autodealer_dev.dbml`. Its generated
+`AutoDealerDataContext` is used by the account service and API-key handler. When
+the schema changes, refresh the DBML in Visual Studio before updating service
+queries; do not restore a separate handwritten entity mapping.
+
+## 2. Configure API authentication
+
+After the migration succeeds, set `ApiSecurity:Enabled` to `true`. All Web API
+routes will then require `Authorization: Bearer ad_live_KEY_ID.SECRET`.
+
+The secret is generated with a cryptographic random-number generator. Only its
+SHA-256 digest is stored. Because the secret has 256 bits of entropy, it cannot
+be recovered from the database; rotate the key if the original is lost.
+
+Each accepted request is counted atomically before execution. The response adds
+`X-Request-Id`, `X-RateLimit-Limit`, and `X-RateLimit-Remaining`. Completion
+records status code, duration, and error totals. Archive detailed rows according
+to your retention policy while retaining `ApiUsageDaily` for billing.
+
+## 3. Configure credential email
+
+Configure the `Smtp:*` application settings with secrets supplied by the host.
+If SMTP is unavailable, registration still succeeds and the one-time credential
+is displayed in the browser. For stronger delivery guarantees, replace direct
+SMTP with an outbox table and background mail worker.
+
+## 4. Configure payments safely
+
+Use a PCI-compliant provider's hosted checkout or hosted fields. Browser card
+fields must submit directly to that provider, which returns an opaque payment
+method token. Post only that token as `Registration.PaymentMethodToken`.
+
+The application intentionally does not store or decrypt primary account numbers
+or CVVs. `PaymentProfiles` stores provider identifiers plus optional card brand,
+last four digits, and expiry for display. Verify provider webhooks before using
+them to activate, renew, pause, or cancel subscriptions.
+
+## 5. Production checklist
+
+- Rotate any DataOne credentials that previously appeared in configuration and
+  inject replacements outside source control.
+- Require HTTPS and HSTS at the application gateway or IIS.
+- Protect SMTP, database, DataOne, and payment-provider secrets with the host's
+  secret store or protected configuration.
+- Set `customErrors` appropriately and disable compilation debugging.
+- Add email verification, password reset, sign-in, CSRF protection for every
+  browser mutation, and administrative key rotation before exposing a portal.
+- Add a privacy policy, terms, retention schedule, webhook signature checks,
+  audit logging, monitoring, backups, and an incident-response process.
+- Put rate limiting at the edge as well as enforcing plan quota in SQL.
+
+## Registration lifecycle
+
+1. The dedicated MVC account controller applies model validation and anti-forgery protection.
+2. The injected account service uses LINQ-to-SQL mapped entities inside a
+   serializable transaction to create the client, password credential, trial
+   subscription, and primary API key.
+3. The full key is returned once and sent by email when SMTP is configured.
+4. Subsequent API calls authenticate the key hash and enforce its scope and plan.
+5. Request and daily usage rows provide per-client metering and billing inputs.
