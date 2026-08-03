@@ -243,3 +243,8 @@ h2,h3{font-weight:500!important}
 .code-block pre,.vin-source-panel{font-size:14px;line-height:1.9}
 .vin-response-head b,.vin-response-head em,.vin-response-head button{font-size:14px}
 .vin-html-panel,.vin-html-panel p{font-size:14px}
+
+/* Dealer demo request. */
+.demo-request-grid{display:grid;grid-template-columns:.78fr 1.22fr;gap:55px;align-items:start}.demo-brief{padding:22px 0;color:var(--graphite-text)}.demo-brief h2{margin:16px 0;font-size:38px}.demo-brief>p{color:var(--graphite-muted)}.demo-steps{margin-top:34px;border-top:1px solid var(--light-line)}.demo-steps article{padding:21px 0;display:flex;gap:17px;border-bottom:1px solid var(--light-line)}.demo-steps b{flex:0 0 34px;color:#f0f2f4;font:11px var(--mono)}.demo-steps strong,.demo-steps span{display:block}.demo-steps strong{font-size:14px;font-weight:500}.demo-steps span{margin-top:4px;color:var(--graphite-muted);font-size:12px}.demo-request-card{padding:38px}.form-field textarea{width:100%;max-width:none;padding:12px;border:1px solid #60676f;border-radius:7px;outline:0;resize:vertical;color:#f1f3f5;background:#41474f;font:14px/1.6 var(--sans)}.form-field textarea:focus{border-color:#aeb4ba;box-shadow:0 0 0 3px rgba(220,224,228,.12)}.form-field select{font-size:14px}.demo-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+@media(max-width:980px){.demo-request-grid{grid-template-columns:1fr;gap:30px}.demo-brief{padding-top:0}}
+@media(max-width:600px){.demo-request-card{padding:25px 20px}.demo-brief h2{font-size:31px}}

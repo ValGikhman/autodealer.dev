@@ -14,6 +14,7 @@ namespace autodealer.dev {
             routes.MapRoute("Admin", "majordome/{action}", new { controller = "Admin", action = "Login" });
             routes.MapRoute("Account", "account/{action}", new { controller = "Account", action = "Register" });
             routes.MapRoute("Documentation", "documentation/{action}", new { controller = "Documentation", action = "Index" });
+            routes.MapRoute("DealerDemo", "request-a-dealer-demo", new { controller = "Solutions", action = "RequestDemo" });
             routes.MapRoute("VinSolution", "solutions/vin-decoder", new { controller = "Solutions", action = "VinDecoder" });
             routes.MapRoute("ShowroomSolution", "solutions/digital-showroom", new { controller = "Solutions", action = "DigitalShowroom" });
             routes.MapRoute("Solutions", "solutions", new { controller = "Solutions", action = "Index" });
