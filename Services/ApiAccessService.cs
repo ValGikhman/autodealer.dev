@@ -1,6 +1,5 @@
 using autodealer.dev.Data;
 using System;
-using System.Configuration;
 using System.Data;
 using System.Linq;
 
@@ -8,9 +7,7 @@ namespace autodealer.dev.Services {
     public sealed class ApiAccessService : IApiAccessService {
         private readonly string connectionString;
 
-        public ApiAccessService() : this(ConfigurationManager.ConnectionStrings["AutoDealer.dev"] == null
-            ? null
-            : ConfigurationManager.ConnectionStrings["AutoDealer.dev"].ConnectionString) { }
+        public ApiAccessService() : this(AutoDealerConnectionString.Resolve()) { }
 
         public ApiAccessService(string connectionString) {
             this.connectionString = connectionString;

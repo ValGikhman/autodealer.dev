@@ -167,6 +167,7 @@
       <DependentUpon>autodealer_dev.dbml</DependentUpon>
     </Compile>
     <Compile Include="Services\ClientAccountService.cs" />
+    <Compile Include="Services\AutoDealerConnectionString.cs" />
     <Compile Include="Services\ApiAccessService.cs" />
     <Compile Include="Services\AdminService.cs" />
     <Compile Include="Services\IApiAccessService.cs" />
