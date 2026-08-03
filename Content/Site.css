@@ -233,3 +233,13 @@ h2,h3{font-weight:500!important}
 .code-tabs button{font-size:14px}
 .pricing-empty{grid-column:1/-1;padding:45px;border:1px solid var(--light-line);border-radius:13px;color:var(--graphite-text);background:var(--graphite-card);text-align:center}
 .home-page .section-heading{max-width:none}
+
+/* Product heroes use their matching solution artwork at landing-hero scale. */
+.page-hero.product-hero{height:480px;min-height:480px;padding:76px 0 24px}
+.product-hero .showroom-ad-visual{max-height:350px}
+@media(max-width:980px){.page-hero.product-hero{height:auto;min-height:360px;padding:84px 0 30px}.product-hero .showroom-ad-visual{max-height:none}}
+
+/* Readable, consistent code typography in documentation and VIN responses. */
+.code-block pre,.vin-source-panel{font-size:14px;line-height:1.9}
+.vin-response-head b,.vin-response-head em,.vin-response-head button{font-size:14px}
+.vin-html-panel,.vin-html-panel p{font-size:14px}
