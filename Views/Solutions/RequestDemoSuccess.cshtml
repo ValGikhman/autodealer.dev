@@ -1,0 +1,6 @@
+@model autodealer.dev.Models.DealerDemoRequestViewModel
+@{ ViewBag.Title = "Demo requested"; }
+<section class="page-hero"><div class="shell"><span class="eyebrow">REQUEST RECEIVED</span><h1>Your dealer demo request is in our hands.</h1><p>Thank you, @Model.ContactName. We received the request from @Model.BusinessName and will follow up using your preferred contact method.</p></div></section>
+<section class="section light-section account-content-section"><div class="shell account-form-shell">
+    <div class="success-card"><div class="success-mark">✓</div><h2>We&rsquo;ll make the conversation useful.</h2><p>Your dealership details have been delivered to our team. We will review your goals before reaching out.</p><div class="button-row centered-row"><a class="button button-primary" href="@Url.Action("DigitalShowroom", "Solutions")">Explore the dealer website</a><a class="button button-outline" href="@Url.Action("Index", "Home")">Return home</a></div></div>
+</div></section>

@@ -161,6 +161,7 @@
     <Compile Include="Models\DataOneCredentials.cs" />
     <Compile Include="Models\DemoQuotaService.cs" />
     <Compile Include="Models\PricingViewModels.cs" />
+    <Compile Include="Models\DealerDemoRequestViewModel.cs" />
     <Compile Include="Data\autodealer_dev.designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -175,6 +176,8 @@
     <Compile Include="Services\IClientAccountService.cs" />
     <Compile Include="Services\IPlanService.cs" />
     <Compile Include="Services\PlanService.cs" />
+    <Compile Include="Services\IDealerDemoRequestService.cs" />
+    <Compile Include="Services\DealerDemoRequestService.cs" />
     <Compile Include="Services\ICredentialEmailService.cs" />
     <Compile Include="Services\SmtpCredentialEmailService.cs" />
     <Compile Include="Global.asax.cs">
@@ -257,6 +260,8 @@
     <Content Include="Views\Solutions\DigitalShowroom.cshtml" />
     <Content Include="Views\Solutions\Index.cshtml" />
     <Content Include="Views\Solutions\VinDecoder.cshtml" />
+    <Content Include="Views\Solutions\RequestDemo.cshtml" />
+    <Content Include="Views\Solutions\RequestDemoSuccess.cshtml" />
     <Content Include="Content\images\vtec-dealer-showroom-ad-v2.png" />
     <Content Include="Content\images\vtec-storefront-reference-v2.png" />
     <Content Include="Content\images\vtec-vehicle-details-preview.png" />
