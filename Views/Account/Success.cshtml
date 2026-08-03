@@ -1,7 +1,8 @@
 @model autodealer.dev.Models.AccountCreatedViewModel
 @{ ViewBag.Title = "Account ready"; ViewBag.BodyClass = "account-page"; }
-<section class="account-shell success-page"><div class="shell"><div class="success-card">
-    <span class="success-mark">&#10003;</span><span class="eyebrow dark">WORKSPACE READY</span><h1>Welcome to the fast lane.</h1><p>Your client number is <strong>@Model.ClientNumber</strong>. Copy the API key now; the original secret cannot be recovered from the database.</p>
+<section class="page-hero account-page-hero"><div class="shell"><span class="eyebrow">WORKSPACE READY</span><h1>Welcome to the fast lane.</h1><p>Your client number is <strong>@Model.ClientNumber</strong>. Your workspace and primary API credential are ready.</p></div></section>
+<section class="section light-section account-content-section success-page"><div class="shell"><div class="success-card">
+    <span class="success-mark">&#10003;</span><h2>Save your API credential</h2><p>Copy the API key now; the original secret cannot be recovered from the database.</p>
     <label>YOUR API KEY &mdash; SHOWN ONCE</label><div class="key-output"><code id="new-api-key">@Model.ApiKey</code><button type="button" data-copy="#new-api-key">Copy key</button></div>
     <p class="delivery-note">@(Model.CredentialsEmailed ? "A credential copy was also sent to " + Model.Email + "." : "SMTP is not configured, so save this credential before leaving this page.")</p>
     <div class="button-row centered-row"><a class="button button-primary" href="@Url.Action("Index", "Documentation")">Make your first request &rarr;</a><a class="button button-outline" href="@Url.Action("Index", "Home")">Return home</a></div>

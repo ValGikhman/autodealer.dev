@@ -16,15 +16,21 @@
             <a class="brand" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><span class="brand-mark">AD</span><span>autodealer<span>.dev</span></span></a>
             <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
             <nav class="site-nav" id="site-nav">
-                <a href="@Url.Action("Index", "Solutions")">Solutions</a>
-                <a href="@Url.Action("Index", "Documentation")">Documentation</a>
-                <a href="@Url.Action("Index", "Pricing")">Pricing</a>
-                @if (Request.IsAuthenticated) {
-                    <a class="nav-quiet" href="@Url.Action("Dashboard", "Account")">My account</a>
-                    using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { @class = "nav-logout" })) { @Html.AntiForgeryToken()<button type="submit">Sign out</button> }
+                @if (User.IsInRole("Admin")) {
+                    <a href="@Url.Action("Dashboard", "Admin")">Dashboard</a>
+                    <a href="@Url.Action("Customers", "Admin")">Customers</a>
+                    using (Html.BeginForm("Logout", "Admin", FormMethod.Post, new { @class = "nav-logout" })) { @Html.AntiForgeryToken()<button type="submit">Sign out</button> }
                 } else {
-                    <a class="nav-quiet" href="@Url.Action("Login", "Account")">Sign in</a>
-                    <a class="button button-primary button-small" href="@Url.Action("Register", "Account")">Get an API key <span>&rarr;</span></a>
+                    <a href="@Url.Action("Index", "Solutions")">Solutions</a>
+                    <a href="@Url.Action("Index", "Documentation")">Documentation</a>
+                    <a href="@Url.Action("Index", "Pricing")">Pricing</a>
+                    if (Request.IsAuthenticated) {
+                        <a class="nav-quiet" href="@Url.Action("Dashboard", "Account")">My account</a>
+                        using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { @class = "nav-logout" })) { @Html.AntiForgeryToken()<button type="submit">Sign out</button> }
+                    } else {
+                        <a class="nav-quiet" href="@Url.Action("Login", "Account")">Sign in</a>
+                        <a class="button button-primary button-small" href="@Url.Action("Register", "Account")">Get an API key <span>&rarr;</span></a>
+                    }
                 }
             </nav>
         </div>

@@ -1,7 +1,8 @@
 @model autodealer.dev.Models.AccountLoginViewModel
 @{ ViewBag.Title = "Sign in"; ViewBag.BodyClass = "account-page login-page"; }
-<section class="account-shell"><div class="shell account-grid login-grid">
-    <div class="account-intro"><a class="back-link" href="@Url.Action("Index", "Home")">&larr; Back to AutoDealer.dev</a><span class="eyebrow">CLIENT ACCESS</span><h1>Welcome back.<br /><em>Keep building.</em></h1><p>Sign in with the email and password used when your AutoDealer.dev account was created.</p><ul><li><b>01</b><span><strong>Account overview</strong>Review your active plan and billing period.</span></li><li><b>02</b><span><strong>API key status</strong>See how many active credentials are available.</span></li><li><b>03</b><span><strong>Protected access</strong>Repeated failed attempts trigger a temporary lock.</span></li></ul></div>
+<section class="page-hero account-page-hero"><div class="shell"><div class="account-intro">
+    <span class="eyebrow">CLIENT ACCESS</span><h1>Welcome back. Keep building.</h1><p>Sign in with the email and password used when your AutoDealer.dev account was created.</p></div></div></section>
+<section class="section light-section account-content-section"><div class="shell account-form-shell">
     <div class="form-card login-card">
         <span class="form-step">SECURE SIGN IN</span><h2>Access your workspace</h2><p>New to AutoDealer.dev? <a href="@Url.Action("Register", "Account")">Create an account</a></p>
         @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "account-form", autocomplete = "on" })) {

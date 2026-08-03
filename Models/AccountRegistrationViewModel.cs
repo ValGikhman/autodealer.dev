@@ -5,6 +5,10 @@ using System.Web.Mvc;
 
 namespace autodealer.dev.Models {
     public class AccountRegistrationViewModel {
+        public AccountRegistrationViewModel() {
+            PlanOptions = new List<SelectListItem>();
+        }
+
         [Required, StringLength(160)]
         [Display(Name = "Dealership / company")]
         public string BusinessName { get; set; }
@@ -30,6 +34,8 @@ namespace autodealer.dev.Models {
         [Required]
         [Display(Name = "Plan")]
         public string PlanCode { get; set; }
+
+        public IList<SelectListItem> PlanOptions { get; set; }
 
         // Set only by a PCI-compliant payment provider's hosted fields/checkout.
         // Raw card number and CVV must never be posted to this application.

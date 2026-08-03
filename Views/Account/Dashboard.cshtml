@@ -1,7 +1,7 @@
 @model autodealer.dev.Models.AccountDashboardViewModel
 @{ ViewBag.Title = "My account"; ViewBag.BodyClass = "dashboard-page"; }
-<section class="page-hero dashboard-hero"><div class="shell"><span class="eyebrow">CLIENT WORKSPACE</span><h1>Welcome back,<br /><em>@Model.ContactName.</em></h1><p>@Model.BusinessName &middot; @Model.ClientNumber</p></div></section>
-<section class="section dashboard-section"><div class="shell">
+<section class="page-hero dashboard-hero"><div class="shell"><span class="eyebrow">CLIENT WORKSPACE</span><h1>Welcome back, @Model.ContactName.</h1><p>@Model.BusinessName &middot; @Model.ClientNumber</p></div></section>
+<section class="section light-section dashboard-section"><div class="shell">
     <div class="dashboard-heading"><div><span class="eyebrow dark">ACCOUNT OVERVIEW</span><h2>Your platform at a glance.</h2></div><span class="status-badge">@Model.SubscriptionStatus</span></div>
     <div class="dashboard-grid">
         <article><span>PLAN</span><strong>@Model.PlanName</strong><small>Current subscription</small></article>

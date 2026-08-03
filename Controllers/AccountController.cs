@@ -1,30 +1,38 @@
 using autodealer.dev.Models;
 using autodealer.dev.Services;
 using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Web.Security;
 using System.Web.Mvc;
 
 namespace autodealer.dev.Controllers {
     public class AccountController : Controller {
         private readonly IClientAccountService accountService;
+        private readonly IPlanService planService;
 
-        public AccountController(IClientAccountService accountService) {
+        public AccountController(IClientAccountService accountService, IPlanService planService) {
             this.accountService = accountService;
+            this.planService = planService;
         }
 
         [HttpGet]
         public ActionResult Register(string plan) {
+            if (User.IsInRole("Admin")) return RedirectToAction("Dashboard", "Admin");
             if (Request.IsAuthenticated) return RedirectToAction("Dashboard");
-            var selected = (plan ?? "STARTER").ToUpperInvariant();
-            if (selected != "STARTER" && selected != "GROWTH" && selected != "PLATFORM") selected = "STARTER";
-            return View(new AccountRegistrationViewModel { PlanCode = selected });
+            var model = new AccountRegistrationViewModel { PlanCode = (plan ?? string.Empty).Trim().ToUpperInvariant() };
+            PopulatePlanOptions(model);
+            return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Register(AccountRegistrationViewModel model) {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) {
+                PopulatePlanOptions(model);
+                return View(model);
+            }
             try {
                 TempData["CreatedAccount"] = accountService.Create(model);
                 return RedirectToAction("Success");
@@ -39,6 +47,7 @@ namespace autodealer.dev.Controllers {
                 ModelState.AddModelError("", ex.Message);
             }
             model.Password = null;
+            PopulatePlanOptions(model);
             return View(model);
         }
 
@@ -51,6 +60,7 @@ namespace autodealer.dev.Controllers {
 
         [HttpGet]
         public ActionResult Login(string returnUrl) {
+            if (User.IsInRole("Admin")) return RedirectToAction("Dashboard", "Admin");
             if (Request.IsAuthenticated) return RedirectToAction("Dashboard");
             return View(new AccountLoginViewModel { ReturnUrl = returnUrl });
         }
@@ -86,6 +96,7 @@ namespace autodealer.dev.Controllers {
         [Authorize]
         [HttpGet]
         public ActionResult Dashboard() {
+            if (User.IsInRole("Admin")) return RedirectToAction("Dashboard", "Admin");
             var account = accountService.GetDashboard(User.Identity.Name);
             if (account == null) {
                 FormsAuthentication.SignOut();
@@ -100,6 +111,23 @@ namespace autodealer.dev.Controllers {
         public ActionResult Logout() {
             FormsAuthentication.SignOut();
             return RedirectToAction("Index", "Home");
+        }
+
+        private void PopulatePlanOptions(AccountRegistrationViewModel model) {
+            try {
+                var plans = planService.GetActivePlans();
+                if (!plans.Any(x => string.Equals(x.PlanCode, model.PlanCode, StringComparison.OrdinalIgnoreCase)))
+                    model.PlanCode = plans.Select(x => x.PlanCode).FirstOrDefault();
+
+                model.PlanOptions = plans.Select(x => new SelectListItem {
+                    Value = x.PlanCode,
+                    Text = x.DisplayName + (x.MonthlyPrice.HasValue ? " - " + x.MonthlyPrice.Value.ToString("$0.##") + "/mo" : " - Custom"),
+                    Selected = string.Equals(x.PlanCode, model.PlanCode, StringComparison.OrdinalIgnoreCase)
+                }).ToList();
+            }
+            catch (SqlException) {
+                model.PlanOptions = new List<SelectListItem>();
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 @{ ViewBag.Title = "API authentication"; }
 <section class="docs-header"><div class="shell"><span class="eyebrow">DOCUMENTATION</span><h1>Authentication</h1><p>Secure, scoped API keys with one-time secret display and client-level usage metering.</p></div></section>
-<section class="docs-page"><div class="shell docs-layout">@Html.Partial("_DocsNav")<article class="docs-article">
+<section class="docs-page light-section"><div class="shell docs-layout">@Html.Partial("_DocsNav")<article class="docs-article">
     <span class="doc-label">AUTHENTICATION</span><h2>Bearer API keys</h2><p>Every protected Web API request sends the complete credential through the standard authorization header.</p>
     <div class="code-block simple"><pre><code>Authorization: Bearer ad_live_KEY_ID.SECRET</code></pre></div>
     <h3>Credential anatomy</h3><div class="anatomy"><span><b>ad_live_</b><small>environment</small></span><span><b>KEY_ID</b><small>database lookup</small></span><span><b>SECRET</b><small>shown once</small></span></div>

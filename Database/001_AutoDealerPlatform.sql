@@ -3,8 +3,8 @@
   Target: SQL Server 2016+.
 
   Run in the intended application database with a migration principal. The web
-  application login should receive EXECUTE on the two API procedures and only
-  the narrow table permissions needed by account registration.
+  application login should receive only the narrow table permissions needed by
+  account registration, API authentication, and usage metering.
 
   Card numbers and CVVs are intentionally absent. Use hosted fields/checkout
   from a PCI-compliant provider and store only its opaque identifiers plus safe
@@ -195,6 +195,8 @@ BEGIN
 END;
 GO
 
+/* Legacy reference only. API access is implemented by ApiAccessService with
+   LINQ-to-SQL transactions; these procedures are intentionally not installed.
 CREATE OR ALTER PROCEDURE dbo.usp_ApiAuthenticateAndBeginRequest
     @KeyId varchar(64),
     @SecretHash binary(32),
@@ -291,13 +293,15 @@ BEGIN
 END;
 GO
 
+Legacy procedure definitions end here.
+*/
 /* Optional least-privilege grants; replace AutoDealerWeb with your database user.
 GRANT SELECT, INSERT ON dbo.Clients TO AutoDealerWeb;
 GRANT SELECT, INSERT, UPDATE ON dbo.ClientCredentials TO AutoDealerWeb;
 GRANT SELECT ON dbo.Plans TO AutoDealerWeb;
 GRANT SELECT, INSERT ON dbo.Subscriptions TO AutoDealerWeb;
-GRANT SELECT, INSERT ON dbo.ApiKeys TO AutoDealerWeb;
+GRANT SELECT, INSERT, UPDATE ON dbo.ApiKeys TO AutoDealerWeb;
 GRANT INSERT ON dbo.PaymentProfiles TO AutoDealerWeb;
-GRANT EXECUTE ON dbo.usp_ApiAuthenticateAndBeginRequest TO AutoDealerWeb;
-GRANT EXECUTE ON dbo.usp_ApiCompleteRequest TO AutoDealerWeb;
+GRANT SELECT, INSERT, UPDATE ON dbo.ApiUsageLog TO AutoDealerWeb;
+GRANT SELECT, INSERT, UPDATE ON dbo.ApiUsageDaily TO AutoDealerWeb;
 */

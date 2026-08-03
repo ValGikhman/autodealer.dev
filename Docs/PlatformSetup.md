@@ -5,15 +5,15 @@
 Run `Database/001_AutoDealerPlatform.sql` in the target SQL Server database.
 The migration creates clients, password credentials, plans, subscriptions,
 tokenized payment profiles, API keys, detailed request logs, daily aggregates,
-indexes, constraints, and the atomic quota procedures.
+indexes, and constraints.
 
-For local development, `AutoDealerPlatform` targets the `GTX` catalog on
-`VALS-PC`. Set deployment-specific connection strings through a release
+For local development, the `AutoDealer.dev` connection targets the
+`AUTODEALER.DEV` catalog on `VALS-PC`. Set deployment-specific connection strings through a release
 transform or a protected configuration provider. Do not commit production
 credentials.
 
 The application data model is `Data/autodealer_dev.dbml`. Its generated
-`AutoDealerDataContext` is used by the account service and API-key handler. When
+`AutoDealerDataContext` is used by the account and API-access services. When
 the schema changes, refresh the DBML in Visual Studio before updating service
 queries; do not restore a separate handwritten entity mapping.
 
@@ -26,7 +26,8 @@ The secret is generated with a cryptographic random-number generator. Only its
 SHA-256 digest is stored. Because the secret has 256 bits of entropy, it cannot
 be recovered from the database; rotate the key if the original is lost.
 
-Each accepted request is counted atomically before execution. The response adds
+`ApiAccessService` authenticates keys and counts each accepted request inside a
+serializable LINQ-to-SQL transaction. The response adds
 `X-Request-Id`, `X-RateLimit-Limit`, and `X-RateLimit-Remaining`. Completion
 records status code, duration, and error totals. Archive detailed rows according
 to your retention policy while retaining `ApiUsageDaily` for billing.
@@ -61,7 +62,7 @@ them to activate, renew, pause, or cancel subscriptions.
   browser mutation, and administrative key rotation before exposing a portal.
 - Add a privacy policy, terms, retention schedule, webhook signature checks,
   audit logging, monitoring, backups, and an incident-response process.
-- Put rate limiting at the edge as well as enforcing plan quota in SQL.
+- Put rate limiting at the edge as well as enforcing plan quota in the API access service.
 
 ## Registration lifecycle
 

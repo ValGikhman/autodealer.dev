@@ -1,8 +1,6 @@
-using autodealer.dev.Data;
+using autodealer.dev.Services;
 using Newtonsoft.Json;
 using System;
-using System.Configuration;
-using System.Data.Linq;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
@@ -17,11 +15,12 @@ using System.Web;
 
 namespace autodealer.dev.Models {
     public sealed class ApiKeyHandler : DelegatingHandler {
-        private readonly string connectionString;
+        private readonly IApiAccessService accessService;
 
-        public ApiKeyHandler() {
-            var setting = ConfigurationManager.ConnectionStrings["AutoDealerPlatform"];
-            connectionString = setting == null ? null : setting.ConnectionString;
+        public ApiKeyHandler() : this(new ApiAccessService()) { }
+
+        public ApiKeyHandler(IApiAccessService accessService) {
+            this.accessService = accessService ?? throw new ArgumentNullException("accessService");
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
@@ -38,12 +37,11 @@ namespace autodealer.dev.Models {
             if (parts.Length != 2 || !parts[0].StartsWith("ad_", StringComparison.Ordinal))
                 return Error(HttpStatusCode.Unauthorized, "invalid_api_key", "The API key is invalid.");
 
-            if (string.IsNullOrWhiteSpace(connectionString))
-                return Error(HttpStatusCode.ServiceUnavailable, "security_not_configured", "API authentication is temporarily unavailable.");
-
-            AccessResult access;
+            ApiAccessResult access;
             try { access = Authenticate(parts[0], Hash(parts[1]), RequiredScope(request), request); }
-            catch (SqlException) { return Error(HttpStatusCode.ServiceUnavailable, "security_unavailable", "API authentication is temporarily unavailable."); }
+            catch (Exception ex) when (ex is SqlException || ex is InvalidOperationException) {
+                return Error(HttpStatusCode.ServiceUnavailable, "security_unavailable", "API authentication is temporarily unavailable.");
+            }
             if (access.ResultCode != "ok") {
                 if (access.ResultCode == "quota_exceeded") return Error((HttpStatusCode)429, access.ResultCode, "The monthly API quota has been reached.");
                 if (access.ResultCode == "scope_denied") return Error(HttpStatusCode.Forbidden, access.ResultCode, "This key does not have access to the endpoint.");
@@ -69,38 +67,22 @@ namespace autodealer.dev.Models {
             return response;
         }
 
-        private AccessResult Authenticate(string keyId, byte[] secretHash, string requiredScope, HttpRequestMessage request) {
-            using (var context = new AutoDealerDataContext(connectionString))
-            using (var results = context.Usp_ApiAuthenticateAndBeginRequest(
-                keyId,
-                new Binary(secretHash),
-                requiredScope,
-                request.RequestUri.AbsolutePath,
-                request.Method.Method,
-                ClientIp(),
-                string.Join(" ", request.Headers.UserAgent.Select(x => x.ToString())).SubstringSafe(300))) {
-                var record = results.GetResult<Usp_ApiAuthenticateAndBeginRequestResult>().SingleOrDefault();
-                if (record == null) return new AccessResult { ResultCode = "invalid_api_key" };
-                return new AccessResult {
-                    ResultCode = record.ResultCode,
-                    RequestId = record.RequestId ?? Guid.Empty,
-                    ClientNumber = record.ClientNumber,
-                    Scopes = record.Scopes,
-                    MonthlyQuota = record.MonthlyQuota ?? 0,
-                    MonthlyUsage = record.MonthlyUsage ?? 0
-                };
-            }
+        private ApiAccessResult Authenticate(string keyId, byte[] secretHash, string requiredScope, HttpRequestMessage request) {
+            return accessService.BeginRequest(new ApiAccessRequest {
+                KeyId = keyId,
+                SecretHash = secretHash,
+                RequiredScope = requiredScope,
+                Endpoint = request.RequestUri.AbsolutePath,
+                HttpMethod = request.Method.Method,
+                IpAddress = ClientIp(),
+                UserAgent = string.Join(" ", request.Headers.UserAgent.Select(x => x.ToString())).SubstringSafe(300)
+            });
         }
 
         private void Complete(Guid requestId, int statusCode, long durationMs) {
             if (requestId == Guid.Empty) return;
             try {
-                using (var context = new AutoDealerDataContext(connectionString)) {
-                    context.Usp_ApiCompleteRequest(
-                        requestId,
-                        (short)statusCode,
-                        (int)Math.Min(int.MaxValue, durationMs));
-                }
+                accessService.CompleteRequest(requestId, statusCode, durationMs);
             }
             catch (Exception) { /* The customer response must not fail because telemetry completion failed. */ }
         }
@@ -126,14 +108,6 @@ namespace autodealer.dev.Models {
             };
         }
 
-        private sealed class AccessResult {
-            public string ResultCode { get; set; }
-            public Guid RequestId { get; set; }
-            public string ClientNumber { get; set; }
-            public string Scopes { get; set; }
-            public int MonthlyQuota { get; set; }
-            public int MonthlyUsage { get; set; }
-        }
     }
 
     internal static class ApiStringExtensions {

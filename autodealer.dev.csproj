@@ -142,28 +142,38 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="App_Start\AdminAuthorizeAttribute.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\UnityConfig.cs" />
     <Compile Include="App_Start\UnityMvcActivator.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\DocumentationController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PricingController.cs" />
     <Compile Include="Controllers\SolutionsController.cs" />
     <Compile Include="Controllers\DecoderController.cs" />
     <Compile Include="Models\AccountRegistrationViewModel.cs" />
+    <Compile Include="Models\AdminViewModels.cs" />
     <Compile Include="Models\ApiKeyHandler.cs" />
     <Compile Include="Models\DataOneCredentials.cs" />
     <Compile Include="Models\DemoQuotaService.cs" />
+    <Compile Include="Models\PricingViewModels.cs" />
     <Compile Include="Data\autodealer_dev.designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>autodealer_dev.dbml</DependentUpon>
     </Compile>
     <Compile Include="Services\ClientAccountService.cs" />
+    <Compile Include="Services\ApiAccessService.cs" />
+    <Compile Include="Services\AdminService.cs" />
+    <Compile Include="Services\IApiAccessService.cs" />
+    <Compile Include="Services\IAdminService.cs" />
     <Compile Include="Services\IClientAccountService.cs" />
+    <Compile Include="Services\IPlanService.cs" />
+    <Compile Include="Services\PlanService.cs" />
     <Compile Include="Services\ICredentialEmailService.cs" />
     <Compile Include="Services\SmtpCredentialEmailService.cs" />
     <Compile Include="Global.asax.cs">
@@ -204,6 +214,9 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Web.config" />
+    <None Include="Data\autodealer_dev.dbml.layout">
+      <DependentUpon>autodealer_dev.dbml</DependentUpon>
+    </None>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -232,6 +245,9 @@
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Dashboard.cshtml" />
     <Content Include="Views\Account\Success.cshtml" />
+    <Content Include="Views\Admin\Login.cshtml" />
+    <Content Include="Views\Admin\Dashboard.cshtml" />
+    <Content Include="Views\Admin\Customers.cshtml" />
     <Content Include="Views\Documentation\Authentication.cshtml" />
     <Content Include="Views\Documentation\Errors.cshtml" />
     <Content Include="Views\Documentation\Index.cshtml" />
@@ -255,7 +271,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

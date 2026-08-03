@@ -22,7 +22,7 @@ namespace autodealer.dev.Data
 	using System;
 	
 	
-	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="GTX")]
+	[global::System.Data.Linq.Mapping.DatabaseAttribute(Name="AUTODEALER.DEV")]
 	public partial class AutoDealerDataContext : System.Data.Linq.DataContext
 	{
 		
@@ -142,22 +142,6 @@ namespace autodealer.dev.Data
 			{
 				return this.GetTable<Subscription>();
 			}
-		}
-		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.usp_ApiAuthenticateAndBeginRequest")]
-		[global::System.Data.Linq.Mapping.ResultTypeAttribute(typeof(Usp_ApiAuthenticateAndBeginRequestResult))]
-		public IMultipleResults Usp_ApiAuthenticateAndBeginRequest([global::System.Data.Linq.Mapping.ParameterAttribute(Name="KeyId", DbType="VarChar(64)")] string keyId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="SecretHash", DbType="Binary(32)")] System.Data.Linq.Binary secretHash, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="RequiredScope", DbType="VarChar(64)")] string requiredScope, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="Endpoint", DbType="NVarChar(300)")] string endpoint, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="HttpMethod", DbType="VarChar(10)")] string httpMethod, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="IpAddress", DbType="VarChar(64)")] string ipAddress, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="UserAgent", DbType="NVarChar(300)")] string userAgent)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), keyId, secretHash, requiredScope, endpoint, httpMethod, ipAddress, userAgent);
-			return ((IMultipleResults)(result.ReturnValue));
-		}
-		
-		[global::System.Data.Linq.Mapping.FunctionAttribute(Name="dbo.usp_ApiCompleteRequest")]
-		[return: global::System.Data.Linq.Mapping.ParameterAttribute(DbType="Int")]
-		public int Usp_ApiCompleteRequest([global::System.Data.Linq.Mapping.ParameterAttribute(Name="RequestId", DbType="UniqueIdentifier")] System.Nullable<System.Guid> requestId, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="StatusCode", DbType="SmallInt")] System.Nullable<short> statusCode, [global::System.Data.Linq.Mapping.ParameterAttribute(Name="DurationMs", DbType="Int")] System.Nullable<int> durationMs)
-		{
-			IExecuteResult result = this.ExecuteMethodCall(this, ((MethodInfo)(MethodInfo.GetCurrentMethod())), requestId, statusCode, durationMs);
-			return ((int)(result.ReturnValue));
 		}
 	}
 	
@@ -3145,122 +3129,6 @@ namespace autodealer.dev.Data
 		{
 			this.SendPropertyChanging();
 			entity.Subscription = null;
-		}
-	}
-	
-	public partial class Usp_ApiAuthenticateAndBeginRequestResult
-	{
-		
-		private string _ResultCode;
-		
-		private System.Nullable<System.Guid> _RequestId;
-		
-		private string _ClientNumber;
-		
-		private string _Scopes;
-		
-		private System.Nullable<int> _MonthlyQuota;
-		
-		private System.Nullable<int> _MonthlyUsage;
-		
-		public Usp_ApiAuthenticateAndBeginRequestResult()
-		{
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ResultCode", DbType="VarChar(15)")]
-		public string ResultCode
-		{
-			get
-			{
-				return this._ResultCode;
-			}
-			set
-			{
-				if ((this._ResultCode != value))
-				{
-					this._ResultCode = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RequestId", DbType="UniqueIdentifier")]
-		public System.Nullable<System.Guid> RequestId
-		{
-			get
-			{
-				return this._RequestId;
-			}
-			set
-			{
-				if ((this._RequestId != value))
-				{
-					this._RequestId = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ClientNumber", DbType="VarChar(32)")]
-		public string ClientNumber
-		{
-			get
-			{
-				return this._ClientNumber;
-			}
-			set
-			{
-				if ((this._ClientNumber != value))
-				{
-					this._ClientNumber = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Scopes", DbType="VarChar(500)")]
-		public string Scopes
-		{
-			get
-			{
-				return this._Scopes;
-			}
-			set
-			{
-				if ((this._Scopes != value))
-				{
-					this._Scopes = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_MonthlyQuota", DbType="Int")]
-		public System.Nullable<int> MonthlyQuota
-		{
-			get
-			{
-				return this._MonthlyQuota;
-			}
-			set
-			{
-				if ((this._MonthlyQuota != value))
-				{
-					this._MonthlyQuota = value;
-				}
-			}
-		}
-		
-		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_MonthlyUsage", DbType="Int")]
-		public System.Nullable<int> MonthlyUsage
-		{
-			get
-			{
-				return this._MonthlyUsage;
-			}
-			set
-			{
-				if ((this._MonthlyUsage != value))
-				{
-					this._MonthlyUsage = value;
-				}
-			}
 		}
 	}
 }

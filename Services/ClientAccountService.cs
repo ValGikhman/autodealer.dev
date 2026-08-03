@@ -14,14 +14,14 @@ namespace autodealer.dev.Services {
         private readonly ICredentialEmailService emailService;
 
         public ClientAccountService(ICredentialEmailService emailService) {
-            var setting = ConfigurationManager.ConnectionStrings["AutoDealerPlatform"];
+            var setting = ConfigurationManager.ConnectionStrings["AutoDealer.dev"];
             connectionString = setting == null ? null : setting.ConnectionString;
             this.emailService = emailService;
         }
 
         public AccountCreatedViewModel Create(AccountRegistrationViewModel model) {
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException("The AutoDealerPlatform database connection is not configured.");
+                throw new InvalidOperationException("The AutoDealer.dev database connection is not configured.");
 
             var planCode = NormalizePlan(model.PlanCode);
             var normalizedEmail = model.Email.Trim().ToLowerInvariant();
@@ -122,7 +122,7 @@ namespace autodealer.dev.Services {
 
         public AccountDashboardViewModel Authenticate(string email, string password) {
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException("The AutoDealerPlatform database connection is not configured.");
+                throw new InvalidOperationException("The AutoDealer.dev database connection is not configured.");
 
             var normalizedEmail = (email ?? string.Empty).Trim().ToLowerInvariant();
             using (var context = new AutoDealerDataContext(connectionString)) {
@@ -155,7 +155,7 @@ namespace autodealer.dev.Services {
 
         public AccountDashboardViewModel GetDashboard(string email) {
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new InvalidOperationException("The AutoDealerPlatform database connection is not configured.");
+                throw new InvalidOperationException("The AutoDealer.dev database connection is not configured.");
             var normalizedEmail = (email ?? string.Empty).Trim().ToLowerInvariant();
             using (var context = new AutoDealerDataContext(connectionString)) {
                 var client = context.Clients.SingleOrDefault(x => x.Email == normalizedEmail && x.Status == "active");
@@ -191,7 +191,7 @@ namespace autodealer.dev.Services {
 
         private static string NormalizePlan(string value) {
             var plan = (value ?? string.Empty).Trim().ToUpperInvariant();
-            if (!new[] { "STARTER", "GROWTH", "PLATFORM" }.Contains(plan)) throw new ArgumentException("Please choose a valid plan.");
+            if (plan.Length == 0 || plan.Length > 32) throw new ArgumentException("Please choose a valid plan.");
             return plan;
         }
 

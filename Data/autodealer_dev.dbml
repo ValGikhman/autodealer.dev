@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Database Name="GTX" EntityNamespace="autodealer.dev.Data" ContextNamespace="autodealer.dev.Data" Class="AutoDealerDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+<Database Name="AUTODEALER.DEV" EntityNamespace="autodealer.dev.Data" ContextNamespace="autodealer.dev.Data" Class="AutoDealerDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
   <Table Name="dbo.ApiKeys" Member="ApiKeys">
     <Type Name="ApiKey">
       <Column Name="ApiKeyId" Type="System.Int64" DbType="BigInt NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
@@ -134,27 +134,4 @@
       <Association Name="FK_Subscriptions_Plan" Member="Plan" ThisKey="PlanId" OtherKey="PlanId" Type="Plan" IsForeignKey="true" />
     </Type>
   </Table>
-  <Function Name="dbo.usp_ApiAuthenticateAndBeginRequest" Method="Usp_ApiAuthenticateAndBeginRequest" HasMultipleResults="true">
-    <Parameter Name="KeyId" Parameter="keyId" Type="System.String" DbType="VarChar(64)" />
-    <Parameter Name="SecretHash" Parameter="secretHash" Type="System.Data.Linq.Binary" DbType="Binary(32)" />
-    <Parameter Name="RequiredScope" Parameter="requiredScope" Type="System.String" DbType="VarChar(64)" />
-    <Parameter Name="Endpoint" Parameter="endpoint" Type="System.String" DbType="NVarChar(300)" />
-    <Parameter Name="HttpMethod" Parameter="httpMethod" Type="System.String" DbType="VarChar(10)" />
-    <Parameter Name="IpAddress" Parameter="ipAddress" Type="System.String" DbType="VarChar(64)" />
-    <Parameter Name="UserAgent" Parameter="userAgent" Type="System.String" DbType="NVarChar(300)" />
-    <ElementType Name="Usp_ApiAuthenticateAndBeginRequestResult">
-      <Column Name="ResultCode" Type="System.String" DbType="VarChar(15)" CanBeNull="true" />
-      <Column Name="RequestId" Type="System.Guid" DbType="UniqueIdentifier" CanBeNull="true" />
-      <Column Name="ClientNumber" Type="System.String" DbType="VarChar(32)" CanBeNull="true" />
-      <Column Name="Scopes" Type="System.String" DbType="VarChar(500)" CanBeNull="true" />
-      <Column Name="MonthlyQuota" Type="System.Int32" DbType="Int" CanBeNull="true" />
-      <Column Name="MonthlyUsage" Type="System.Int32" DbType="Int" CanBeNull="true" />
-    </ElementType>
-  </Function>
-  <Function Name="dbo.usp_ApiCompleteRequest" Method="Usp_ApiCompleteRequest">
-    <Parameter Name="RequestId" Parameter="requestId" Type="System.Guid" DbType="UniqueIdentifier" />
-    <Parameter Name="StatusCode" Parameter="statusCode" Type="System.Int16" DbType="SmallInt" />
-    <Parameter Name="DurationMs" Parameter="durationMs" Type="System.Int32" DbType="Int" />
-    <Return Type="System.Int32" DbType="Int" />
-  </Function>
 </Database>
