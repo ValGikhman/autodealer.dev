@@ -1,7 +1,6 @@
 using autodealer.dev.Data;
 using autodealer.dev.Models;
 using System;
-using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Security.Cryptography;
@@ -14,8 +13,7 @@ namespace autodealer.dev.Services {
         private readonly ICredentialEmailService emailService;
 
         public ClientAccountService(ICredentialEmailService emailService) {
-            var setting = ConfigurationManager.ConnectionStrings["AutoDealer.dev"];
-            connectionString = setting == null ? null : setting.ConnectionString;
+            connectionString = AutoDealerConnectionString.Resolve();
             this.emailService = emailService;
         }
 

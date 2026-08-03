@@ -11,8 +11,7 @@ namespace autodealer.dev.Services {
         private readonly string connectionString;
 
         public AdminService() {
-            var setting = ConfigurationManager.ConnectionStrings["AutoDealer.dev"];
-            connectionString = setting == null ? null : setting.ConnectionString;
+            connectionString = AutoDealerConnectionString.Resolve();
         }
 
         public bool Authenticate(string userId, string password) {

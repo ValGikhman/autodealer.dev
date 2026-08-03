@@ -2,7 +2,6 @@ using autodealer.dev.Data;
 using autodealer.dev.Models;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 
 namespace autodealer.dev.Services {
@@ -10,8 +9,7 @@ namespace autodealer.dev.Services {
         private readonly string connectionString;
 
         public PlanService() {
-            var setting = ConfigurationManager.ConnectionStrings["AutoDealer.dev"];
-            connectionString = setting == null ? null : setting.ConnectionString;
+            connectionString = AutoDealerConnectionString.Resolve();
         }
 
         public IList<PricingPlanViewModel> GetActivePlans() {
