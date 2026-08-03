@@ -1,0 +1,19 @@
+@model autodealer.dev.Models.AccountLoginViewModel
+@{ ViewBag.Title = "Sign in"; ViewBag.BodyClass = "account-page login-page"; }
+<section class="page-hero account-page-hero"><div class="shell"><div class="account-intro">
+    <span class="eyebrow">CLIENT ACCESS</span><h1>Welcome back. Keep building.</h1><p>Sign in with the email and password used when your AutoDealer.dev account was created.</p></div></div></section>
+<section class="section light-section account-content-section"><div class="shell account-form-shell">
+    <div class="form-card login-card">
+        <span class="form-step">SECURE SIGN IN</span><h2>Access your workspace</h2><p>New to AutoDealer.dev? <a href="@Url.Action("Register", "Account")">Create an account</a></p>
+        @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "account-form", autocomplete = "on" })) {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.ReturnUrl)
+            @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
+            <div class="form-field">@Html.LabelFor(m => m.Email)@Html.TextBoxFor(m => m.Email, new { type = "email", placeholder = "you@dealership.com", autocomplete = "email", autofocus = "autofocus" })@Html.ValidationMessageFor(m => m.Email)</div>
+            <div class="form-field">@Html.LabelFor(m => m.Password)@Html.PasswordFor(m => m.Password, new { placeholder = "Your account password", autocomplete = "current-password" })@Html.ValidationMessageFor(m => m.Password)</div>
+            <label class="check-field remember-field">@Html.CheckBoxFor(m => m.RememberMe)<span>Keep me signed in on this device</span></label>
+            <button class="button button-primary submit-button" type="submit">Sign in to your account <span>&rarr;</span></button>
+            <small class="form-secure">Encrypted session &middot; Passwords are never stored in plain text</small>
+        }
+    </div>
+</div></section>

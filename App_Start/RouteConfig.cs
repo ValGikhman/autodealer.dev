@@ -11,6 +11,14 @@ namespace autodealer.dev {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
             routes.IgnoreRoute("api/{*pathInfo}"); // <— important in mixed MVC + Web API apps
 
+            routes.MapRoute("Admin", "majordome/{action}", new { controller = "Admin", action = "Login" });
+            routes.MapRoute("Account", "account/{action}", new { controller = "Account", action = "Register" });
+            routes.MapRoute("Documentation", "documentation/{action}", new { controller = "Documentation", action = "Index" });
+            routes.MapRoute("VinSolution", "solutions/vin-decoder", new { controller = "Solutions", action = "VinDecoder" });
+            routes.MapRoute("ShowroomSolution", "solutions/digital-showroom", new { controller = "Solutions", action = "DigitalShowroom" });
+            routes.MapRoute("Solutions", "solutions", new { controller = "Solutions", action = "Index" });
+            routes.MapRoute("Pricing", "pricing", new { controller = "Pricing", action = "Index" });
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

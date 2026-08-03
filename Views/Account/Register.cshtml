@@ -1,0 +1,18 @@
+@model autodealer.dev.Models.AccountRegistrationViewModel
+@{ ViewBag.Title = "Create your account"; ViewBag.BodyClass = "account-page"; }
+<section class="page-hero account-page-hero"><div class="shell"><div class="account-intro"><span class="eyebrow">CREATE YOUR WORKSPACE</span><h1>Get your API key and start building.</h1><p>Your 14-day trial includes real API credentials and usage tracking. No payment method is required today.</p></div></div></section>
+<section class="section light-section account-content-section"><div class="shell account-form-shell wide-form-shell">
+    <div class="form-card">
+        <span class="form-step">ACCOUNT DETAILS</span><h2>Create your workspace</h2><p>Already registered? <a href="@Url.Action("Login", "Account")">Sign in</a></p>
+        @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "account-form", autocomplete = "on" })) {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
+            <div class="form-field">@Html.LabelFor(m => m.BusinessName)@Html.TextBoxFor(m => m.BusinessName, new { placeholder = "Northstar Motors", autocomplete = "organization" })@Html.ValidationMessageFor(m => m.BusinessName)</div>
+            <div class="form-row"><div class="form-field">@Html.LabelFor(m => m.FirstName)@Html.TextBoxFor(m => m.FirstName, new { placeholder = "Alex", autocomplete = "given-name" })@Html.ValidationMessageFor(m => m.FirstName)</div><div class="form-field">@Html.LabelFor(m => m.LastName)@Html.TextBoxFor(m => m.LastName, new { placeholder = "Morgan", autocomplete = "family-name" })@Html.ValidationMessageFor(m => m.LastName)</div></div>
+            <div class="form-row"><div class="form-field">@Html.LabelFor(m => m.Email)@Html.TextBoxFor(m => m.Email, new { type = "email", placeholder = "alex@dealership.com", autocomplete = "email" })@Html.ValidationMessageFor(m => m.Email)</div><div class="form-field">@Html.LabelFor(m => m.Phone)@Html.TextBoxFor(m => m.Phone, new { type = "tel", placeholder = "(555) 012-3456", autocomplete = "tel" })@Html.ValidationMessageFor(m => m.Phone)</div></div>
+            <div class="form-row"><div class="form-field">@Html.LabelFor(m => m.Password)@Html.PasswordFor(m => m.Password, new { placeholder = "12 or more characters", autocomplete = "new-password" })@Html.ValidationMessageFor(m => m.Password)</div><div class="form-field">@Html.LabelFor(m => m.PlanCode)@Html.DropDownListFor(m => m.PlanCode, Model.PlanOptions)@Html.ValidationMessageFor(m => m.PlanCode)</div></div>
+            <label class="check-field">@Html.CheckBoxFor(m => m.AcceptTerms)<span>I agree to the service terms and privacy policy.</span></label>@Html.ValidationMessageFor(m => m.AcceptTerms)
+            <button class="button button-primary submit-button" type="submit">Create account and issue key <span>&rarr;</span></button><small class="form-secure">Protected by TLS &middot; API secrets are displayed once</small>
+        }
+    </div>
+</div></section>

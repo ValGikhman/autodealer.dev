@@ -1,0 +1,13 @@
+@model autodealer.dev.Models.AccountDashboardViewModel
+@{ ViewBag.Title = "My account"; ViewBag.BodyClass = "dashboard-page"; }
+<section class="page-hero dashboard-hero"><div class="shell"><span class="eyebrow">CLIENT WORKSPACE</span><h1>Welcome back, @Model.ContactName.</h1><p>@Model.BusinessName &middot; @Model.ClientNumber</p></div></section>
+<section class="section light-section dashboard-section"><div class="shell">
+    <div class="dashboard-heading"><div><span class="eyebrow dark">ACCOUNT OVERVIEW</span><h2>Your platform at a glance.</h2></div><span class="status-badge">@Model.SubscriptionStatus</span></div>
+    <div class="dashboard-grid">
+        <article><span>PLAN</span><strong>@Model.PlanName</strong><small>Current subscription</small></article>
+        <article><span>MONTHLY QUOTA</span><strong>@Model.MonthlyRequestQuota</strong><small>API requests per period</small></article>
+        <article><span>ACTIVE KEYS</span><strong>@Model.ActiveApiKeyCount</strong><small>Credentials ready to use</small></article>
+        <article><span>PERIOD ENDS</span><strong>@(Model.CurrentPeriodEndUtc.HasValue ? Model.CurrentPeriodEndUtc.Value.ToString("MMM d") : "—")</strong><small>@(Model.CurrentPeriodEndUtc.HasValue ? Model.CurrentPeriodEndUtc.Value.ToString("yyyy 'at' HH:mm 'UTC'") : "No active billing period")</small></article>
+    </div>
+    <div class="dashboard-footer"><div><span>ACCOUNT EMAIL</span><strong>@Model.Email</strong></div><a class="button button-primary" href="@Url.Action("Index", "Documentation")">Open API documentation &rarr;</a></div>
+</div></section>

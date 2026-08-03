@@ -1,0 +1,32 @@
+@model autodealer.dev.Models.AdminDashboardViewModel
+@{ ViewBag.Title = "Customers"; ViewBag.BodyClass = "dashboard-page admin-dashboard-page"; }
+<section class="page-hero dashboard-hero admin-hero"><div class="shell">
+    <span class="eyebrow">ADMIN CONTROL ROOM</span>
+    <h1>Active customers.</h1>
+    <p>@Model.ActiveCustomers active of @Model.TotalCustomers registered accounts</p>
+</div></section>
+<section class="section light-section dashboard-section"><div class="shell">
+    <div class="dashboard-heading"><div><span class="eyebrow dark">CUSTOMER DIRECTORY</span><h2>Dealer accounts.</h2></div><span class="status-badge">@Model.ActiveCustomers active</span></div>
+    <div class="admin-customer-panel customer-directory">
+        @if (Model.Customers.Count == 0) {
+            <div class="admin-empty">No active customer accounts are currently available.</div>
+        } else {
+            <div class="admin-table-scroll"><table class="admin-table">
+                <thead><tr><th>Customer</th><th>Contact</th><th>Plan</th><th>Status</th><th>API keys</th><th>Period ends</th><th>Joined</th></tr></thead>
+                <tbody>
+                @foreach (var customer in Model.Customers) {
+                    <tr>
+                        <td><strong>@customer.BusinessName</strong><small>@customer.ClientNumber</small></td>
+                        <td><strong>@customer.ContactName</strong><small>@customer.Email</small></td>
+                        <td>@customer.PlanName</td>
+                        <td><span class="table-status">@customer.SubscriptionStatus</span></td>
+                        <td>@customer.ActiveApiKeyCount</td>
+                        <td>@(customer.PeriodEndUtc.HasValue ? customer.PeriodEndUtc.Value.ToString("MMM d, yyyy") : "—")</td>
+                        <td>@customer.CreatedUtc.ToString("MMM d, yyyy")</td>
+                    </tr>
+                }
+                </tbody>
+            </table></div>
+        }
+    </div>
+</div></section>

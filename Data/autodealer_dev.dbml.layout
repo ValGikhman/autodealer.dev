@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 14.25, 19.125" name="autodealer_dev">
+  <DataContextMoniker Name="/AutoDealerDataContext" />
+  <nestedChildShapes>
+    <classShape Id="ae84257b-d311-4775-ac48-6d328e3187c8" absoluteBounds="9.25, 8.125, 2, 3.3093082682291666">
+      <DataClassMoniker Name="/AutoDealerDataContext/ApiKey" />
+      <nestedChildShapes>
+        <elementListCompartment Id="9324ad24-49ed-4e0b-b05a-0c0c2e574bca" absoluteBounds="9.265, 8.585, 1.9700000000000002, 2.7493082682291665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="c056aba7-a7c4-450e-b41f-e3c7dfc53885" absoluteBounds="3.5, 6.75, 2, 1.9631982421874996">
+      <DataClassMoniker Name="/AutoDealerDataContext/ApiUsageDaily" />
+      <nestedChildShapes>
+        <elementListCompartment Id="87ec8d16-96e0-4a03-a26f-6356cfbd2237" absoluteBounds="3.515, 7.21, 1.9700000000000002, 1.4031982421875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="54eb7de9-101b-4614-9e6b-5db62a84baf4" absoluteBounds="12, 8.25, 2, 3.1170068359375023">
+      <DataClassMoniker Name="/AutoDealerDataContext/ApiUsageLog" />
+      <nestedChildShapes>
+        <elementListCompartment Id="9ffe30d9-3c1d-4e8d-b8f8-d9ea8fd1663a" absoluteBounds="12.015, 8.71, 1.9700000000000002, 2.5570068359375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="903a38e6-9abc-4d89-a352-8dcf5d81cd07" absoluteBounds="3.5, 9.5, 2, 2.3478011067708344">
+      <DataClassMoniker Name="/AutoDealerDataContext/ClientCredential" />
+      <nestedChildShapes>
+        <elementListCompartment Id="90a73809-cf26-4d0d-af2c-e51629a7b629" absoluteBounds="3.515, 9.96, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="fb46bfe5-613a-4cd1-89f2-20c22472d760" absoluteBounds="0.75, 8.25, 2, 3.1170068359375023">
+      <DataClassMoniker Name="/AutoDealerDataContext/Client" />
+      <nestedChildShapes>
+        <elementListCompartment Id="4e37f096-2924-4f23-8c7e-090f7287e093" absoluteBounds="0.765, 8.71, 1.9700000000000002, 2.5570068359375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="df81b0d5-a5bf-4845-b5ab-992b4fef27db" absoluteBounds="3.5, 16, 2, 2.9247054036458309">
+      <DataClassMoniker Name="/AutoDealerDataContext/PaymentProfile" />
+      <nestedChildShapes>
+        <elementListCompartment Id="a3a5d384-31a2-4642-9544-5b5f6ff5f318" absoluteBounds="3.515, 16.46, 1.9700000000000002, 2.364705403645833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="e8a87eb8-cc15-42ed-9458-60334609eb38" absoluteBounds="3.75, 12.625, 2, 2.3478011067708344">
+      <DataClassMoniker Name="/AutoDealerDataContext/Plan" />
+      <nestedChildShapes>
+        <elementListCompartment Id="28b4571c-5989-4835-b399-bfb2e53a2dcf" absoluteBounds="3.765, 13.085, 1.9700000000000002, 1.7878011067708335" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="c9d0a208-5b27-4f70-9790-04da033ec626" absoluteBounds="6.5, 8.375, 2, 2.7324039713541666">
+      <DataClassMoniker Name="/AutoDealerDataContext/Subscription" />
+      <nestedChildShapes>
+        <elementListCompartment Id="e779aadd-0bb1-49ab-8e80-4db00839eb6c" absoluteBounds="6.515, 8.835, 1.9700000000000002, 2.1724039713541665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(2.75 : 9.80850341796875); (2.91666666666667 : 9.80850341796875 : JumpStart); (3.08333333333333 : 9.80850341796875 : JumpEnd); (3.25 : 9.80850341796875); (3.25 : 9.25); (5.57291666666667 : 9.25 : JumpStart); (5.73958333333333 : 9.25 : JumpEnd); (6.25 : 9.25); (6.25 : 7.875); (7.41666666666667 : 7.875 : JumpStart); (7.58333333333333 : 7.875 : JumpEnd); (10.25 : 7.875); (10.25 : 8.125)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/AutoDealerDataContext/Client/Client_ApiKey" />
+      <nodes>
+        <classShapeMoniker Id="fb46bfe5-613a-4cd1-89f2-20c22472d760" />
+        <classShapeMoniker Id="ae84257b-d311-4775-ac48-6d328e3187c8" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(8.5 : 9.74120198567708); (9.25 : 9.74120198567708)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/AutoDealerDataContext/Subscription/Subscription_ApiKey" />
+      <nodes>
+        <classShapeMoniker Id="c9d0a208-5b27-4f70-9790-04da033ec626" />
+        <classShapeMoniker Id="ae84257b-d311-4775-ac48-6d328e3187c8" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(2.75 : 8.48159912109375); (3.5 : 8.48159912109375)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/AutoDealerDataContext/Client/Client_ApiUsageDaily" />
+      <nodes>
+        <classShapeMoniker Id="fb46bfe5-613a-4cd1-89f2-20c22472d760" />
+        <classShapeMoniker Id="c056aba7-a7c4-450e-b41f-e3c7dfc53885" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(7.5 : 8.375); (7.5 : 7.3125); (5.5 : 7.3125)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/AutoDealerDataContext/Subscription/Subscription_ApiUsageDaily" />
+      <nodes>
+        <classShapeMoniker Id="c9d0a208-5b27-4f70-9790-04da033ec626" />
+        <classShapeMoniker Id="c056aba7-a7c4-450e-b41f-e3c7dfc53885" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(2.75 : 10.6190071269531); (3 : 10.6190071269531); (3 : 9); (6 : 9); (6 : 7.625); (7.41666666666667 : 7.625 : JumpStart); (7.58333333333333 : 7.625 : JumpEnd); (13 : 7.625); (13 : 8.25)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/AutoDealerDataContext/Client/Client_ApiUsageLog" />
+      <nodes>
+        <classShapeMoniker Id="fb46bfe5-613a-4cd1-89f2-20c22472d760" />
+        <classShapeMoniker Id="54eb7de9-101b-4614-9e6b-5db62a84baf4" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(11.25 : 9.80850341796875); (12 : 9.80850341796875)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/AutoDealerDataContext/ApiKey/ApiKey_ApiUsageLog" />
+      <nodes>
+        <classShapeMoniker Id="ae84257b-d311-4775-ac48-6d328e3187c8" />
+        <classShapeMoniker Id="54eb7de9-101b-4614-9e6b-5db62a84baf4" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(8.5 : 11.1074039713542); (8.875 : 11.4824039713542); (8.875 : 11.7420068359375); (11.625 : 11.7420068359375); (12 : 11.3670068359375)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/AutoDealerDataContext/Subscription/Subscription_ApiUsageLog" />
+      <nodes>
+        <classShapeMoniker Id="c9d0a208-5b27-4f70-9790-04da033ec626" />
+        <classShapeMoniker Id="54eb7de9-101b-4614-9e6b-5db62a84baf4" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(2.75 : 11.0555069814453); (3.5 : 11.0555069814453)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/AutoDealerDataContext/Client/Client_ClientCredential" />
+      <nodes>
+        <classShapeMoniker Id="fb46bfe5-613a-4cd1-89f2-20c22472d760" />
+        <classShapeMoniker Id="903a38e6-9abc-4d89-a352-8dcf5d81cd07" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(1.75 : 11.3670068359375); (1.75 : 17.4623527018229); (3.5 : 17.4623527018229)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/AutoDealerDataContext/Client/Client_PaymentProfile" />
+      <nodes>
+        <classShapeMoniker Id="fb46bfe5-613a-4cd1-89f2-20c22472d760" />
+        <classShapeMoniker Id="df81b0d5-a5bf-4845-b5ab-992b4fef27db" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(2.75 : 8.82534912109375); (5.91666666666667 : 8.82534912109375 : JumpStart); (6.08333333333333 : 8.82534912109375 : JumpEnd); (6.16666666666667 : 8.82534912109375 : JumpStart); (6.33333333333333 : 8.82534912109375 : JumpEnd); (6.5 : 8.82534912109375)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/AutoDealerDataContext/Client/Client_Subscription" />
+      <nodes>
+        <classShapeMoniker Id="fb46bfe5-613a-4cd1-89f2-20c22472d760" />
+        <classShapeMoniker Id="c9d0a208-5b27-4f70-9790-04da033ec626" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(5.65625 : 12.625); (5.65625 : 9.125); (6.16666666666667 : 9.125 : JumpStart); (6.33333333333333 : 9.125 : JumpEnd); (6.5 : 9.125)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+      <AssociationMoniker Name="/AutoDealerDataContext/Plan/Plan_Subscription" />
+      <nodes>
+        <classShapeMoniker Id="e8a87eb8-cc15-42ed-9458-60334609eb38" />
+        <classShapeMoniker Id="c9d0a208-5b27-4f70-9790-04da033ec626" />
+      </nodes>
+    </associationConnector>
+  </nestedChildShapes>
+</ordesignerObjectsDiagram>

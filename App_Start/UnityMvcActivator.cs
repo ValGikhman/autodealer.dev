@@ -18,6 +18,7 @@ namespace autodealer.dev
         /// </summary>
         public static void Start() 
         {
+            UnityConfig.RegisterComponents();
             FilterProviders.Providers.Remove(FilterProviders.Providers.OfType<FilterAttributeFilterProvider>().First());
             FilterProviders.Providers.Add(new UnityFilterAttributeFilterProvider(UnityConfig.Container));
 
@@ -32,7 +33,7 @@ namespace autodealer.dev
         /// </summary>
         public static void Shutdown()
         {
-            UnityConfig.Container.Dispose();
+            if (UnityConfig.Container != null) UnityConfig.Container.Dispose();
         }
     }
 }

@@ -1,0 +1,39 @@
+@model autodealer.dev.Models.AdminDashboardViewModel
+@{ ViewBag.Title = "Admin dashboard"; ViewBag.BodyClass = "dashboard-page admin-dashboard-page"; }
+<section class="page-hero dashboard-hero admin-hero"><div class="shell">
+    <span class="eyebrow">ADMIN CONTROL ROOM</span>
+    <h1>Customer operations, at a glance.</h1>
+    <p>Live account information from AutoDealer.dev</p>
+</div></section>
+<section class="section light-section dashboard-section"><div class="shell">
+    <div class="dashboard-heading"><div><span class="eyebrow dark">PLATFORM OVERVIEW</span><h2>Current customer activity.</h2></div><span class="status-badge">Administrator</span></div>
+    <div class="dashboard-grid admin-metrics">
+        <article><span>TOTAL CUSTOMERS</span><strong>@Model.TotalCustomers</strong><small>All registered accounts</small></article>
+        <article><span>ACTIVE CUSTOMERS</span><strong>@Model.ActiveCustomers</strong><small>Accounts currently enabled</small></article>
+        <article><span>TRIALING</span><strong>@Model.TrialingSubscriptions</strong><small>Subscriptions in trial</small></article>
+        <article><span>ACTIVE API KEYS</span><strong>@Model.ActiveApiKeys</strong><small>Credentials currently enabled</small></article>
+    </div>
+
+    <div class="admin-customer-panel">
+        <div class="admin-table-heading"><div><span class="eyebrow dark">ACTIVE CUSTOMERS</span><h2>Dealer accounts</h2></div><span>@Model.Customers.Count active</span></div>
+        @if (Model.Customers.Count == 0) {
+            <div class="admin-empty">No active customer accounts are currently available.</div>
+        } else {
+            <div class="admin-table-scroll"><table class="admin-table">
+                <thead><tr><th>Customer</th><th>Contact</th><th>Plan</th><th>Status</th><th>API keys</th><th>Period ends</th></tr></thead>
+                <tbody>
+                @foreach (var customer in Model.Customers) {
+                    <tr>
+                        <td><strong>@customer.BusinessName</strong><small>@customer.ClientNumber</small></td>
+                        <td><strong>@customer.ContactName</strong><small>@customer.Email</small></td>
+                        <td>@customer.PlanName</td>
+                        <td><span class="table-status">@customer.SubscriptionStatus</span></td>
+                        <td>@customer.ActiveApiKeyCount</td>
+                        <td>@(customer.PeriodEndUtc.HasValue ? customer.PeriodEndUtc.Value.ToString("MMM d, yyyy") : "—")</td>
+                    </tr>
+                }
+                </tbody>
+            </table></div>
+        }
+    </div>
+</div></section>

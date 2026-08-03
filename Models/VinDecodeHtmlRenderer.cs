@@ -108,7 +108,7 @@ namespace autodealer.dev.Models {
         }
 
         private static void AppendPricing(StringBuilder output, XElement pricing) {
-            OpenPanel(output, "✓ DataOne Pricing");
+            OpenPanel(output, "DataOne Pricing");
             if (!HasContent(pricing)) {
                 AppendEmpty(output, "No pricing data");
             }
@@ -304,7 +304,7 @@ namespace autodealer.dev.Models {
         private static void AppendXmlElement(StringBuilder output, XElement element) {
             var label = Humanize(element.Name.LocalName);
             var namedLabel = Attr(element, "name");
-            if (!string.IsNullOrWhiteSpace(namedLabel)) label += " — " + namedLabel;
+            if (!string.IsNullOrWhiteSpace(namedLabel)) label += " - " + namedLabel;
 
             if (!element.Elements().Any()) {
                 AppendKeyValueTable(output, new[] { Pair(label, Value(element)) });
@@ -322,7 +322,7 @@ namespace autodealer.dev.Models {
                 foreach (var child in simpleChildren) {
                     var childLabel = Humanize(child.Name.LocalName);
                     var childName = Attr(child, "name");
-                    if (!string.IsNullOrWhiteSpace(childName)) childLabel += " — " + childName;
+                    if (!string.IsNullOrWhiteSpace(childName)) childLabel += " - " + childName;
                     values.Add(Pair(childLabel, Value(child)));
                     foreach (var attribute in child.Attributes())
                         values.Add(Pair(childLabel + " @" + Humanize(attribute.Name.LocalName), attribute.Value));

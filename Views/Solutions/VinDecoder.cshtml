@@ -1,0 +1,178 @@
+@{ ViewBag.Title = "VIN Decode API"; var demoApiKey = System.Configuration.ConfigurationManager.AppSettings["DemoApi:Key"] ?? "ad_live_demo.keysecret"; }
+<section class="page-hero product-hero"><div class="shell two-col"><div><span class="eyebrow">VIN DECODE API</span><h1>From seventeen characters to the complete vehicle.</h1><p>Decode every matching style and preserve the complete automotive record in the format your application needs.</p><div class="button-row"><a class="button button-primary" href="@Url.Action("Register", "Account")">Get an API key &rarr;</a><a class="button button-secondary" href="@Url.Action("Index", "Documentation")">View reference</a></div></div><div class="spec-card"><span>SUPPORTED OUTPUTS</span><strong>JSON</strong><strong>XML</strong><strong>HTML</strong><small>One endpoint family. No lossy transformation.</small></div></div></section>
+
+<section class="section light-section vin-playground-section"><div class="shell">
+    <div class="section-heading playground-heading"><span class="eyebrow dark">LIVE API PLAYGROUND</span><h2>Everything returned. Nothing guessed.</h2><p>Choose a format, enter a 17-character VIN, and call the real endpoint. JSON and XML are shown as source; HTML is rendered as a vehicle report.</p></div>
+    <div class="vin-playground">
+        <form class="vin-demo-form" id="vin-demo-form">
+            <div class="vin-format-tabs" role="tablist" aria-label="Response format">
+                <button type="button" class="active" data-vin-format="json" role="tab" aria-selected="true">JSON</button>
+                <button type="button" data-vin-format="xml" role="tab" aria-selected="false">XML</button>
+                <button type="button" data-vin-format="html" role="tab" aria-selected="false">HTML</button>
+            </div>
+            <div class="vin-demo-fields">
+                <label><span>VIN NUMBER</span><input id="demo-vin" name="vin" value="1HGCM82633A004352" maxlength="17" autocomplete="off" spellcheck="false" required /></label>
+                <label><span>API KEY <small>5 VIN TRIALS</small></span><input id="demo-api-key" name="apiKey" type="text" value="@demoApiKey" autocomplete="off" /></label>
+                <button class="button button-primary" type="submit">Run API call &rarr;</button>
+            </div>
+            <div class="vin-endpoint"><b>GET</b><code id="vin-endpoint">/api/service/vin/1HGCM82633A004352/json</code></div>
+        </form>
+
+        <div class="vin-demo-response">
+            <div class="vin-response-head"><span><i></i><b id="vin-response-title">JSON response</b></span><div><em id="vin-demo-status">Ready</em><button type="button" id="copy-vin-response">Copy</button></div></div>
+            <pre class="vin-source-panel" data-vin-panel="json"><code id="vin-json-output">Run the API call to see the real JSON response.</code></pre>
+            <pre class="vin-source-panel" data-vin-panel="xml" hidden><code id="vin-xml-output">Run the API call to see the real XML response.</code></pre>
+            <pre class="vin-source-panel" data-vin-panel="html" hidden><code id="vin-html-source">Run the API call to see the real HTML response.</code></pre>
+            <div class="vin-html-panel" id="vin-html-output" hidden><div class="html-sample-card"><span>HTML PREVIEW</span><h3>Vehicle decode report</h3><p>Run the API call to render the complete responsive HTML fragment here.</p></div></div>
+        </div>
+    </div>
+</div></section>
+
+@section scripts {
+<script>
+$(function () {
+    var format = 'json';
+    var apiBase = '@Url.Content("~/api/service/vin/")';
+    var $tabs = $('[data-vin-format]');
+    var $sourcePanels = $('[data-vin-panel]');
+    var $htmlPanel = $('#vin-html-output');
+    var $status = $('#vin-demo-status');
+    var $title = $('#vin-response-title');
+    var hasRenderedHtml = false;
+
+    function endpoint() {
+        return '/api/service/vin/' + ($('#demo-vin').val() || '{vin}').trim().toUpperCase() + '/' + format;
+    }
+
+    function escapeSource(value) {
+        return $('<div>').text(value == null ? '' : value).html();
+    }
+
+    function highlightJson(value) {
+        var formatted = value;
+        try { formatted = JSON.stringify(JSON.parse(value), null, 2); } catch (ignore) { }
+        var token = /"(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"\s*:|"(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|\b(?:true|false|null)\b/g;
+        var output = '';
+        var cursor = 0;
+        var match;
+        while ((match = token.exec(formatted)) !== null) {
+            output += escapeSource(formatted.substring(cursor, match.index));
+            var valueToken = match[0];
+            var tokenClass = /^"/.test(valueToken)
+                ? (/\s*:$/.test(valueToken) ? 'vin-token-key' : 'vin-token-string')
+                : (/^(true|false|null)$/.test(valueToken) ? 'vin-token-literal' : 'vin-token-number');
+            output += '<span class="' + tokenClass + '">' + escapeSource(valueToken) + '</span>';
+            cursor = match.index + valueToken.length;
+        }
+        return output + escapeSource(formatted.substring(cursor));
+    }
+
+    function prettyXml(value) {
+        var compact = value.replace(/>\s*</g, '><').replace(/></g, '>\n<');
+        var depth = 0;
+        return $.map(compact.split('\n'), function (line) {
+            line = $.trim(line);
+            if (!line) return null;
+            if (/^<\//.test(line)) depth = Math.max(0, depth - 1);
+            var result = new Array(depth + 1).join('  ') + line;
+            if (/^<[^!?\/][^>]*[^\/]?>$/.test(line) && !/\/>$/.test(line) && !/<\/[^>]+>$/.test(line)) depth++;
+            return result;
+        }).join('\n');
+    }
+
+    function highlightXml(value) {
+        var formatted = prettyXml(value);
+        var tag = /<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<\/?[A-Za-z_][^<>]*?>/g;
+        var output = '';
+        var cursor = 0;
+        var match;
+        while ((match = tag.exec(formatted)) !== null) {
+            output += escapeSource(formatted.substring(cursor, match.index));
+            output += '<span class="vin-token-tag">' + escapeSource(match[0]) + '</span>';
+            cursor = match.index + match[0].length;
+        }
+        return output + escapeSource(formatted.substring(cursor));
+    }
+
+    function showPanel() {
+        $sourcePanels.attr('hidden', true);
+        $htmlPanel.attr('hidden', true);
+        if (format === 'html' && hasRenderedHtml) {
+            $htmlPanel.removeAttr('hidden');
+        } else {
+            $('[data-vin-panel="' + format + '"]').removeAttr('hidden');
+        }
+        $title.text(format.toUpperCase() + ' response');
+        $('#vin-endpoint').text(endpoint());
+    }
+
+    $tabs.on('click', function () {
+        format = $(this).data('vin-format');
+        $tabs.removeClass('active').attr('aria-selected', 'false');
+        $(this).addClass('active').attr('aria-selected', 'true');
+        showPanel();
+    });
+
+    $('#demo-vin').on('input', function () {
+        this.value = this.value.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, '').slice(0, 17);
+        $('#vin-endpoint').text(endpoint());
+    });
+
+    $('#vin-demo-form').on('submit', function (event) {
+        event.preventDefault();
+        var vin = $('#demo-vin').val().trim().toUpperCase();
+        if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(vin)) {
+            $status.text('Enter a valid 17-character VIN').addClass('error');
+            return;
+        }
+
+        var headers = { Accept: format === 'html' ? 'text/html' : 'application/' + format };
+        var apiKey = $('#demo-api-key').val().trim();
+        if (apiKey) headers.Authorization = 'Bearer ' + apiKey;
+        $status.text('Calling API...').removeClass('error success');
+        $tabs.prop('disabled', true);
+
+        $.ajax({
+            url: apiBase + encodeURIComponent(vin) + '/' + format,
+            method: 'GET',
+            headers: headers,
+            dataType: 'text',
+            cache: false
+        }).done(function (body, textStatus, xhr) {
+            if (format === 'json') {
+                $('#vin-json-output').html(highlightJson(body));
+            } else if (format === 'xml') {
+                $('#vin-xml-output').html(highlightXml(body));
+            } else {
+                $('#vin-html-source').text(body);
+                $('[data-vin-panel="html"]').attr('hidden', true);
+                $htmlPanel.html(body);
+                $htmlPanel.find('details.avd-style').first().prop('open', true);
+                $htmlPanel.removeAttr('hidden');
+                hasRenderedHtml = true;
+            }
+            $title.text('Live ' + format.toUpperCase() + ' response');
+            var remaining = xhr.getResponseHeader('X-Demo-Remaining');
+            $status.text(xhr.status + ' ' + xhr.statusText + (remaining !== null ? ' - ' + remaining + ' VIN trials left' : '')).addClass('success');
+        }).fail(function (xhr) {
+            var message = xhr.responseText || 'The API request could not be completed.';
+            try { var parsed = JSON.parse(message); message = parsed.message || (parsed.error && parsed.error.message) || message; } catch (ignore) { }
+            $('[data-vin-panel="' + format + '"]').removeAttr('hidden').find('code').text(message);
+            $htmlPanel.attr('hidden', true);
+            if (format === 'html') hasRenderedHtml = false;
+            $title.text('API error');
+            var remaining = xhr.getResponseHeader('X-Demo-Remaining');
+            $status.text((xhr.status || 'Network') + ' error' + (remaining !== null ? ' - ' + remaining + ' VIN trials left' : '')).addClass('error');
+        }).always(function () {
+            $tabs.prop('disabled', false);
+        });
+    });
+
+    $('#copy-vin-response').on('click', function () {
+        var text = format === 'html' && !$htmlPanel.is('[hidden]') ? $('#vin-html-source').text() : $('[data-vin-panel="' + format + '"]').text();
+        var $button = $(this);
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { $button.text('Copied'); setTimeout(function () { $button.text('Copy'); }, 1200); });
+    });
+});
+</script>
+}
