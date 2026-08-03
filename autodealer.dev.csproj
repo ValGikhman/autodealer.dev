@@ -178,6 +178,7 @@
     <Compile Include="Services\PlanService.cs" />
     <Compile Include="Services\IDealerDemoRequestService.cs" />
     <Compile Include="Services\DealerDemoRequestService.cs" />
+    <Compile Include="Services\IonosAspMailSender.cs" />
     <Compile Include="Services\ICredentialEmailService.cs" />
     <Compile Include="Services\SmtpCredentialEmailService.cs" />
     <Compile Include="Global.asax.cs">
