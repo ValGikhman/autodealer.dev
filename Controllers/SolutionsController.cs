@@ -34,7 +34,7 @@ namespace autodealer.dev.Controllers {
             catch (System.Exception ex) {
                 var detail = ex.GetBaseException().Message;
                 var error = HttpContext.IsDebuggingEnabled && Request.IsLocal
-                    ? "IONOS SMTP error: " + detail
+                    ? "SMTP error: " + detail
                     : "Your request could not be delivered right now. Please try again shortly.";
                 ModelState.AddModelError("", error);
                 return View(model);

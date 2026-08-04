@@ -1,9 +1,6 @@
 using autodealer.dev.Models;
 using System;
-using System.Configuration;
 using System.Diagnostics;
-using System.Net;
-using System.Net.Mail;
 using System.Text;
 using System.Web;
 
@@ -12,47 +9,16 @@ namespace autodealer.dev.Services {
         public bool Send(DealerDemoRequestViewModel request) {
             if (request == null) throw new ArgumentNullException("request");
 
-            var host = ConfigurationManager.AppSettings["Smtp:Host"];
-            var from = ConfigurationManager.AppSettings["Smtp:From"];
-            var fromName = ConfigurationManager.AppSettings["Smtp:FromName"];
-            var recipient = ConfigurationManager.AppSettings["DemoRequest:Recipient"];
-            if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(recipient))
-                return false;
-
             try {
-                var displayName = string.IsNullOrWhiteSpace(fromName) ? "AutoDealer.dev" : fromName;
-                var username = ConfigurationManager.AppSettings["Smtp:Username"];
-                var password = ConfigurationManager.AppSettings["Smtp:Password"];
                 var subject = "Dealer demo request — " + SafeSubject(request.BusinessName);
                 var body = BuildBody(request);
-                if (IonosAspMailSender.TrySend(displayName, from, password, "Valentin Gikhman", recipient, subject, body, request.Email))
-                    return true;
-
-                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-                using (var message = new MailMessage())
-                using (var smtp = new SmtpClient(host)) {
-                    message.From = new MailAddress(from, displayName);
-                    message.To.Add(recipient);
-                    message.Subject = subject;
-                    message.Body = body;
-                    message.IsBodyHtml = true;
-                    message.ReplyToList.Add(new MailAddress(request.Email, request.ContactName));
-
-                    int port;
-                    if (int.TryParse(ConfigurationManager.AppSettings["Smtp:Port"], out port)) smtp.Port = port;
-                    smtp.EnableSsl = !string.Equals(ConfigurationManager.AppSettings["Smtp:EnableSsl"], "false", StringComparison.OrdinalIgnoreCase);
-                    smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
-                    smtp.UseDefaultCredentials = false;
-                    smtp.Timeout = 30000;
-                    if (!string.IsNullOrWhiteSpace(username))
-                        smtp.Credentials = new NetworkCredential(username, password);
-                    smtp.Send(message);
-                    return true;
-                }
+                var recipient = System.Configuration.ConfigurationManager.AppSettings["DemoRequest:Recipient"];
+                SmtpMailSender.Send(recipient, "Valentin Gikhman", subject, body, request.Email, request.ContactName);
+                return true;
             }
             catch (Exception ex) {
                 Trace.TraceError("Dealer demo SMTP delivery failed: {0}", ex);
-                throw new InvalidOperationException("IONOS SMTP delivery failed.", ex);
+                throw new InvalidOperationException("SMTP delivery failed.", ex);
             }
         }
 
