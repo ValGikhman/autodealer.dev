@@ -1,35 +1,74 @@
+@using System.Collections.Generic
+@using System.Linq
 @model autodealer.dev.Models.PricingPageViewModel
-@{ ViewBag.Title = "Pricing"; }
+@{
+    ViewBag.Title = "API Pricing Plans";
+    ViewBag.Description = "Compare AutoDealer.dev API pricing plans for VIN decoding, secure API keys, JSON, XML and HTML responses, usage tracking, and a 14-day trial.";
+    ViewBag.CanonicalUrl = Url.Action("Index", "Pricing", null, Request.Url.Scheme);
+
+    var offerItems = new List<Dictionary<string, object>>();
+    foreach (var seoPlan in Model.Plans.Where(x => x.MonthlyPrice.HasValue)) {
+        offerItems.Add(new Dictionary<string, object> {
+            { "@type", "Offer" },
+            { "name", seoPlan.DisplayName + " API plan" },
+            { "price", seoPlan.MonthlyPrice.Value },
+            { "priceCurrency", "USD" },
+            { "availability", "https://schema.org/InStock" },
+            { "url", Url.Action("Register", "Account", new { plan = seoPlan.PlanCode }, Request.Url.Scheme) },
+            { "description", seoPlan.MonthlyRequestQuota.ToString("N0") + " API requests per month and up to " + seoPlan.MaxApiKeys + " secure API keys." }
+        });
+    }
+
+    var serviceData = new Dictionary<string, object> {
+        { "@context", "https://schema.org" },
+        { "@type", "Service" },
+        { "name", "AutoDealer.dev API access" },
+        { "description", ViewBag.Description },
+        { "provider", new Dictionary<string, object> { { "@type", "Organization" }, { "name", "AutoDealer.dev" }, { "url", Url.Action("Index", "Home", null, Request.Url.Scheme) } } },
+        { "serviceType", "Automotive data API" },
+        { "url", ViewBag.CanonicalUrl },
+        { "hasOfferCatalog", new Dictionary<string, object> { { "@type", "OfferCatalog" }, { "name", "API pricing plans" }, { "itemListElement", offerItems } } }
+    };
+    var jsonSettings = new Newtonsoft.Json.JsonSerializerSettings { StringEscapeHandling = Newtonsoft.Json.StringEscapeHandling.EscapeHtml };
+    var serviceJson = Newtonsoft.Json.JsonConvert.SerializeObject(serviceData, jsonSettings);
+}
+@section head {
+    <script type="application/ld+json">@Html.Raw(serviceJson)</script>
+}
 <section class="page-hero pricing-hero"><div class="shell narrow"><span class="eyebrow">SIMPLE PRICING</span><h1>Start focused. Scale without friction.</h1><p>Every plan includes secure API keys, complete response formats, usage metering, and access to the dealer API documentation.</p></div></section>
-<section class="section light-section pricing-section"><div class="shell pricing-grid">
-    @if (Model.Plans.Count == 0) {
-        <div class="pricing-empty">No plans are currently available.</div>
-    }
-    @foreach (var plan in Model.Plans) {
-        <article class="price-card @(plan.IsRecommended ? "featured-price" : "")">
-            @if (plan.IsRecommended) { <span class="popular-label">RECOMMENDED</span> }
-            <span class="plan-name">@plan.DisplayName.ToUpperInvariant()</span>
-            @if (plan.MonthlyPrice.HasValue) {
-                <h2>@plan.MonthlyPrice.Value.ToString("$0.##")<small>/month</small></h2>
-            } else {
-                <h2>Custom</h2>
+<section class="section light-section pricing-section">
+    <div class="shell pricing-grid pricing-plans-grid">
+            @if (Model.Plans.Count == 0) {
+                <div class="pricing-empty">No plans are currently available.</div>
             }
-            <p>@plan.DisplayName access for automotive applications and dealership teams.</p>
-            <strong>@plan.MonthlyRequestQuota.ToString("N0") requests monthly</strong>
-            <ul class="check-list">
-                <li>@(plan.MaxApiKeys == 1 ? "1 secure API key" : plan.MaxApiKeys.ToString("N0") + " secure API keys")</li>
-                <li>VIN Decode API</li>
-                <li>JSON, XML, and HTML</li>
-                <li>Usage visibility</li>
-            </ul>
-            <a class="button @(plan.IsRecommended ? "button-primary" : "button-outline")" href="@Url.Action("Register", "Account", new { plan = plan.PlanCode })">Choose @plan.DisplayName</a>
-        </article>
-    }
-</div></section>
-<section class="section light-section faq-section"><div class="shell two-col"><div><span class="eyebrow dark">COMMON QUESTIONS</span><h2>Clear terms before you build.</h2></div><div class="accordion">
-    <article><button type="button">Do I need a card for the trial?<span>+</span></button><p>No. Create the account and test the API for 14 days before adding a payment method.</p></article>
-    <article><button type="button">How are API calls counted?<span>+</span></button><p>Every authenticated request is metered atomically against the active subscription and summarized daily per client.</p></article>
-    <article><button type="button">Can I rotate an API key?<span>+</span></button><p>Yes. Keys are designed to be revoked and reissued independently of the customer account.</p></article>
-    <article><button type="button">Do you store credit card numbers?<span>+</span></button><p>No. A hosted payment provider returns an opaque token. The application never receives or stores a card number or CVV.</p></article>
-</div></div></section>
-@section scripts {<script>$(function () { $('.accordion button').on('click', function () { var $article = $(this).closest('article'); $article.toggleClass('open').siblings().removeClass('open'); }); });</script>}
+            @foreach (var plan in Model.Plans) {
+                <article class="price-card @(plan.IsRecommended ? "featured-price" : "") @(plan.IsCurrentPlan ? "current-plan" : "")">
+                    @if (plan.IsCurrentPlan) {
+                        <span class="popular-label current-plan-label">CURRENT PLAN</span>
+                    } else if (plan.IsRecommended) {
+                        <span class="popular-label">RECOMMENDED</span>
+                    }
+                    <span class="color-icon plan-icon" aria-hidden="true"><svg><use href="#icon-plan"></use></svg></span>
+                    <span class="plan-name">@plan.DisplayName.ToUpperInvariant()</span>
+                    @if (plan.MonthlyPrice.HasValue) {
+                        <h2>@plan.MonthlyPrice.Value.ToString("$0.##")<small>/month</small></h2>
+                    } else {
+                        <h2>Custom</h2>
+                    }
+                    <p>@plan.DisplayName access for automotive applications and dealership teams.</p>
+                    <strong>@plan.MonthlyRequestQuota.ToString("N0") requests monthly</strong>
+                    <ul class="check-list">
+                        <li>@(plan.MaxApiKeys == 1 ? "1 secure API key" : plan.MaxApiKeys.ToString("N0") + " secure API keys")</li>
+                        <li>VIN Decode API</li>
+                        <li>JSON, XML, and HTML</li>
+                        <li>Usage visibility</li>
+                    </ul>
+                    @if (plan.IsCurrentPlan) {
+                        <a class="button button-primary current-plan-button" href="@Url.Action("Dashboard", "Account")"><span aria-hidden="true">&#10003;</span> Current plan</a>
+                    } else {
+                        <a class="button @(plan.IsRecommended ? "button-primary" : "button-outline")" href="@Url.Action("Register", "Account", new { plan = plan.PlanCode })">Choose @plan.DisplayName</a>
+                    }
+                </article>
+            }
+    </div>
+</section>

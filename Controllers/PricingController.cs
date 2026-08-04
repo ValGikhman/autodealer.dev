@@ -11,7 +11,10 @@ namespace autodealer.dev.Controllers {
         }
 
         public ActionResult Index() {
-            return View(new PricingPageViewModel { Plans = planService.GetActivePlans() });
+            var plans = Request.IsAuthenticated && !User.IsInRole("Admin")
+                ? planService.GetActivePlans(User.Identity.Name)
+                : planService.GetActivePlans();
+            return View(new PricingPageViewModel { Plans = plans });
         }
     }
 }
