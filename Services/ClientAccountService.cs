@@ -114,7 +114,7 @@ namespace autodealer.dev.Services {
                 }
             }
 
-            var emailed = emailService != null && emailService.Send(model.FirstName, model.Email.Trim(), clientNumber, fullKey, planCode);
+            var emailed = emailService != null && emailService.Send(model.BusinessName, model.FirstName, model.LastName, model.Email.Trim(), model.Phone, clientNumber, fullKey, planCode);
             return new AccountCreatedViewModel { ClientNumber = clientNumber, ApiKey = fullKey, Email = model.Email, CredentialsEmailed = emailed };
         }
 

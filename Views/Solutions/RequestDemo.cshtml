@@ -4,20 +4,18 @@
 
 <section class="section light-section account-content-section demo-request-section"><div class="shell demo-request-grid">
     <aside class="demo-brief">
-        <span class="eyebrow dark">A WORKING SESSION</span>
         <h2>Useful from the first conversation.</h2>
         <p>This is not a generic product tour. We will focus on the parts of your operation that can create the clearest customer and business impact.</p>
         <div class="demo-steps">
-            <article><b>01</b><div><strong>Your current experience</strong><span>Website, inventory sources, lead flow, and operational friction.</span></div></article>
-            <article><b>02</b><div><strong>A relevant walkthrough</strong><span>Customer storefront, vehicle details, integrations, and dealer tools.</span></div></article>
-            <article><b>03</b><div><strong>Practical next steps</strong><span>Scope, rollout approach, and the right plan for your dealership.</span></div></article>
+            <article><strong>Your current experience</strong><span>Website, inventory sources, lead flow, and operational friction.</span></article>
+            <article><strong>A relevant walkthrough</strong><span>Customer storefront, vehicle details, integrations, and dealer tools.</span></article>
+            <article><strong>Practical next steps</strong><span>Scope, rollout approach, and the right plan for your dealership.</span></article>
         </div>
     </aside>
 
     <div class="form-card demo-request-card">
         <span class="form-step">REQUEST YOUR DEMO</span>
         <h2>Tell us about your dealership</h2>
-        <p>Share a few details and we will follow up personally.</p>
         @using (Html.BeginForm("RequestDemo", "Solutions", FormMethod.Post, new { @class = "account-form", autocomplete = "on" })) {
             @Html.AntiForgeryToken()
             @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
@@ -39,7 +37,7 @@
                 <div class="form-field">@Html.LabelFor(m => m.PrimaryGoal)@Html.DropDownListFor(m => m.PrimaryGoal, new[] { new SelectListItem { Text = "Select your primary goal", Value = "" }, new SelectListItem { Text = "Replace our dealer website", Value = "Replace our dealer website" }, new SelectListItem { Text = "Improve inventory merchandising", Value = "Improve inventory merchandising" }, new SelectListItem { Text = "Generate more qualified leads", Value = "Generate more qualified leads" }, new SelectListItem { Text = "Connect vehicle data by API", Value = "Connect vehicle data by API" }, new SelectListItem { Text = "Support multiple locations", Value = "Support multiple locations" }, new SelectListItem { Text = "Explore the complete platform", Value = "Explore the complete platform" } })@Html.ValidationMessageFor(m => m.PrimaryGoal)</div>
                 <div class="form-field">@Html.LabelFor(m => m.PreferredContact)@Html.DropDownListFor(m => m.PreferredContact, new[] { new SelectListItem { Text = "Email", Value = "Email" }, new SelectListItem { Text = "Phone", Value = "Phone" } })@Html.ValidationMessageFor(m => m.PreferredContact)</div>
             </div>
-            <div class="form-field">@Html.LabelFor(m => m.Message)@Html.TextAreaFor(m => m.Message, new { rows = "6", placeholder = "Tell us about your current setup, what is not working, and what a successful rollout would look like." })@Html.ValidationMessageFor(m => m.Message)</div>
+            <div class="form-field">@Html.LabelFor(m => m.Message)@Html.TextAreaFor(m => m.Message, new { rows = "3", placeholder = "Tell us about your current setup, what is not working, and what a successful rollout would look like." })@Html.ValidationMessageFor(m => m.Message)</div>
             <button class="button button-primary submit-button" type="submit">Request my dealer demo <span>&rarr;</span></button>
             <small class="form-secure">Your information is used only to respond to this request.</small>
         }

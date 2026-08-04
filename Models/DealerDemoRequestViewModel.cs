@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace autodealer.dev.Models {
-    public sealed class DealerDemoRequestViewModel {
+    public sealed class DealerDemoRequestViewModel : IValidatableObject {
         [Required, StringLength(160)]
         [Display(Name = "Dealership / company")]
         public string BusinessName { get; set; }
@@ -43,5 +44,10 @@ namespace autodealer.dev.Models {
 
         // Honeypot: real users never see or complete this field.
         public string CompanyWebsite { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
+            if (string.Equals(PreferredContact, "Phone", System.StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(Phone))
+                yield return new ValidationResult("Please enter a phone number when phone is your preferred contact method.", new[] { "Phone" });
+        }
     }
 }

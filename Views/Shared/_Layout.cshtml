@@ -61,10 +61,9 @@
                         using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { @class = "nav-logout" })) { @Html.AntiForgeryToken()<button type="submit">Sign out</button> }
                     } else {
                         <a class="nav-quiet" href="@Url.Action("Login", "Account")">Sign in</a>
-                        <a class="button button-primary button-small nav-api-key" href="@Url.Action("Register", "Account")">
-                            <span class="nav-api-key-icon" aria-hidden="true"><svg><use href="#icon-key"></use></svg></span>
+                        <a class="button site-cta" href="@Url.Action("Register", "Account")">
                             <span>Get an API key</span>
-                            <span class="nav-api-key-arrow" aria-hidden="true">&rarr;</span>
+                            <i aria-hidden="true">&rarr;</i>
                         </a>
                     }
                 }
