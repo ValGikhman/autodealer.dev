@@ -12,5 +12,6 @@ namespace autodealer.dev.Models {
         public int MonthlyRequestQuota { get; set; }
         public short MaxApiKeys { get; set; }
         public bool IsRecommended { get; set; }
+        public bool IsCurrentPlan { get; set; }
     }
 }

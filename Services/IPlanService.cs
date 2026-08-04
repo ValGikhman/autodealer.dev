@@ -4,5 +4,6 @@ using System.Collections.Generic;
 namespace autodealer.dev.Services {
     public interface IPlanService {
         IList<PricingPlanViewModel> GetActivePlans();
+        IList<PricingPlanViewModel> GetActivePlans(string customerEmail);
     }
 }

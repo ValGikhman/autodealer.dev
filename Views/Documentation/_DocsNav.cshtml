@@ -1,10 +1,49 @@
+@{
+    var currentAction = (ViewContext.RouteData.Values["action"] ?? "Index").ToString();
+    var isQuickstart = currentAction.Equals("Index", StringComparison.OrdinalIgnoreCase);
+    var isAuthentication = currentAction.Equals("Authentication", StringComparison.OrdinalIgnoreCase);
+    var isErrors = currentAction.Equals("Errors", StringComparison.OrdinalIgnoreCase);
+}
 <aside class="docs-sidebar">
-    <strong>GET STARTED</strong>
-    <a href="@Url.Action("Index", "Documentation")">Quickstart</a>
-    <a href="@Url.Action("Authentication", "Documentation")">Authentication</a>
-    <a href="@Url.Action("Errors", "Documentation")">Errors &amp; limits</a>
-    <strong>ENDPOINTS</strong>
-    <a href="@Url.Action("Index", "Documentation")#vin"><span>GET</span> VIN decode</a>
-    <strong>FORMATS</strong>
-    <a href="@Url.Action("Index", "Documentation")#formats">JSON, XML &amp; HTML</a>
+    <div class="docs-nav-card">
+        <header class="docs-nav-head">
+            <strong>Developer guide</strong>
+        </header>
+        <nav class="docs-nav" aria-label="Documentation bookmarks">
+            <section class="docs-nav-group">
+                <span class="docs-nav-section"><b>01</b> Get started</span>
+                <a class="docs-nav-link @(isQuickstart ? "active" : "")" href="@Url.Action("Index", "Documentation")" aria-current="@(isQuickstart ? "page" : null)">
+                    <span class="docs-nav-icon icon-blue" aria-hidden="true"><svg><use href="#icon-code"></use></svg></span>
+                    <span class="docs-nav-copy"><b>Quickstart</b><small>Make your first request</small></span>
+                    <i class="docs-nav-arrow" aria-hidden="true">&rsaquo;</i>
+                </a>
+                <a class="docs-nav-link @(isAuthentication ? "active" : "")" href="@Url.Action("Authentication", "Documentation")" aria-current="@(isAuthentication ? "page" : null)">
+                    <span class="docs-nav-icon icon-violet" aria-hidden="true"><svg><use href="#icon-key"></use></svg></span>
+                    <span class="docs-nav-copy"><b>Authentication</b><small>Keys, scopes, and security</small></span>
+                    <i class="docs-nav-arrow" aria-hidden="true">&rsaquo;</i>
+                </a>
+                <a class="docs-nav-link @(isErrors ? "active" : "")" href="@Url.Action("Errors", "Documentation")" aria-current="@(isErrors ? "page" : null)">
+                    <span class="docs-nav-icon icon-coral" aria-hidden="true"><svg><use href="#icon-support"></use></svg></span>
+                    <span class="docs-nav-copy"><b>Errors &amp; limits</b><small>Status codes and quotas</small></span>
+                    <i class="docs-nav-arrow" aria-hidden="true">&rsaquo;</i>
+                </a>
+            </section>
+            <section class="docs-nav-group">
+                <span class="docs-nav-section"><b>02</b> Endpoints</span>
+                <a class="docs-nav-link" href="@Url.Action("Index", "Documentation")#vin">
+                    <span class="docs-nav-icon icon-teal" aria-hidden="true"><svg><use href="#icon-vehicle-data"></use></svg></span>
+                    <span class="docs-nav-copy"><b>VIN decode</b><small><em>GET</em> Vehicle intelligence</small></span>
+                    <i class="docs-nav-arrow" aria-hidden="true">&rsaquo;</i>
+                </a>
+            </section>
+            <section class="docs-nav-group">
+                <span class="docs-nav-section"><b>03</b> Response formats</span>
+                <a class="docs-nav-link" href="@Url.Action("Index", "Documentation")#formats">
+                    <span class="docs-nav-icon icon-amber" aria-hidden="true"><svg><use href="#icon-plan"></use></svg></span>
+                    <span class="docs-nav-copy"><b>JSON, XML &amp; HTML</b><small>Choose the right output</small></span>
+                    <i class="docs-nav-arrow" aria-hidden="true">&rsaquo;</i>
+                </a>
+            </section>
+        </nav>
+    </div>
 </aside>

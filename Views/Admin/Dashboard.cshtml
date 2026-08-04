@@ -8,10 +8,10 @@
 <section class="section light-section dashboard-section"><div class="shell">
     <div class="dashboard-heading"><div><span class="eyebrow dark">PLATFORM OVERVIEW</span><h2>Current customer activity.</h2></div><span class="status-badge">Administrator</span></div>
     <div class="dashboard-grid admin-metrics">
-        <article><span>TOTAL CUSTOMERS</span><strong>@Model.TotalCustomers</strong><small>All registered accounts</small></article>
-        <article><span>ACTIVE CUSTOMERS</span><strong>@Model.ActiveCustomers</strong><small>Accounts currently enabled</small></article>
-        <article><span>TRIALING</span><strong>@Model.TrialingSubscriptions</strong><small>Subscriptions in trial</small></article>
-        <article><span>ACTIVE API KEYS</span><strong>@Model.ActiveApiKeys</strong><small>Credentials currently enabled</small></article>
+        <article><span class="color-icon metric-icon" aria-hidden="true"><svg><use href="#icon-users"></use></svg></span><span>TOTAL CUSTOMERS</span><strong>@Model.TotalCustomers</strong><small>All registered accounts</small></article>
+        <article><span class="color-icon metric-icon" aria-hidden="true"><svg><use href="#icon-check"></use></svg></span><span>ACTIVE CUSTOMERS</span><strong>@Model.ActiveCustomers</strong><small>Accounts currently enabled</small></article>
+        <article><span class="color-icon metric-icon" aria-hidden="true"><svg><use href="#icon-trial"></use></svg></span><span>TRIALING</span><strong>@Model.TrialingSubscriptions</strong><small>Subscriptions in trial</small></article>
+        <article><span class="color-icon metric-icon" aria-hidden="true"><svg><use href="#icon-key"></use></svg></span><span>ACTIVE API KEYS</span><strong>@Model.ActiveApiKeys</strong><small>Credentials currently enabled</small></article>
     </div>
 
     <div class="admin-customer-panel">
