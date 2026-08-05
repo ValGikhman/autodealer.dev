@@ -1,0 +1,30 @@
+<div class="modal fade dashboard-record-modal" id="dashboard-record-modal" tabindex="-1" aria-labelledby="dashboard-record-title" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header dashboard-record-header">
+                <div>
+                    <span class="dashboard-record-kicker" id="dashboard-record-kicker">RECORD DETAILS</span>
+                    <h2 class="modal-title" id="dashboard-record-title">Account details</h2>
+                    <p id="dashboard-record-subtitle"></p>
+                </div>
+                <button type="button" class="btn-close dashboard-modal-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="dashboard-record-summary">
+                    <span class="dashboard-record-monogram" id="dashboard-record-monogram" aria-hidden="true">AD</span>
+                    <div><strong id="dashboard-record-name"></strong><span id="dashboard-record-caption"></span></div>
+                    <span class="dashboard-record-status" id="dashboard-record-status"></span>
+                </div>
+                <div class="dashboard-record-actions" id="dashboard-record-actions"></div>
+                <div class="dashboard-record-sections" id="dashboard-record-sections"></div>
+            </div>
+            <div class="modal-footer">
+                <span>AutoDealer.dev administrative record</span>
+                <button type="button" class="dashboard-modal-done" data-bs-dismiss="modal">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-pepgrid-template" id="customer-status-template"><span class="dashboard-grid-status">{{SubscriptionStatus}}</span></script>
+<script type="text/x-pepgrid-template" id="demo-status-template"><span class="dashboard-grid-status">{{Status}}</span></script>

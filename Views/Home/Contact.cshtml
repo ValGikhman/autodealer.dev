@@ -1,6 +1,122 @@
-@{ ViewBag.Title = "Contact"; ViewBag.BodyClass = "content-page"; }
+@model autodealer.dev.Models.ContactInquiryViewModel
+@{ ViewBag.Title = "Contact"; ViewBag.BodyClass = "content-page contact-page"; }
 <section class="page-hero content-hero"><div class="shell"><span class="eyebrow">CONTACT AUTODEALER.DEV</span><h1>Let&rsquo;s build the right automotive experience.</h1><p>Whether you are launching a modern dealer website or connecting vehicle data to your product, tell us what you are working on. We will help turn the idea into a practical next step.</p></div></section>
 <section class="section light-section content-section"><div class="shell contact-grid">
-    <a class="contact-card" href="mailto:sales@autodealer.dev?subject=Dealer%20Website%20Inquiry"><span class="contact-index">DEALER WEBSITES</span><span class="color-icon icon-teal contact-icon" aria-hidden="true"><svg><use href="#icon-browser"></use></svg></span><h2>A digital showroom built around your dealership.</h2><p>Let&rsquo;s talk about your inventory, brand, locations, and customer journey. We can shape a fast, polished website that makes every vehicle easier to discover and every next action easier to take.</p><strong>sales@autodealer.dev <i>&rarr;</i></strong></a>
-    <a class="contact-card" href="mailto:sales@autodealer.dev?subject=Automotive%20API%20Inquiry"><span class="contact-index">API &amp; VEHICLE DATA</span><span class="color-icon icon-blue contact-icon" aria-hidden="true"><svg><use href="#icon-code"></use></svg></span><h2>Reliable vehicle data, ready for your stack.</h2><p>Tell us what you are building and how you plan to use the data. We can help with VIN decoding, response formats, authentication, expected volume, and the right path to production.</p><strong>sales@autodealer.dev <i>&rarr;</i></strong></a>
+    <article class="contact-card"><span class="contact-index">DEALER WEBSITES</span><span class="color-icon icon-teal contact-icon" aria-hidden="true"><svg><use href="#icon-browser"></use></svg></span><h2>A digital showroom built around your dealership.</h2><p>Let&rsquo;s talk about your inventory, brand, locations, and customer journey. We can shape a fast, polished website that makes every vehicle easier to discover and every next action easier to take.</p><a class="button site-cta contact-email-button" href="#contact-inquiry-modal" data-bs-toggle="modal" data-bs-target="#contact-inquiry-modal" data-inquiry-type="website"><span>sales@autodealer.dev</span></a></article>
+    <article class="contact-card"><span class="contact-index">API &amp; VEHICLE DATA</span><span class="color-icon icon-blue contact-icon" aria-hidden="true"><svg><use href="#icon-code"></use></svg></span><h2>Reliable vehicle data, ready for your stack.</h2><p>Tell us what you are building and how you plan to use the data. We can help with VIN decoding, response formats, authentication, expected volume, and the right path to production.</p><a class="button site-cta contact-email-button" href="#contact-inquiry-modal" data-bs-toggle="modal" data-bs-target="#contact-inquiry-modal" data-inquiry-type="api"><span>sales@autodealer.dev</span></a></article>
 </div></section>
+
+<div class="modal fade contact-inquiry-modal" id="contact-inquiry-modal" tabindex="-1" aria-labelledby="contact-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header contact-modal-header">
+                <div>
+                    <span class="contact-modal-kicker" id="contact-modal-kicker">START A CONVERSATION</span>
+                    <h2 class="modal-title" id="contact-modal-title">Tell us what you are building.</h2>
+                    <p id="contact-modal-subtitle">A few useful details will help us begin in the right place.</p>
+                </div>
+                <button type="button" class="btn-close contact-modal-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                @using (Html.BeginForm("Contact", "Home", FormMethod.Post, new { id = "contact-inquiry-form", @class = "form-card contact-modal-form", autocomplete = "on" })) {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.InquiryType, new { id = "contact-inquiry-type" })
+                    <div class="contact-honeypot" aria-hidden="true">@Html.LabelFor(m => m.CompanyWebsite)@Html.TextBoxFor(m => m.CompanyWebsite, new { tabindex = "-1", autocomplete = "off" })</div>
+                    @Html.ValidationSummary(true, "", new { @class = "validation-summary contact-validation-summary" })
+                    <div class="form-field">@Html.LabelFor(m => m.BusinessName)@Html.TextBoxFor(m => m.BusinessName, new { placeholder = "Northstar Motors", autocomplete = "organization" })@Html.ValidationMessageFor(m => m.BusinessName)</div>
+                    <div class="form-row">
+                        <div class="form-field">@Html.LabelFor(m => m.FirstName)@Html.TextBoxFor(m => m.FirstName, new { placeholder = "Alex", autocomplete = "given-name" })@Html.ValidationMessageFor(m => m.FirstName)</div>
+                        <div class="form-field">@Html.LabelFor(m => m.LastName)@Html.TextBoxFor(m => m.LastName, new { placeholder = "Morgan", autocomplete = "family-name" })@Html.ValidationMessageFor(m => m.LastName)</div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-field">@Html.LabelFor(m => m.Email)@Html.TextBoxFor(m => m.Email, new { type = "email", placeholder = "alex@dealership.com", autocomplete = "email" })@Html.ValidationMessageFor(m => m.Email)</div>
+                        <div class="form-field">@Html.LabelFor(m => m.Phone)@Html.TextBoxFor(m => m.Phone, new { type = "tel", placeholder = "(555) 012-3456", autocomplete = "tel" })@Html.ValidationMessageFor(m => m.Phone)</div>
+                    </div>
+                    <div class="form-field">@Html.LabelFor(m => m.Message)@Html.TextAreaFor(m => m.Message, new { rows = "4", placeholder = "Tell us what you are planning, what is getting in the way, and what a successful next step would look like." })@Html.ValidationMessageFor(m => m.Message)</div>
+                    <button class="button button-primary submit-button contact-modal-submit" type="submit"><span>Send my message</span></button>
+                    <small class="form-secure legal-form-note">Your message goes directly to the AutoDealer.dev team. Read our <a href="@Url.Action("Legal", "Home")#service-terms" target="_blank" rel="noopener">Service Terms</a> and <a href="@Url.Action("Legal", "Home")#privacy-policy" target="_blank" rel="noopener">Privacy Policy</a>.</small>
+                }
+                <div class="contact-modal-success" id="contact-modal-success" hidden>
+                    <span class="contact-success-mark" aria-hidden="true">&#10003;</span>
+                    <span>MESSAGE RECEIVED</span>
+                    <h3>The conversation has begun.</h3>
+                    <p>Your note is with our team. We will read it carefully and reply using the email address you provided.</p>
+                    <button type="button" class="button site-cta" data-bs-dismiss="modal"><span>Close window</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            var $modal = $('#contact-inquiry-modal');
+            var $form = $('#contact-inquiry-form');
+            var $success = $('#contact-modal-success');
+            var $submit = $form.find('.contact-modal-submit');
+            var submitHtml = $submit.html();
+
+            function clearErrors() {
+                $form.find('.field-validation-error').empty().removeClass('field-validation-error').addClass('field-validation-valid');
+                $form.find('.contact-validation-summary').empty().removeClass('validation-summary-errors').addClass('validation-summary-valid');
+            }
+
+            function showErrors(errors) {
+                clearErrors();
+                var summaryItems = [];
+                $.each(errors || [], function (_, error) {
+                    var message = (error.messages || []).join(' ');
+                    var $fieldMessage = error.field ? $form.find('[data-valmsg-for="' + error.field + '"]') : $();
+                    if ($fieldMessage.length) {
+                        $fieldMessage.text(message).removeClass('field-validation-valid').addClass('field-validation-error');
+                    } else if (message) {
+                        summaryItems.push('<li>' + $('<div>').text(message).html() + '</li>');
+                    }
+                });
+                if (summaryItems.length) {
+                    $form.find('.contact-validation-summary').html('<ul>' + summaryItems.join('') + '</ul>').removeClass('validation-summary-valid').addClass('validation-summary-errors');
+                }
+            }
+
+            $modal.on('show.bs.modal', function (event) {
+                var trigger = event.relatedTarget;
+                var inquiryType = trigger ? $(trigger).data('inquiry-type') : 'website';
+                var isApi = inquiryType === 'api';
+                $form[0].reset();
+                clearErrors();
+                $('#contact-inquiry-type').val(inquiryType);
+                $('#contact-modal-kicker').text(isApi ? 'API & VEHICLE DATA' : 'DEALER WEBSITES');
+                $('#contact-modal-title').text(isApi ? 'Tell us what you are building.' : 'Tell us about your dealership.');
+                $('#contact-modal-subtitle').text(isApi ? 'Share the product, data needs, and volume you have in mind.' : 'Share the experience you have today and what you want customers to feel next.');
+                $form.removeAttr('hidden');
+                $success.attr('hidden', true);
+                $submit.prop('disabled', false).html(submitHtml);
+            });
+
+            $form.on('submit', function (event) {
+                event.preventDefault();
+                if ($form.valid && !$form.valid()) return;
+
+                clearErrors();
+                $submit.prop('disabled', true).text('Sending your message...');
+                $.ajax({
+                    url: $form.attr('action'),
+                    method: 'POST',
+                    data: $form.serialize()
+                }).done(function (response) {
+                    if (response && response.success) {
+                        $form.attr('hidden', true);
+                        $success.removeAttr('hidden');
+                        return;
+                    }
+                    showErrors(response ? response.errors : []);
+                }).fail(function () {
+                    showErrors([{ field: '', messages: ['Your message could not be delivered right now. Please try again shortly.'] }]);
+                }).always(function () {
+                    $submit.prop('disabled', false).html(submitHtml);
+                });
+            });
+        });
+    </script>
+}

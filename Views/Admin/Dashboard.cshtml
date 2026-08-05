@@ -1,9 +1,13 @@
 @model autodealer.dev.Models.AdminDashboardViewModel
 @{ ViewBag.Title = "Admin dashboard"; ViewBag.BodyClass = "dashboard-page admin-dashboard-page"; }
+
+@section head {
+    <link rel="stylesheet" href="@Url.Content("~/Content/pepTools/pepGrid.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/dashboard.css")" />
+}
+
 <section class="page-hero dashboard-hero admin-hero"><div class="shell">
-    <span class="eyebrow">ADMIN CONTROL ROOM</span>
-    <h1>Customer operations, at a glance.</h1>
-    <p>Live account information from AutoDealer.dev</p>
+    <span class="eyebrow">ADMIN CONTROL ROOM</span><h1>Customer operations, at a glance.</h1><p>Live account information from AutoDealer.dev</p>
 </div></section>
 <section class="section light-section dashboard-section"><div class="shell">
     <div class="dashboard-heading"><div><span class="eyebrow dark">PLATFORM OVERVIEW</span><h2>Current customer activity.</h2></div><span class="status-badge">Administrator</span></div>
@@ -13,27 +17,19 @@
         <article><span class="color-icon metric-icon" aria-hidden="true"><svg><use href="#icon-trial"></use></svg></span><span>TRIALING</span><strong>@Model.TrialingSubscriptions</strong><small>Subscriptions in trial</small></article>
         <article><span class="color-icon metric-icon" aria-hidden="true"><svg><use href="#icon-key"></use></svg></span><span>ACTIVE API KEYS</span><strong>@Model.ActiveApiKeys</strong><small>Credentials currently enabled</small></article>
     </div>
-
-    <div class="admin-customer-panel">
-        <div class="admin-table-heading"><div><span class="eyebrow dark">ACTIVE CUSTOMERS</span><h2>Dealer accounts</h2></div><span>@Model.Customers.Count active</span></div>
-        @if (Model.Customers.Count == 0) {
-            <div class="admin-empty">No active customer accounts are currently available.</div>
-        } else {
-            <div class="admin-table-scroll"><table class="admin-table">
-                <thead><tr><th>Customer</th><th>Contact</th><th>Plan</th><th>Status</th><th>API keys</th><th>Period ends</th></tr></thead>
-                <tbody>
-                @foreach (var customer in Model.Customers) {
-                    <tr>
-                        <td><strong>@customer.BusinessName</strong><small>@customer.ClientNumber</small></td>
-                        <td><strong>@customer.ContactName</strong><small>@customer.Email</small></td>
-                        <td>@customer.PlanName</td>
-                        <td><span class="table-status">@customer.SubscriptionStatus</span></td>
-                        <td>@customer.ActiveApiKeyCount</td>
-                        <td>@(customer.PeriodEndUtc.HasValue ? customer.PeriodEndUtc.Value.ToString("MMM d, yyyy") : "—")</td>
-                    </tr>
-                }
-                </tbody>
-            </table></div>
-        }
-    </div>
+    <section class="admin-customer-panel dashboard-grid-panel" aria-labelledby="customer-grid-title">
+        <div class="admin-table-heading"><div><span class="eyebrow dark">ACTIVE CUSTOMERS</span><h2 id="customer-grid-title">Dealer accounts</h2></div><span>@Model.Customers.Count active</span></div>
+        <div id="customer-grid" class="admin-pep-grid" data-url="@Url.Action("CustomerGridData", "Admin")"></div>
+    </section>
+    <section class="admin-customer-panel dashboard-grid-panel" aria-labelledby="demo-grid-title">
+        <div class="admin-table-heading"><div><span class="eyebrow dark">DEALER DEMO REQUESTS</span><h2 id="demo-grid-title">New opportunities</h2></div><span>@Model.DemoRequests.Count recent</span></div>
+        <div id="demo-request-grid" class="admin-pep-grid" data-url="@Url.Action("DemoRequestGridData", "Admin")"></div>
+    </section>
 </div></section>
+
+@Html.Partial("_AdminRecordModal")
+
+@section scripts {
+    <script src="@Url.Content("~/Scripts/pepTools/pepGrid.js")"></script>
+    <script src="@Url.Content("~/Scripts/Admin/adminDashboard.js")"></script>
+}

@@ -19,6 +19,7 @@ namespace autodealer.dev {
             routes.MapRoute("ShowroomSolution", "solutions/digital-showroom", new { controller = "Solutions", action = "DigitalShowroom" });
             routes.MapRoute("Solutions", "solutions", new { controller = "Solutions", action = "Index" });
             routes.MapRoute("Pricing", "pricing", new { controller = "Pricing", action = "Index" });
+            routes.MapRoute("Legal", "terms-and-privacy", new { controller = "Home", action = "Legal" });
 
             routes.MapRoute(
                 name: "Default",
