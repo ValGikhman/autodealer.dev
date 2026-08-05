@@ -10,7 +10,6 @@
     <div class="form-card login-card">
         <span class="form-step">ADMIN SIGN IN</span>
         <h2>Open the control room</h2>
-        <p>This area is restricted to authorized administrators.</p>
         @using (Html.BeginForm("Login", "Admin", FormMethod.Post, new { @class = "account-form", autocomplete = "on" })) {
             @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.ReturnUrl)
@@ -26,7 +25,7 @@
                 @Html.ValidationMessageFor(m => m.Password)
             </div>
             <label class="check-field remember-field">@Html.CheckBoxFor(m => m.RememberMe)<span>Keep me signed in on this device</span></label>
-            <button class="button button-primary submit-button" type="submit">Sign in as administrator <span>&rarr;</span></button>
+            <button class="button button-primary submit-button" type="submit">Sign in as administrator</button>
             <small class="form-secure">Role-protected session &middot; Password verified using PBKDF2</small>
         }
     </div>

@@ -34,13 +34,13 @@ namespace autodealer.dev.Controllers {
             catch (System.Exception ex) {
                 var detail = ex.GetBaseException().Message;
                 var error = HttpContext.IsDebuggingEnabled && Request.IsLocal
-                    ? "SMTP error: " + detail
-                    : "Your request could not be delivered right now. Please try again shortly.";
+                    ? "Request error: " + detail
+                    : "Your request could not be saved or delivered right now. Please try again shortly.";
                 ModelState.AddModelError("", error);
                 return View(model);
             }
 
-            ModelState.AddModelError("", "Your request could not be delivered right now. Please try again shortly.");
+            ModelState.AddModelError("", "Your request could not be saved or delivered right now. Please try again shortly.");
             return View(model);
         }
     }

@@ -3,7 +3,7 @@
 <section class="docs-page light-section"><div class="shell docs-layout">
     @Html.Partial("_DocsNav")
     <article class="docs-article">
-        <span class="doc-label">QUICKSTART</span><h2>Your first API request</h2><p>Create an account, copy the credential shown once, and place it in a server-side environment variable or secrets manager.</p>
+        <h2>Your first API request</h2><p>Create an account, copy the credential shown once, and place it in a server-side environment variable or secrets manager.</p>
         <div class="doc-callout"><b>Keep credentials private</b><p>Never embed the API key in browser JavaScript, a public mobile bundle, or source control.</p></div>
         <h3>Decode a vehicle</h3><p>Send a valid 17-character VIN and your bearer credential. VINs are normalized to uppercase and cannot contain I, O, or Q.</p>
         <div class="code-block"><div class="code-tabs"><button class="active" data-tab="curl">cURL</button><button data-tab="javascript">jQuery</button><button data-tab="csharp">C#</button><button class="copy" data-copy=".code-block pre:visible">Copy</button></div>
@@ -24,6 +24,6 @@ var result = await client.GetStringAsync(
         </div>
         <h3 id="vin">VIN Decode endpoints</h3><div class="endpoint-list"><div><b>GET</b><code>/api/service/vin/{vin}/json</code><span>Complete JSON record</span></div><div><b>GET</b><code>/api/service/vin/{vin}/xml</code><span>Complete XML record</span></div><div><b>GET</b><code>/api/service/vin/{vin}/html</code><span>Embeddable HTML fragment</span></div></div>
         <h3 id="formats">Response formats</h3><p>VIN routes use explicit JSON, XML, and HTML format suffixes so clients always receive a predictable media type.</p>
-        <div class="next-doc"><span>NEXT</span><a href="@Url.Action("Authentication")">Authentication and API keys &rarr;</a></div>
+        <div class="next-doc"><span>NEXT</span><a class="button site-cta" href="@Url.Action("Authentication")"><span>Authentication and API keys</span><i aria-hidden="true">&rarr;</i></a></div>
     </article>
 </div></section>

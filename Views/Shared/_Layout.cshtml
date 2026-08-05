@@ -45,7 +45,7 @@
     </svg>
     <header class="site-header">
         <div class="shell nav-shell">
-            <a class="brand" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><span class="brand-mark">AD</span><span>autodealer<span>.dev</span></span></a>
+            <a class="brand header-brand-logo" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><img class="brand-logo" src="@Url.Content("~/Content/images/autodealer-logo-dark.png")" alt="AutoDealer.dev" /></a>
             <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
             <nav class="site-nav" id="site-nav">
                 @if (User.IsInRole("Admin")) {
@@ -61,10 +61,9 @@
                         using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { @class = "nav-logout" })) { @Html.AntiForgeryToken()<button type="submit">Sign out</button> }
                     } else {
                         <a class="nav-quiet" href="@Url.Action("Login", "Account")">Sign in</a>
-                        <a class="button button-primary button-small nav-api-key" href="@Url.Action("Register", "Account")">
-                            <span class="nav-api-key-icon" aria-hidden="true"><svg><use href="#icon-key"></use></svg></span>
+                        <a class="button site-cta" href="@Url.Action("Register", "Account")">
                             <span>Get an API key</span>
-                            <span class="nav-api-key-arrow" aria-hidden="true">&rarr;</span>
+                            <i aria-hidden="true">&rarr;</i>
                         </a>
                     }
                 }
@@ -74,28 +73,74 @@
 
     <main>@RenderBody()</main>
 
+    @if (!(ViewBag.HideLegalModal is bool && (bool)ViewBag.HideLegalModal)) {
+        <div class="modal fade legal-modal" id="legal-modal" tabindex="-1" aria-labelledby="legal-modal-title" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header legal-modal-header">
+                        <div><span>TERMS &amp; PRIVACY</span><h2 class="modal-title" id="legal-modal-title">The details behind the agreement.</h2><p>Read the Service Terms and Privacy Policy without leaving your form.</p></div>
+                        <button type="button" class="btn-close legal-modal-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                    </div>
+                    <div class="modal-body legal-modal-body">@Html.Partial("_LegalTermsPrivacy")</div>
+                    <div class="modal-footer legal-modal-footer"><a href="@Url.Action("Legal", "Home")">Open the full page</a><button type="button" data-bs-dismiss="modal">Done reading</button></div>
+                </div>
+            </div>
+        </div>
+    }
+
     <footer class="site-footer">
         <div class="shell footer-grid">
-            <div><a class="brand" href="@Url.Action("Index", "Home")"><span class="brand-mark">AD</span><span>autodealer<span>.dev</span></span></a></div>
+            <div><a class="brand footer-brand-logo" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><img class="brand-logo" src="@Url.Content("~/Content/images/autodealer-logo.png")" alt="AutoDealer.dev" /></a></div>
             <div><strong>PRODUCT</strong><a href="@Url.Action("VinDecoder", "Solutions")">VIN Decode</a><a href="@Url.Action("DigitalShowroom", "Solutions")">Dealer Website</a></div>
             <div><strong>DEVELOPERS</strong><a href="@Url.Action("Index", "Documentation")">Quickstart</a><a href="@Url.Action("Authentication", "Documentation")">Authentication</a><a href="@Url.Action("Errors", "Documentation")">Errors &amp; limits</a></div>
-            <div><strong>COMPANY</strong><a href="@Url.Action("About", "Home")">About</a><a href="@Url.Action("Contact", "Home")">Contact</a><a href="@Url.Action("Index", "Pricing")">Pricing</a></div>
+            <div><strong>COMPANY</strong><a href="@Url.Action("About", "Home")">About</a><a href="@Url.Action("Contact", "Home")">Contact</a><a href="@Url.Action("Index", "Pricing")">Pricing</a><a href="@Url.Action("Legal", "Home")">Terms &amp; Privacy</a></div>
         </div>
         <div class="shell footer-bottom"><span>&copy; @DateTime.UtcNow.Year AutoDealer.dev. All rights reserved.</span><span>Built for dealers who build what&rsquo;s next.</span></div>
     </footer>
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/jqueryval")
+    <script src="@Url.Content("~/Scripts/bootstrap.bundle.min.js")"></script>
     <script>
         if ($.validator && $.validator.unobtrusive) {
             $.validator.addMethod('mustbetrue', function (value, element) { return element.checked; });
             $.validator.unobtrusive.adapters.addBool('mustbetrue');
         }
         $(function () {
+            function formatPhone(value) {
+                var digits = (value || '').replace(/\D/g, '');
+                if (digits.length > 10 && digits.charAt(0) === '1') digits = digits.substring(1);
+                digits = digits.substring(0, 10);
+                if (!digits.length) return '';
+                if (digits.length <= 3) return '(' + digits;
+                if (digits.length <= 6) return '(' + digits.substring(0, 3) + ') ' + digits.substring(3);
+                return '(' + digits.substring(0, 3) + ') ' + digits.substring(3, 6) + '-' + digits.substring(6);
+            }
+
+            var $phoneFields = $('input[type="tel"]');
+            $phoneFields.attr({ inputmode: 'tel', maxlength: '14' }).each(function () {
+                this.value = formatPhone(this.value);
+            }).on('input', function () {
+                this.value = formatPhone(this.value);
+            });
+
             $('.nav-toggle').on('click', function () { var open = $(this).attr('aria-expanded') === 'true'; $(this).attr('aria-expanded', !open); $('#site-nav').toggleClass('open', !open); });
             $('.site-nav a').on('click', function () { $('#site-nav').removeClass('open'); $('.nav-toggle').attr('aria-expanded', 'false'); });
             $('[data-copy]').on('click', function () { var $button = $(this), text = $($button.data('copy')).text(); navigator.clipboard.writeText(text).then(function () { var old = $button.text(); $button.text('Copied'); setTimeout(function () { $button.text(old); }, 1400); }); });
             $('[data-tab]').on('click', function () { var name = $(this).data('tab'); $('[data-tab]').removeClass('active'); $(this).addClass('active'); $('[data-code]').attr('hidden', true); $('[data-code="' + name + '"]').removeAttr('hidden'); });
+            $(document).on('click', '[data-legal-modal]', function (event) {
+                if (!window.bootstrap || !document.getElementById('legal-modal')) return;
+                event.preventDefault();
+                event.stopPropagation();
+                $('#legal-modal').data('legal-section', $(this).data('legal-section') || 'service-terms');
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('legal-modal')).show();
+            });
+            $('#legal-modal').on('shown.bs.modal', function () {
+                var sectionId = $(this).data('legal-section');
+                var section = sectionId ? document.getElementById(sectionId) : null;
+                var body = this.querySelector('.legal-modal-body');
+                if (section && body) body.scrollTop = Math.max(0, section.offsetTop - body.offsetTop - 18);
+            });
         });
     </script>
     @RenderSection("scripts", required: false)

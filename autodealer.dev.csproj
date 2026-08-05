@@ -156,6 +156,7 @@
     <Compile Include="Controllers\SolutionsController.cs" />
     <Compile Include="Controllers\DecoderController.cs" />
     <Compile Include="Models\AccountRegistrationViewModel.cs" />
+    <Compile Include="Models\ContactInquiryViewModel.cs" />
     <Compile Include="Models\AdminViewModels.cs" />
     <Compile Include="Models\ApiKeyHandler.cs" />
     <Compile Include="Models\DataOneCredentials.cs" />
@@ -168,12 +169,14 @@
       <DependentUpon>autodealer_dev.dbml</DependentUpon>
     </Compile>
     <Compile Include="Services\ClientAccountService.cs" />
+    <Compile Include="Services\ContactInquiryService.cs" />
     <Compile Include="Services\AutoDealerConnectionString.cs" />
     <Compile Include="Services\ApiAccessService.cs" />
     <Compile Include="Services\AdminService.cs" />
     <Compile Include="Services\IApiAccessService.cs" />
     <Compile Include="Services\IAdminService.cs" />
     <Compile Include="Services\IClientAccountService.cs" />
+    <Compile Include="Services\IContactInquiryService.cs" />
     <Compile Include="Services\IPlanService.cs" />
     <Compile Include="Services\PlanService.cs" />
     <Compile Include="Services\IDealerDemoRequestService.cs" />
@@ -207,6 +210,10 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
+    <Content Include="Database\001_AutoDealerPlatform.sql" />
+    <Content Include="Database\002_DealerDemoRequests.sql" />
+    <Content Include="Content\dashboard.css" />
+    <Content Include="Content\pepTools\pepGrid.css" />
     <Content Include="Content\Site.css" />
     <Content Include="images\1.png" />
     <Content Include="images\2.png" />
@@ -218,6 +225,8 @@
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\Admin\adminDashboard.js" />
+    <Content Include="Scripts\pepTools\pepGrid.js" />
     <Content Include="Web.config" />
     <None Include="Data\autodealer_dev.dbml.layout">
       <DependentUpon>autodealer_dev.dbml</DependentUpon>
@@ -243,9 +252,11 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Shared\_LegalTermsPrivacy.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
+    <Content Include="Views\Home\Legal.cshtml" />
     <Content Include="Views\Account\Register.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Dashboard.cshtml" />
@@ -253,6 +264,7 @@
     <Content Include="Views\Admin\Login.cshtml" />
     <Content Include="Views\Admin\Dashboard.cshtml" />
     <Content Include="Views\Admin\Customers.cshtml" />
+    <Content Include="Views\Admin\_AdminRecordModal.cshtml" />
     <Content Include="Views\Documentation\Authentication.cshtml" />
     <Content Include="Views\Documentation\Errors.cshtml" />
     <Content Include="Views\Documentation\Index.cshtml" />
@@ -268,6 +280,8 @@
     <Content Include="Content\images\vtec-vehicle-details-preview.png" />
     <Content Include="Content\images\vin-html-api-response.png" />
     <Content Include="Content\images\vin-html-api-promo-v2.png" />
+    <Content Include="Content\images\autodealer-logo.png" />
+    <Content Include="Content\images\autodealer-logo-dark.png" />
     <Content Include="Content\images\landing-showcase\dealer-inventory-grid.png" />
     <Content Include="Content\images\landing-showcase\vehicle-details-gallery.png" />
     <Content Include="Content\images\landing-showcase\vehicle-pricing-details.png" />

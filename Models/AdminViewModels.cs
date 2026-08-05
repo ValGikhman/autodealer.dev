@@ -23,6 +23,7 @@ namespace autodealer.dev.Models {
         public int TrialingSubscriptions { get; set; }
         public int ActiveApiKeys { get; set; }
         public IReadOnlyList<AdminCustomerViewModel> Customers { get; set; }
+        public IReadOnlyList<AdminDemoRequestViewModel> DemoRequests { get; set; }
     }
 
     public sealed class AdminCustomerViewModel {
@@ -36,5 +37,24 @@ namespace autodealer.dev.Models {
         public DateTime? PeriodEndUtc { get; set; }
         public int ActiveApiKeyCount { get; set; }
         public DateTime CreatedUtc { get; set; }
+    }
+
+    public sealed class AdminDemoRequestViewModel {
+        public Guid RequestId { get; set; }
+        public string BusinessName { get; set; }
+        public string ContactName { get; set; }
+        public string Email { get; set; }
+        public string Phone { get; set; }
+        public string CurrentWebsite { get; set; }
+        public string WebsiteHref { get; set; }
+        public int? LocationCount { get; set; }
+        public string InventorySize { get; set; }
+        public string PrimaryGoal { get; set; }
+        public string PreferredContact { get; set; }
+        public string Message { get; set; }
+        public string Status { get; set; }
+        public DateTime CreatedUtc { get; set; }
+        public string ContactHref { get; set; }
+        public string ContactAction { get; set; }
     }
 }

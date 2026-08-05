@@ -1,6 +1,7 @@
 using autodealer.dev.Models;
 using autodealer.dev.Services;
 using System;
+using System.Linq;
 using System.Security.Principal;
 using System.Web;
 using System.Web.Mvc;
@@ -56,6 +57,52 @@ namespace autodealer.dev.Controllers {
         [HttpGet]
         public ActionResult Customers() {
             return View(adminService.GetDashboard());
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
+        public ActionResult CustomerGridData() {
+            var rows = adminService.GetDashboard().Customers.Select(customer => new {
+                customer.ClientId,
+                customer.BusinessName,
+                customer.ClientNumber,
+                customer.ContactName,
+                customer.Email,
+                customer.PlanName,
+                customer.SubscriptionStatus,
+                customer.ActiveApiKeyCount,
+                PeriodEnd = customer.PeriodEndUtc.HasValue ? customer.PeriodEndUtc.Value.ToString("MMM d, yyyy") : "N/A",
+                Created = customer.CreatedUtc.ToString("MMM d, yyyy"),
+                CreatedSort = customer.CreatedUtc.ToString("o"),
+                ContactHref = "mailto:" + customer.Email + "?subject=" + Uri.EscapeDataString("Your AutoDealer.dev account")
+            });
+            return Json(new { Data = rows }, JsonRequestBehavior.AllowGet);
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
+        public ActionResult DemoRequestGridData() {
+            var rows = adminService.GetDashboard().DemoRequests.Select(request => new {
+                request.RequestId,
+                request.BusinessName,
+                request.CurrentWebsite,
+                request.WebsiteHref,
+                request.ContactName,
+                request.Email,
+                request.Phone,
+                request.PrimaryGoal,
+                request.LocationCount,
+                request.InventorySize,
+                Inventory = request.InventorySize + (request.LocationCount.HasValue ? " / " + request.LocationCount.Value + " location" + (request.LocationCount.Value == 1 ? "" : "s") : string.Empty),
+                request.Message,
+                request.PreferredContact,
+                request.Status,
+                Received = request.CreatedUtc.ToString("MMM d, yyyy HH:mm 'UTC'"),
+                CreatedSort = request.CreatedUtc.ToString("o"),
+                request.ContactHref,
+                request.ContactAction
+            });
+            return Json(new { Data = rows }, JsonRequestBehavior.AllowGet);
         }
 
         [AdminAuthorize]

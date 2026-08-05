@@ -3,8 +3,11 @@ using autodealer.dev.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace autodealer.dev.Services {
     public sealed class AdminService : IAdminService {
@@ -96,9 +99,75 @@ namespace autodealer.dev.Services {
                     ActiveCustomers = customerRows.Count,
                     TrialingSubscriptions = context.Subscriptions.Count(x => x.Status == "trialing"),
                     ActiveApiKeys = context.ApiKeys.Count(x => x.Status == "active"),
-                    Customers = customerRows
+                    Customers = customerRows,
+                    DemoRequests = GetDemoRequests()
                 };
             }
+        }
+
+        private IReadOnlyList<AdminDemoRequestViewModel> GetDemoRequests() {
+            var requests = new List<AdminDemoRequestViewModel>();
+            using (var connection = new SqlConnection(connectionString)) {
+                connection.Open();
+                using (var exists = new SqlCommand("SELECT OBJECT_ID('dbo.DealerDemoRequests', 'U');", connection)) {
+                    if (exists.ExecuteScalar() == DBNull.Value) return requests;
+                }
+
+                const string sql = @"SELECT TOP (100)
+                    RequestId,BusinessName,ContactName,Email,Phone,CurrentWebsite,LocationCount,
+                    InventorySize,PrimaryGoal,PreferredContact,Message,Status,CreatedUtc
+                    FROM dbo.DealerDemoRequests ORDER BY CreatedUtc DESC;";
+                using (var command = new SqlCommand(sql, connection))
+                using (var reader = command.ExecuteReader()) {
+                    while (reader.Read()) {
+                        var preferredContact = reader.GetString(9);
+                        var email = reader.GetString(3);
+                        var phone = reader.IsDBNull(4) ? null : reader.GetString(4);
+                        var website = reader.IsDBNull(5) ? null : reader.GetString(5);
+                        var prefersPhone = string.Equals(preferredContact, "Phone", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(phone);
+                        requests.Add(new AdminDemoRequestViewModel {
+                            RequestId = reader.GetGuid(0),
+                            BusinessName = reader.GetString(1),
+                            ContactName = reader.GetString(2),
+                            Email = email,
+                            Phone = phone,
+                            CurrentWebsite = website,
+                            WebsiteHref = WebsiteHref(website),
+                            LocationCount = reader.IsDBNull(6) ? (int?)null : reader.GetInt32(6),
+                            InventorySize = reader.GetString(7),
+                            PrimaryGoal = reader.GetString(8),
+                            PreferredContact = preferredContact,
+                            Message = reader.GetString(10),
+                            Status = reader.GetString(11),
+                            CreatedUtc = reader.GetDateTime(12),
+                            ContactHref = prefersPhone ? PhoneHref(phone) : EmailHref(email, reader.GetString(1), reader.GetString(2)),
+                            ContactAction = prefersPhone ? "Call" : "Reply"
+                        });
+                    }
+                }
+            }
+            return requests;
+        }
+
+        private static string WebsiteHref(string website) {
+            if (string.IsNullOrWhiteSpace(website)) return null;
+            var value = website.Trim();
+            return value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || value.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+                ? value
+                : "https://" + value;
+        }
+
+        private static string PhoneHref(string phone) {
+            var normalized = new StringBuilder();
+            foreach (var character in phone ?? string.Empty) {
+                if (char.IsDigit(character) || (character == '+' && normalized.Length == 0)) normalized.Append(character);
+            }
+            return "tel:" + normalized;
+        }
+
+        private static string EmailHref(string email, string businessName, string contactName) {
+            return "mailto:" + email + "?subject=" + Uri.EscapeDataString("Your AutoDealer.dev dealer demo") +
+                "&body=" + Uri.EscapeDataString("Hi " + contactName + ",\r\n\r\nThank you for reaching out about " + businessName + ". ");
         }
 
         private static bool FixedTimeEquals(byte[] left, byte[] right) {
