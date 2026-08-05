@@ -45,7 +45,7 @@
     </svg>
     <header class="site-header">
         <div class="shell nav-shell">
-            <a class="brand header-brand-logo" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><img class="brand-logo" src="@Url.Content("~/Content/images/autodealer-logo-dark.png")" alt="AutoDealer.dev" /></a>
+            <a class="brand header-brand-logo" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><img class="brand-logo" src="@Url.Content("~/Content/images/autodealer-logo-light.png")" alt="AutoDealer.dev" /></a>
             <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
             <nav class="site-nav" id="site-nav">
                 @if (User.IsInRole("Admin")) {
@@ -92,7 +92,7 @@
         <div class="shell footer-grid">
             <div><a class="brand footer-brand-logo" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><img class="brand-logo" src="@Url.Content("~/Content/images/autodealer-logo.png")" alt="AutoDealer.dev" /></a></div>
             <div><strong>PRODUCT</strong><a href="@Url.Action("VinDecoder", "Solutions")">VIN Decode</a><a href="@Url.Action("DigitalShowroom", "Solutions")">Dealer Website</a></div>
-            <div><strong>DEVELOPERS</strong><a href="@Url.Action("Index", "Documentation")">Quickstart</a><a href="@Url.Action("Authentication", "Documentation")">Authentication</a><a href="@Url.Action("Errors", "Documentation")">Errors &amp; limits</a></div>
+            <div><strong>DEVELOPERS</strong><a href="@Url.Action("Index", "Documentation")">Quickstart</a><a href="@Url.Action("VinHtml", "Documentation")">HTML VIN report</a><a href="@Url.Action("Authentication", "Documentation")">Authentication</a><a href="@Url.Action("Errors", "Documentation")">Errors &amp; limits</a></div>
             <div><strong>COMPANY</strong><a href="@Url.Action("About", "Home")">About</a><a href="@Url.Action("Contact", "Home")">Contact</a><a href="@Url.Action("Index", "Pricing")">Pricing</a><a href="@Url.Action("Legal", "Home")">Terms &amp; Privacy</a></div>
         </div>
         <div class="shell footer-bottom"><span>&copy; @DateTime.UtcNow.Year AutoDealer.dev. All rights reserved.</span><span>Built for dealers who build what&rsquo;s next.</span></div>

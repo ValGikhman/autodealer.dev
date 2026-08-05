@@ -76,6 +76,7 @@ namespace autodealer.dev.Services {
                     .GroupBy(x => x.ClientId)
                     .Select(x => new { ClientId = x.Key, Count = x.Count() })
                     .ToDictionary(x => x.ClientId, x => x.Count);
+                var emailCounts = GetClientEmailCounts(clientIds);
 
                 var customerRows = new List<AdminCustomerViewModel>();
                 foreach (var client in clients) {
@@ -90,6 +91,7 @@ namespace autodealer.dev.Services {
                         SubscriptionStatus = subscription == null ? "unavailable" : subscription.Status,
                         PeriodEndUtc = subscription == null ? (DateTime?)null : subscription.CurrentPeriodEndUtc,
                         ActiveApiKeyCount = keyCounts.ContainsKey(client.ClientId) ? keyCounts[client.ClientId] : 0,
+                        EmailCount = emailCounts.ContainsKey(client.ClientId) ? emailCounts[client.ClientId] : 0,
                         CreatedUtc = client.CreatedUtc
                     });
                 }
@@ -105,13 +107,71 @@ namespace autodealer.dev.Services {
             }
         }
 
+        public IReadOnlyList<AdminClientEmailViewModel> GetClientEmails(long clientId) {
+            var emails = new List<AdminClientEmailViewModel>();
+            if (clientId <= 0 || string.IsNullOrWhiteSpace(connectionString)) return emails;
+
+            using (var connection = new SqlConnection(connectionString)) {
+                connection.Open();
+                if (!TableExists(connection, "dbo.ClientEmailHistory")) return emails;
+
+                const string sql = @"SELECT TOP (250)
+                    ClientEmailHistoryId,ClientId,SentUtc,ToEmail,Subject,HtmlBody
+                    FROM dbo.ClientEmailHistory
+                    WHERE ClientId=@ClientId
+                    ORDER BY SentUtc DESC,ClientEmailHistoryId DESC;";
+                using (var command = new SqlCommand(sql, connection)) {
+                    command.Parameters.Add("@ClientId", SqlDbType.BigInt).Value = clientId;
+                    using (var reader = command.ExecuteReader()) {
+                        while (reader.Read()) {
+                            emails.Add(new AdminClientEmailViewModel {
+                                ClientEmailHistoryId = reader.GetInt64(0),
+                                ClientId = reader.GetInt64(1),
+                                SentUtc = reader.GetDateTime(2),
+                                ToEmail = reader.GetString(3),
+                                Subject = reader.GetString(4),
+                                HtmlBody = reader.GetString(5)
+                            });
+                        }
+                    }
+                }
+            }
+            return emails;
+        }
+
+        private IDictionary<long, int> GetClientEmailCounts(IReadOnlyCollection<long> clientIds) {
+            var counts = new Dictionary<long, int>();
+            if (clientIds == null || clientIds.Count == 0) return counts;
+
+            using (var connection = new SqlConnection(connectionString)) {
+                connection.Open();
+                if (!TableExists(connection, "dbo.ClientEmailHistory")) return counts;
+                const string sql = @"SELECT ClientId,COUNT(*)
+                    FROM dbo.ClientEmailHistory
+                    GROUP BY ClientId;";
+                using (var command = new SqlCommand(sql, connection))
+                using (var reader = command.ExecuteReader()) {
+                    while (reader.Read()) {
+                        var clientId = reader.GetInt64(0);
+                        if (clientIds.Contains(clientId)) counts[clientId] = reader.GetInt32(1);
+                    }
+                }
+            }
+            return counts;
+        }
+
+        private static bool TableExists(SqlConnection connection, string tableName) {
+            using (var command = new SqlCommand("SELECT OBJECT_ID(@TableName, 'U');", connection)) {
+                command.Parameters.Add("@TableName", SqlDbType.NVarChar, 260).Value = tableName;
+                return command.ExecuteScalar() != DBNull.Value;
+            }
+        }
+
         private IReadOnlyList<AdminDemoRequestViewModel> GetDemoRequests() {
             var requests = new List<AdminDemoRequestViewModel>();
             using (var connection = new SqlConnection(connectionString)) {
                 connection.Open();
-                using (var exists = new SqlCommand("SELECT OBJECT_ID('dbo.DealerDemoRequests', 'U');", connection)) {
-                    if (exists.ExecuteScalar() == DBNull.Value) return requests;
-                }
+                if (!TableExists(connection, "dbo.DealerDemoRequests")) return requests;
 
                 const string sql = @"SELECT TOP (100)
                     RequestId,BusinessName,ContactName,Email,Phone,CurrentWebsite,LocationCount,

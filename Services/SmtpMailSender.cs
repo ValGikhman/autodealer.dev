@@ -11,6 +11,14 @@ namespace autodealer.dev.Services {
         internal const string LogoToken = "{{AUTODEALER_LOGO}}";
 
         public static void Send(string recipientAddress, string recipientName, string subject, string htmlBody, string replyToAddress, string replyToName) {
+            Send(null, recipientAddress, recipientName, subject, htmlBody, replyToAddress, replyToName);
+        }
+
+        public static void SendForClient(long clientId, string recipientAddress, string recipientName, string subject, string htmlBody, string replyToAddress, string replyToName) {
+            Send(clientId, recipientAddress, recipientName, subject, htmlBody, replyToAddress, replyToName);
+        }
+
+        private static void Send(long? clientId, string recipientAddress, string recipientName, string subject, string htmlBody, string replyToAddress, string replyToName) {
             var host = ConfigurationManager.AppSettings["Smtp:Host"];
             var fromAddress = ConfigurationManager.AppSettings["Smtp:From"];
             var fromName = ConfigurationManager.AppSettings["Smtp:FromName"];
@@ -23,8 +31,8 @@ namespace autodealer.dev.Services {
             var logoPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content", "images", "autodealer-logo.png");
             var hasLogo = File.Exists(logoPath);
             var logoMarkup = hasLogo
-                ? "<div style=\"margin:0 0 18px\"><img src=\"cid:autodealer-logo\" width=\"240\" alt=\"AutoDealer.dev\" style=\"display:block;width:240px;max-width:100%;height:auto;border:0\"></div>"
-                : "<div style=\"margin:0 0 18px;color:#ffffff;font-size:20px;font-weight:700\">AutoDealer.dev</div>";
+                ? "<div class=\"email-logo\"><img class=\"email-logo-image\" src=\"cid:autodealer-logo\" width=\"240\" alt=\"AutoDealer.dev\"></div>"
+                : "<div class=\"email-logo email-logo-text\">AutoDealer.dev</div>";
             var renderedBody = (htmlBody ?? string.Empty).Replace(LogoToken, logoMarkup);
 
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
@@ -58,6 +66,8 @@ namespace autodealer.dev.Services {
                 if (!string.IsNullOrWhiteSpace(username)) smtp.Credentials = new NetworkCredential(username.Trim(), password ?? string.Empty);
                 smtp.Send(message);
             }
+
+            ClientEmailHistoryRecorder.Record(clientId, recipientAddress, replyToAddress, subject, renderedBody);
         }
     }
 }

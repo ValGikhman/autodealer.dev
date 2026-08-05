@@ -7,5 +7,5 @@
     <h3>Storage model</h3><p>The application generates a high-entropy secret using a cryptographic random-number generator. Only its SHA-256 digest is stored. The original secret cannot be decrypted from the database.</p>
     <h3>Scopes and lifecycle</h3><p>Keys receive the explicit <code>vin:read</code> scope. They may be revoked or expired independently of the client account and subscription.</p>
     <h3>Authentication responses</h3><div class="status-table"><div><b>401</b><span>Missing, malformed, invalid, expired, or inactive key</span></div><div><b>403</b><span>The key does not include the required endpoint scope</span></div><div><b>429</b><span>The active subscription reached its monthly quota</span></div></div>
-    <div class="next-doc"><span>NEXT</span><a class="button site-cta" href="@Url.Action("Errors")"><span>Errors, quotas, and headers</span><i aria-hidden="true">&rarr;</i></a></div>
+    <div class="next-doc"><a class="button site-cta" href="@Url.Action("Errors")"><span>Errors, quotas, and headers</span><i aria-hidden="true">&rarr;</i></a></div>
 </article></div></section>

@@ -54,6 +54,7 @@ Include both files **after** jQuery and Bootstrap Icons in your view:
 ```javascript
 $('#myGrid').pepGrid({
     url: '/api/my-data',
+    pageable: true,
     pageSize: 50,
     columns: [
         { field: 'Id',   hidden: true },
@@ -70,6 +71,7 @@ $('#myGrid').pepGrid({
 | `url` | `string` | `null` | AJAX URL for data. Mutually exclusive with `data`. |
 | `data` | `Array` | `null` | Static data array. When provided, `url` is ignored. |
 | `schema` | `object` | `null` | `{ data: fn(response) }` — extracts the records array from the AJAX response. |
+| `pageable` | `boolean` | `true` | Enable client-side pagination and show the footer/pager. When `false`, every matching row is rendered and `pageSize` is ignored. The misspelled `pabeble` option is accepted as an alias. |
 | `pageSize` | `number` | `50` | Rows per page. |
 | `defaultSort` | `Array` | `[]` | Initial sort: `[{ field: 'Name', dir: 'asc' }]`. |
 | `columns` | `Array` | `[]` | Column definitions (see below). |

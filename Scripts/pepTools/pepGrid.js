@@ -42,6 +42,9 @@
         /** Number of rows per page. */
         pageSize: 50,
 
+        /** Enable client-side pagination and render the grid footer/pager. */
+        pageable: true,
+
         /**
          * Initial sort state.
          * @example [{ field: 'Name', dir: 'asc' }]
@@ -242,6 +245,11 @@
         this.$el           = $el;
         this._el           = $el[0];
         this._opts         = $.extend({}, defaults, options);
+        // Accept the originally requested misspelling as an alias, while exposing
+        // the conventional `pageable` name as the supported public option.
+        if (options && options.pabeble !== undefined && options.pageable === undefined) {
+            this._opts.pageable = options.pabeble;
+        }
         this._raw          = [];
         this._page         = 1;
         this._pageSize     = this._opts.pageSize || 50;
@@ -1199,7 +1207,8 @@
             });
 
             const tbody  = document.createElement('tbody');
-            const footer = document.createElement('div'); footer.className = 'pg-grid-footer';
+            const footer = self._opts.pageable !== false ? document.createElement('div') : null;
+            if (footer) footer.className = 'pg-grid-footer';
 
             thead.appendChild(hRow);
             table.appendChild(thead);
@@ -1235,7 +1244,7 @@
             }
 
             wrap.appendChild(scroll);
-            wrap.appendChild(footer);
+            if (footer) wrap.appendChild(footer);
             self._el.appendChild(wrap);
 
             self._headerRow = hRow;
@@ -1293,21 +1302,24 @@
                     self._trigger('searchChange', { term: self._searchTerm, matchCount: gSorted.length });
                 }
 
-                // Grouped footer: show row count with a "grouped" badge, no page nav
-                self._footer.innerHTML = '<div class="pg-pager">'
-                    + '<span class="pg-pager-info">'
-                    + '<i class="bi bi-table"></i>'
-                    + '<span class="pg-pager-info-total">' + gSorted.length + '</span>'
-                    + '<span class="pg-pager-info-label">rows</span>'
-                    + '<span class="pg-pager-info-page"><i class="bi bi-collection me-1"></i>grouped</span>'
-                    + '</span>'
-                    + '</div>';
+                // Grouped footer: show row count with a "grouped" badge, no page nav.
+                if (self._footer) {
+                    self._footer.innerHTML = '<div class="pg-pager">'
+                        + '<span class="pg-pager-info">'
+                        + '<i class="bi bi-table"></i>'
+                        + '<span class="pg-pager-info-total">' + gSorted.length + '</span>'
+                        + '<span class="pg-pager-info-label">rows</span>'
+                        + '<span class="pg-pager-info-page"><i class="bi bi-collection me-1"></i>grouped</span>'
+                        + '</span>'
+                        + '</div>';
+                }
             } else {
                 const sorted    = self._applySort(searched);
                 const total    = sorted.length;
-                const start    = (self._page - 1) * self._pageSize;
-                const end      = Math.min(start + self._pageSize, total);
-                const pageData = sorted.slice(start, end);
+                const pageable = self._opts.pageable !== false;
+                const start    = pageable ? (self._page - 1) * self._pageSize : 0;
+                const end      = pageable ? Math.min(start + self._pageSize, total) : total;
+                const pageData = pageable ? sorted.slice(start, end) : sorted;
 
                 if (!pageData.length) {
                     const etr = document.createElement('tr');
@@ -1394,7 +1406,7 @@
                     self._trigger('searchChange', { term: self._searchTerm, matchCount: total });
                 }
 
-                self._renderPager(total, start + 1, Math.min(end, total));
+                if (pageable) self._renderPager(total, start + 1, Math.min(end, total));
             }
         },
 
@@ -1874,6 +1886,7 @@
 
         _renderPager: function (total, from, to) {
             const self       = this;
+            if (!self._footer || self._opts.pageable === false) return;
             const totalPages = Math.max(1, Math.ceil(total / self._pageSize));
             const cur        = self._page;
 

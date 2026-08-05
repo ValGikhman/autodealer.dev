@@ -175,7 +175,43 @@ therefore accepted.
 
 ## Browser JavaScript
 
-Use this example when the consuming page is hosted by the same application:
+For customer sites, keep the API credential in a server-side proxy and let the
+browser call that same-origin proxy. The included widget reads the VIN and URL
+template from a div and renders the returned HTML fragment:
+
+```html
+<div id="vehicle-report"
+     data-autodealer-vin-report
+     data-api-url="/vehicles/vin-report?vin={vin}"
+     data-vin="1HGCM82633A004352"
+     data-loading-text="Loading vehicle details...">
+</div>
+
+<script src="https://api.autodealer.dev/Scripts/autodealer-vin-report.js"></script>
+```
+
+The customer can also download this script and serve it with their own
+versioned site assets.
+
+The literal `{vin}` placeholder is required. The widget validates and
+URL-encodes the VIN, requests `text/html`, handles loading and error states, and
+emits `autodealer:loading`, `autodealer:loaded`, and `autodealer:error` events.
+Change a report after the page loads with:
+
+```javascript
+const report = document.querySelector("#vehicle-report");
+await AutoDealerVinReport.load(report, "1HGCM82633A004352");
+```
+
+The full customer guide and working example are available at:
+
+```text
+/Documentation/VinHtml
+```
+
+The following lower-level example is appropriate only when the consuming page
+has a same-origin server proxy. Point the request at the proxy rather than
+placing a production bearer key in JavaScript:
 
 ```html
 <form id="vin-form">
@@ -208,7 +244,7 @@ Use this example when the consuming page is hosted by the same application:
 
         try {
             const response = await fetch(
-                `/api/service/vin/${encodeURIComponent(vin)}/html`,
+                `/vehicles/vin-report?vin=${encodeURIComponent(vin)}`,
                 {
                     method: "GET",
                     headers: { Accept: "text/html" },
@@ -240,12 +276,14 @@ The returned fragment contains no executable scripts.
 
 ## jQuery
 
+This example also calls the customer's server-side proxy:
+
 ```javascript
 function decodeVin(vin) {
     const normalizedVin = (vin || "").trim().toUpperCase();
 
     return $.ajax({
-        url: `/api/service/vin/${encodeURIComponent(normalizedVin)}/html`,
+        url: `/vehicles/vin-report?vin=${encodeURIComponent(normalizedVin)}`,
         method: "GET",
         dataType: "html",
         cache: false

@@ -19,7 +19,7 @@
     </div>
     <section class="admin-customer-panel dashboard-grid-panel" aria-labelledby="customer-grid-title">
         <div class="admin-table-heading"><div><span class="eyebrow dark">ACTIVE CUSTOMERS</span><h2 id="customer-grid-title">Dealer accounts</h2></div><span>@Model.Customers.Count active</span></div>
-        <div id="customer-grid" class="admin-pep-grid" data-url="@Url.Action("CustomerGridData", "Admin")"></div>
+        <div id="customer-grid" class="admin-pep-grid" data-url="@Url.Action("CustomerGridData", "Admin")" data-email-url="@Url.Action("CustomerEmailGridData", "Admin")"></div>
     </section>
     <section class="admin-customer-panel dashboard-grid-panel" aria-labelledby="demo-grid-title">
         <div class="admin-table-heading"><div><span class="eyebrow dark">DEALER DEMO REQUESTS</span><h2 id="demo-grid-title">New opportunities</h2></div><span>@Model.DemoRequests.Count recent</span></div>

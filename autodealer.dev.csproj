@@ -162,6 +162,7 @@
     <Compile Include="Models\DataOneCredentials.cs" />
     <Compile Include="Models\DemoQuotaService.cs" />
     <Compile Include="Models\PricingViewModels.cs" />
+    <Compile Include="Models\SanitizingModelBinder.cs" />
     <Compile Include="Models\DealerDemoRequestViewModel.cs" />
     <Compile Include="Data\autodealer_dev.designer.cs">
       <AutoGen>True</AutoGen>
@@ -169,6 +170,7 @@
       <DependentUpon>autodealer_dev.dbml</DependentUpon>
     </Compile>
     <Compile Include="Services\ClientAccountService.cs" />
+    <Compile Include="Services\ClientEmailHistoryRecorder.cs" />
     <Compile Include="Services\ContactInquiryService.cs" />
     <Compile Include="Services\AutoDealerConnectionString.cs" />
     <Compile Include="Services\ApiAccessService.cs" />
@@ -181,6 +183,8 @@
     <Compile Include="Services\PlanService.cs" />
     <Compile Include="Services\IDealerDemoRequestService.cs" />
     <Compile Include="Services\DealerDemoRequestService.cs" />
+    <Compile Include="Services\EmailTemplateName.cs" />
+    <Compile Include="Services\EmailTemplateRenderer.cs" />
     <Compile Include="Services\SmtpMailSender.cs" />
     <Compile Include="Services\ICredentialEmailService.cs" />
     <Compile Include="Services\SmtpCredentialEmailService.cs" />
@@ -212,7 +216,9 @@
     <Content Include="Global.asax" />
     <Content Include="Database\001_AutoDealerPlatform.sql" />
     <Content Include="Database\002_DealerDemoRequests.sql" />
+    <Content Include="Database\003_ClientEmailHistory.sql" />
     <Content Include="Content\dashboard.css" />
+    <Content Include="Content\email.css" />
     <Content Include="Content\pepTools\pepGrid.css" />
     <Content Include="Content\Site.css" />
     <Content Include="images\1.png" />
@@ -226,6 +232,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\Admin\adminDashboard.js" />
+    <Content Include="Scripts\autodealer-vin-report.js" />
     <Content Include="Scripts\pepTools\pepGrid.js" />
     <Content Include="Web.config" />
     <None Include="Data\autodealer_dev.dbml.layout">
@@ -268,6 +275,7 @@
     <Content Include="Views\Documentation\Authentication.cshtml" />
     <Content Include="Views\Documentation\Errors.cshtml" />
     <Content Include="Views\Documentation\Index.cshtml" />
+    <Content Include="Views\Documentation\VinHtml.cshtml" />
     <Content Include="Views\Documentation\_DocsNav.cshtml" />
     <Content Include="Views\Pricing\Index.cshtml" />
     <Content Include="Views\Solutions\DigitalShowroom.cshtml" />
@@ -282,6 +290,11 @@
     <Content Include="Content\images\vin-html-api-promo-v2.png" />
     <Content Include="Content\images\autodealer-logo.png" />
     <Content Include="Content\images\autodealer-logo-dark.png" />
+    <Content Include="Templates\Emails\api-credentials.html" />
+    <Content Include="Templates\Emails\new-api-account.html" />
+    <Content Include="Templates\Emails\dealer-demo-owner.html" />
+    <Content Include="Templates\Emails\dealer-demo-confirmation.html" />
+    <Content Include="Templates\Emails\contact-inquiry.html" />
     <Content Include="Content\images\landing-showcase\dealer-inventory-grid.png" />
     <Content Include="Content\images\landing-showcase\vehicle-details-gallery.png" />
     <Content Include="Content\images\landing-showcase\vehicle-pricing-details.png" />

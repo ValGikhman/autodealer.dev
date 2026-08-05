@@ -1,6 +1,7 @@
 @{
     var currentAction = (ViewContext.RouteData.Values["action"] ?? "Index").ToString();
     var isQuickstart = currentAction.Equals("Index", StringComparison.OrdinalIgnoreCase);
+    var isVinHtml = currentAction.Equals("VinHtml", StringComparison.OrdinalIgnoreCase);
     var isAuthentication = currentAction.Equals("Authentication", StringComparison.OrdinalIgnoreCase);
     var isErrors = currentAction.Equals("Errors", StringComparison.OrdinalIgnoreCase);
 }
@@ -16,8 +17,8 @@
         <a class="@(isErrors ? "active" : "")" href="@Url.Action("Errors", "Documentation")" aria-current="@(isErrors ? "page" : null)">
             <span><strong>Errors &amp; limits</strong><small>Status codes and quotas</small></span>
         </a>
-        <a href="@Url.Action("Index", "Documentation")#vin">
-            <span><strong>VIN decode</strong><small>Vehicle intelligence endpoint</small></span>
+        <a class="@(isVinHtml ? "active" : "")" href="@Url.Action("VinHtml", "Documentation")" aria-current="@(isVinHtml ? "page" : null)">
+            <span><strong>HTML VIN report</strong><small>Embed and render a vehicle</small></span>
         </a>
         <a href="@Url.Action("Index", "Documentation")#formats">
             <span><strong>JSON, XML &amp; HTML</strong><small>Choose the right output</small></span>

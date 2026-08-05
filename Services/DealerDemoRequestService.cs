@@ -107,16 +107,16 @@ namespace autodealer.dev.Services {
             AddRow(rows, "Preferred contact", PreferredContact(request));
             AddRow(rows, "Request ID", requestId.ToString());
 
-            var body = "<!doctype html><html><body style=\"margin:0;padding:0;background:#eef0f2;font-family:Arial,sans-serif;color:#202327\">" +
-                "<table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"background:#eef0f2;padding:32px 14px\"><tr><td align=\"center\">" +
-                "<table role=\"presentation\" width=\"640\" cellspacing=\"0\" cellpadding=\"0\" style=\"max-width:640px;width:100%;overflow:hidden;border:1px solid #d5d9dd;border-radius:16px;background:#ffffff;box-shadow:0 18px 48px rgba(20,24,28,.12)\">" +
-                "<tr><td style=\"padding:36px 40px;background:linear-gradient(135deg,#111315,#353a40);color:#ffffff\">" + SmtpMailSender.LogoToken + "<div style=\"font-size:12px;letter-spacing:1.6px;color:#c9cdd2\">A NEW CONVERSATION</div><h1 style=\"margin:13px 0 9px;font-size:29px;font-weight:500\">A dealership is ready to move.</h1><p style=\"margin:0;color:#c8cdd2;font-size:15px;line-height:1.7\">" + Encode(request.BusinessName) + " has opened the door to what comes next.</p></td></tr>" +
-                "<tr><td style=\"padding:32px 40px\"><p style=\"margin:0 0 25px;color:#4c535a;font-size:15px;line-height:1.75\">Every dealership reaches a moment when the experience it has is no longer enough for the future it sees. " + Encode(request.BusinessName) + " may be standing at that threshold—and they have invited us into the conversation.</p>" +
-                "<h2 style=\"margin:0 0 18px;font-size:19px;font-weight:500\">The opportunity at a glance</h2><table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">" + rows + "</table>" +
-                "<div style=\"margin-top:26px;padding:22px;border-left:3px solid #555d65;border-radius:8px;background:#f1f3f5\"><div style=\"margin-bottom:8px;font-size:12px;letter-spacing:1px;color:#687078\">IN THEIR OWN WORDS</div><div style=\"font-size:15px;line-height:1.75;color:#30343a;white-space:pre-line\">" + Encode(request.Message) + "</div></div>" +
-                "<div style=\"margin-top:26px;padding:22px;border-radius:10px;background:#25292d;color:#ffffff\"><p style=\"margin:0 0 16px;color:#c8cdd2;font-size:14px;line-height:1.65\">" + Encode(actionNote) + "</p><a href=\"" + AttributeEncode(actionHref) + "\" style=\"display:inline-block;padding:12px 18px;border:1px solid #727980;border-radius:8px;color:#ffffff;background:linear-gradient(135deg,#555d65,#353b41);font-size:14px;font-weight:600;text-decoration:none\">" + Encode(actionText) + " &rarr;</a>" +
-                (prefersPhone ? "<div style=\"margin-top:13px;color:#ffffff;font-size:18px\">" + Encode(request.Phone) + "</div>" : string.Empty) + "</div>" +
-                "</td></tr></table></td></tr></table></body></html>";
+            var phoneBlock = prefersPhone ? "<div class=\"email-phone\">" + Encode(request.Phone) + "</div>" : string.Empty;
+            var body = EmailTemplateRenderer.Render(EmailTemplateName.DealerDemoOwnerNotification,
+                new EmailTemplateValues()
+                    .Add("BUSINESS_NAME", request.BusinessName)
+                    .Add("MESSAGE", request.Message)
+                    .Add("ACTION_NOTE", actionNote)
+                    .Add("ACTION_TEXT", actionText)
+                    .AddAttribute("ACTION_HREF", actionHref)
+                    .AddHtml("DETAIL_ROWS", rows.ToString())
+                    .AddHtml("PHONE_BLOCK", phoneBlock));
 
             var subject = "A dealership is ready to talk — " + SafeSubject(request.BusinessName);
             SmtpMailSender.Send(recipient, recipientName, subject, body, request.Email, request.ContactName);
@@ -124,14 +124,12 @@ namespace autodealer.dev.Services {
 
         private static bool SendCustomerConfirmation(DealerDemoRequestViewModel request, Guid requestId) {
             try {
-                var body = "<!doctype html><html><body style=\"margin:0;padding:0;background:#eef0f2;font-family:Arial,sans-serif;color:#202327\">" +
-                    "<table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"background:#eef0f2;padding:32px 14px\"><tr><td align=\"center\">" +
-                    "<table role=\"presentation\" width=\"640\" cellspacing=\"0\" cellpadding=\"0\" style=\"max-width:640px;width:100%;overflow:hidden;border:1px solid #d5d9dd;border-radius:16px;background:#ffffff;box-shadow:0 18px 48px rgba(20,24,28,.12)\">" +
-                    "<tr><td style=\"padding:34px 38px;background:linear-gradient(135deg,#111315,#353a40);color:#ffffff\">" + SmtpMailSender.LogoToken + "<div style=\"font-size:12px;letter-spacing:1.5px;color:#c9cdd2\">REQUEST RECEIVED</div><h1 style=\"margin:12px 0 8px;font-size:28px;font-weight:500\">Your dealer demo is in motion.</h1><p style=\"margin:0;color:#c8cdd2;font-size:15px;line-height:1.6\">Thank you, " + Encode(request.ContactName) + ". We received the request for " + Encode(request.BusinessName) + ".</p></td></tr>" +
-                    "<tr><td style=\"padding:30px 38px\"><h2 style=\"margin:0 0 12px;font-size:19px;font-weight:500\">What happens next</h2>" +
-                    "<p style=\"margin:0;color:#555d65;font-size:15px;line-height:1.75\">Our team will review your goals, current website, inventory needs, and preferred contact method before reaching out. That preparation helps us keep the first conversation focused on your dealership instead of giving you a generic product tour.</p>" +
-                    "<div style=\"margin-top:24px;padding:18px;border-left:3px solid #555d65;border-radius:8px;background:#f1f3f5;color:#4c535a;font-size:14px;line-height:1.6\"><strong style=\"color:#25292d\">Your primary goal</strong><br>" + Encode(request.PrimaryGoal) + "</div>" +
-                    "<p style=\"margin:24px 0 0;color:#747b82;font-size:13px;line-height:1.6\">Reference: " + Encode(requestId.ToString()) + ". You can reply directly to this email if there is anything else you would like us to know.</p></td></tr></table></td></tr></table></body></html>";
+                var body = EmailTemplateRenderer.Render(EmailTemplateName.DealerDemoCustomerConfirmation,
+                    new EmailTemplateValues()
+                        .Add("CONTACT_NAME", request.ContactName)
+                        .Add("BUSINESS_NAME", request.BusinessName)
+                        .Add("PRIMARY_GOAL", request.PrimaryGoal)
+                        .Add("REQUEST_ID", requestId));
 
                 SmtpMailSender.Send(request.Email, request.ContactName, "We received your AutoDealer.dev demo request", body, null, null);
                 return true;
@@ -157,8 +155,8 @@ namespace autodealer.dev.Services {
 
         private static void AddRow(StringBuilder output, string label, string value) {
             if (string.IsNullOrWhiteSpace(value)) return;
-            output.Append("<tr><td style=\"width:155px;padding:10px 12px 10px 0;border-bottom:1px solid #eceff1;color:#747b82;font-size:13px\">")
-                .Append(Encode(label)).Append("</td><td style=\"padding:10px 0;border-bottom:1px solid #eceff1;color:#25292d;font-size:14px\">")
+            output.Append("<tr><td class=\"detail-label\">")
+                .Append(Encode(label)).Append("</td><td class=\"detail-value\">")
                 .Append(Encode(value)).Append("</td></tr>");
         }
 

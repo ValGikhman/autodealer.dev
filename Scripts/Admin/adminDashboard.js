@@ -8,8 +8,20 @@
         var recordModal = window.bootstrap.Modal.getOrCreateInstance(modalElement);
         var sectionsElement = document.getElementById('dashboard-record-sections');
         var actionsElement = document.getElementById('dashboard-record-actions');
+        var profileElement = document.getElementById('dashboard-record-profile');
+        var emailPreviewElement = document.getElementById('dashboard-email-preview');
+        var emailPreviewFrame = document.getElementById('dashboard-email-preview-frame');
+        var expandedEmailDetail = null;
 
         function responseData(response) { return response && response.Data ? response.Data : []; }
+        function clearEmailPreview() {
+            emailPreviewFrame.removeAttribute('srcdoc');
+            emailPreviewFrame.setAttribute('src', 'about:blank');
+        }
+        function templateHtml(id) {
+            var template = document.getElementById(id);
+            return template ? template.innerHTML.trim() : '';
+        }
         function text(id, value) { document.getElementById(id).textContent = value == null ? '' : value; }
         function valueOrEmpty(value) { return value == null || String(value).trim() === '' ? 'Not provided' : String(value); }
         function initials(value) {
@@ -81,6 +93,10 @@
             actionsElement.appendChild(action);
         }
         function prepareModal(item, type) {
+            modalElement.classList.remove('dashboard-email-modal');
+            profileElement.hidden = false;
+            emailPreviewElement.hidden = true;
+            clearEmailPreview();
             sectionsElement.innerHTML = '';
             actionsElement.innerHTML = '';
             var isCustomer = type === 'customer';
@@ -137,20 +153,106 @@
             recordModal.show();
         }
 
+        function closeEmailDetail() {
+            if (!expandedEmailDetail) return;
+            if (expandedEmailDetail.toggle) {
+                expandedEmailDetail.toggle.setAttribute('aria-expanded', 'false');
+                expandedEmailDetail.toggle.classList.remove('is-open');
+            }
+            if (expandedEmailDetail.row && expandedEmailDetail.row.parentNode)
+                expandedEmailDetail.row.parentNode.removeChild(expandedEmailDetail.row);
+            expandedEmailDetail = null;
+        }
+
+        function showEmailPreview(item) {
+            modalElement.classList.add('dashboard-email-modal');
+            profileElement.hidden = true;
+            emailPreviewElement.hidden = false;
+            text('dashboard-record-kicker', 'MESSAGE PREVIEW');
+            text('dashboard-record-title', item.Subject || 'Email message');
+            text('dashboard-record-subtitle', 'Sent ' + valueOrEmpty(item.Sent) + ' to ' + valueOrEmpty(item.ToEmail));
+            clearEmailPreview();
+            emailPreviewFrame.removeAttribute('src');
+            emailPreviewFrame.srcdoc = item.HtmlBody || '';
+            recordModal.show();
+        }
+
+        $(modalElement).on('hidden.bs.modal', function () {
+            clearEmailPreview();
+            modalElement.classList.remove('dashboard-email-modal');
+            emailPreviewElement.hidden = true;
+            profileElement.hidden = false;
+        });
+
+        function expandCustomerEmails(detail) {
+            var toggle = detail.event.target.closest('.customer-email-toggle');
+            if (!toggle || !detail.dataItem.EmailCount) return;
+            detail.event.preventDefault();
+            detail.event.stopPropagation();
+
+            if (expandedEmailDetail && expandedEmailDetail.ownerRow === detail.rowElement) {
+                closeEmailDetail();
+                return;
+            }
+            closeEmailDetail();
+
+            var detailRow = document.createElement('tr');
+            detailRow.className = 'customer-email-detail-row';
+            var detailCell = document.createElement('td');
+            detailCell.colSpan = detail.rowElement.children.length;
+            detailCell.innerHTML = templateHtml('customer-email-detail-template');
+            detailRow.appendChild(detailCell);
+            detail.rowElement.parentNode.insertBefore(detailRow, detail.rowElement.nextSibling);
+            toggle.setAttribute('aria-expanded', 'true');
+            toggle.classList.add('is-open');
+            expandedEmailDetail = { ownerRow: detail.rowElement, row: detailRow, toggle: toggle };
+
+            detailRow.querySelector('.customer-email-collapse').addEventListener('click', closeEmailDetail);
+
+            var emailUrl = $('#customer-grid').data('email-url');
+            var separator = String(emailUrl).indexOf('?') >= 0 ? '&' : '?';
+            $(detailRow).find('.customer-email-grid').pepGrid({
+                url: emailUrl + separator + $.param({ clientId: detail.dataItem.ClientId }),
+                schema: { data: responseData }, height: null, pageable: false, pageSize: 20,
+                resizable: false, autozoomable: true, exportToExcel: false, exportToPdf: false,
+                defaultSort: [{ field: 'SentSort', dir: 'desc' }],
+                onCellClick: function (emailDetail) {
+                    var action = emailDetail.event.target.closest('[data-email-action]');
+                    if (!action) return;
+                    emailDetail.event.preventDefault();
+                    emailDetail.event.stopPropagation();
+                    showEmailPreview(emailDetail.dataItem);
+                },
+                columns: [
+                    { field: 'Sent', title: 'Sent', width: '24%' },
+                    { field: 'ToEmail', title: 'To', width: '26%' },
+                    { field: 'Subject', title: 'Subject', width: '38%' },
+                    { field: 'View', title: 'Message', width: '12%', sortable: false, filterable: false, template: '#customer-email-actions-template' }
+                ]
+            });
+        }
+
         var $customerGrid = $('#customer-grid');
         if ($customerGrid.length) {
             $customerGrid.pepGrid({
-                url: $customerGrid.data('url'), schema: { data: responseData }, height: null, pageSize: 100,
+                url: $customerGrid.data('url'), schema: { data: responseData }, height: null, pageable: false, pageSize: 100,
                 resizable: false, autozoomable: true, exportToExcel: false, exportToPdf: false,
                 defaultSort: [{ field: 'CreatedSort', dir: 'desc' }],
-                onCellDblClick: function (detail) { prepareModal(detail.dataItem, 'customer'); },
+                onDataBound: function () { expandedEmailDetail = null; },
+                onCellClick: function (detail) {
+                    if (detail.field === 'EmailCount') expandCustomerEmails(detail);
+                },
+                onCellDblClick: function (detail) {
+                    if (detail.field !== 'EmailCount') prepareModal(detail.dataItem, 'customer');
+                },
                 onRowDblClick: function (detail) { prepareModal(detail.dataItem, 'customer'); },
                 columns: [
-                    { field: 'BusinessName', title: 'Customer', width: '20%' },
-                    { field: 'ClientNumber', title: 'Client number', width: '20%' },
-                    { field: 'ContactName', title: 'Contact', width: '20%' },
+                    { field: 'BusinessName', title: 'Customer', width: '19%' },
+                    { field: 'ClientNumber', title: 'Client number', width: '18%' },
+                    { field: 'ContactName', title: 'Contact', width: '18%' },
                     { field: 'Email', title: 'Email', width: '20%' },
-                    { field: 'PlanName', title: 'Plan', width: '20%' }
+                    { field: 'PlanName', title: 'Plan', width: '17%' },
+                    { field: 'EmailCount', title: 'Mail', width: '8%', sortable: false, filterable: false, template: '#customer-email-toggle-template' }
                 ]
             });
         }
@@ -158,7 +260,7 @@
         var $demoGrid = $('#demo-request-grid');
         if ($demoGrid.length) {
             $demoGrid.pepGrid({
-                url: $demoGrid.data('url'), schema: { data: responseData }, height: null, pageSize: 100,
+                url: $demoGrid.data('url'), schema: { data: responseData }, height: null, pageable: false, pageSize: 100,
                 resizable: false, autozoomable: true, exportToExcel: false, exportToPdf: false,
                 defaultSort: [{ field: 'CreatedSort', dir: 'desc' }],
                 onCellDblClick: function (detail) { prepareModal(detail.dataItem, 'demo'); },
