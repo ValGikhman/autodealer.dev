@@ -29,6 +29,7 @@ namespace autodealer.dev.Services {
             var secret = RandomToken(32);
             var fullKey = keyId + "." + secret;
             var passwordSalt = RandomBytes(32);
+            long clientId = 0;
             byte[] passwordHash;
             using (var derive = new Rfc2898DeriveBytes(model.Password, passwordSalt, PasswordIterations, HashAlgorithmName.SHA256))
                 passwordHash = derive.GetBytes(32);
@@ -105,6 +106,7 @@ namespace autodealer.dev.Services {
                         context.ApiKeys.InsertOnSubmit(apiKey);
                         if (paymentProfile != null) context.PaymentProfiles.InsertOnSubmit(paymentProfile);
                         context.SubmitChanges();
+                        clientId = client.ClientId;
                         transaction.Commit();
                     }
                     catch {
@@ -114,7 +116,7 @@ namespace autodealer.dev.Services {
                 }
             }
 
-            var emailed = emailService != null && emailService.Send(model.BusinessName, model.FirstName, model.LastName, model.Email.Trim(), model.Phone, clientNumber, fullKey, planCode);
+            var emailed = emailService != null && emailService.Send(clientId, model.BusinessName, model.FirstName, model.LastName, model.Email.Trim(), model.Phone, clientNumber, fullKey, planCode);
             return new AccountCreatedViewModel { ClientNumber = clientNumber, ApiKey = fullKey, Email = model.Email, CredentialsEmailed = emailed };
         }
 

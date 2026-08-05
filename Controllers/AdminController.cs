@@ -71,12 +71,33 @@ namespace autodealer.dev.Controllers {
                 customer.PlanName,
                 customer.SubscriptionStatus,
                 customer.ActiveApiKeyCount,
+                customer.EmailCount,
                 PeriodEnd = customer.PeriodEndUtc.HasValue ? customer.PeriodEndUtc.Value.ToString("MMM d, yyyy") : "N/A",
                 Created = customer.CreatedUtc.ToString("MMM d, yyyy"),
                 CreatedSort = customer.CreatedUtc.ToString("o"),
                 ContactHref = "mailto:" + customer.Email + "?subject=" + Uri.EscapeDataString("Your AutoDealer.dev account")
             });
             return Json(new { Data = rows }, JsonRequestBehavior.AllowGet);
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
+        public ActionResult CustomerEmailGridData(long clientId) {
+            var rows = adminService.GetClientEmails(clientId).Select(email => new {
+                email.ClientEmailHistoryId,
+                email.ClientId,
+                Sent = email.SentUtc.ToString("MMM d, yyyy HH:mm:ss 'UTC'"),
+                SentSort = email.SentUtc.ToString("o"),
+                email.ToEmail,
+                email.Subject,
+                email.HtmlBody,
+                View = true
+            });
+            return new JsonResult {
+                Data = new { Data = rows },
+                JsonRequestBehavior = JsonRequestBehavior.AllowGet,
+                MaxJsonLength = int.MaxValue
+            };
         }
 
         [AdminAuthorize]

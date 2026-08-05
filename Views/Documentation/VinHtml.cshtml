@@ -1,0 +1,169 @@
+@{
+    ViewBag.Title = "HTML VIN report integration";
+    ViewBag.Description = "Render the AutoDealer.dev VIN Decode API as a responsive HTML vehicle report with secure customer integration examples.";
+    var demoApiKey = System.Configuration.ConfigurationManager.AppSettings["DemoApi:Key"] ?? "ad_live_demo.keysecret";
+}
+<section class="docs-header">
+    <div class="shell">
+        <span class="eyebrow">VIN DECODE DOCUMENTATION</span>
+        <h1>Render a complete vehicle report.</h1>
+        <p>Place a VIN and API URL on one div, load the widget, and render the self-styled HTML response. Production integrations keep the API key behind a server-side proxy.</p>
+        <div class="button-row docs-header-actions">
+            <a class="button site-cta" href="#live-example"><span>Run the live example</span><i aria-hidden="true">&darr;</i></a>
+            <a class="button button-secondary" href="@Url.Action("VinDecoder", "Solutions")">Open full API playground</a>
+        </div>
+    </div>
+</section>
+
+<section class="docs-page light-section">
+    <div class="shell docs-layout">
+        @Html.Partial("_DocsNav")
+        <article class="docs-article vin-html-docs">
+            <h2>Customer implementation</h2>
+            <p>The browser widget reads <code>data-vin</code>, replaces <code>{vin}</code> in <code>data-api-url</code>, requests <code>text/html</code>, and places the trusted API response inside the div.</p>
+
+            <div class="doc-callout">
+                <b>Keep the production API key server-side</b>
+                <p>The recommended API URL is your own same-origin server endpoint. That endpoint adds the bearer key and forwards the HTML response. Never place a live customer key in HTML, browser JavaScript, source control, or a public bundle.</p>
+            </div>
+
+            <h3 id="html-markup">1. Add the report div</h3>
+            <p>Use a URL template containing the literal <code>{vin}</code> placeholder. The widget safely URL-encodes the VIN before making the request.</p>
+            <div class="code-block simple"><pre><code>&lt;div id="vehicle-report"
+     data-autodealer-vin-report
+     data-api-url="/vehicles/vin-report?vin={vin}"
+     data-vin="1HGCM82633A004352"
+     data-loading-text="Loading vehicle details..."&gt;
+&lt;/div&gt;
+
+&lt;script src="https://api.autodealer.dev/Scripts/autodealer-vin-report.js"&gt;&lt;/script&gt;</code></pre></div>
+            <p>Customers may load the hosted script as shown or download and serve the same file from their own versioned assets.</p>
+
+            <div class="vin-widget-live-heading" id="live-example">
+                <div><span>LIVE EMBEDDED HTML</span><h3>Vehicle report div</h3><p>No form is used. JavaScript loads this embedded div automatically when the page is ready.</p></div>
+                <button class="button button-primary" id="reload-live-vehicle" type="button">Reload live HTML</button>
+            </div>
+            <p class="vin-widget-live-status" id="vin-widget-demo-status" role="status">Loading the live HTML report...</p>
+            <div class="vin-widget-demo">
+                <div id="live-vehicle-report"
+                     class="vin-widget-report"
+                     data-autodealer-vin-report
+                     data-auto-load="false"
+                     data-api-url="@Url.Content("~/api/service/vin/{vin}/html")"
+                     data-api-key="@demoApiKey"
+                     data-vin="1HGCM82633A004352"
+                     data-loading-text="Decoding the vehicle and building its report...">
+                    Loading the embedded vehicle report...
+                </div>
+            </div>
+
+            <h3 id="server-proxy">2. Add a secure C# proxy</h3>
+            <p>This ASP.NET MVC example validates the VIN, reads the secret from the server environment, calls the HTML route, and returns the fragment to the browser.</p>
+            <div class="code-block docs-code-tall"><pre><code>private static readonly Regex VinPattern =
+    new Regex("^[A-HJ-NPR-Z0-9]{17}$", RegexOptions.CultureInvariant);
+
+[HttpGet]
+public async Task&lt;ActionResult&gt; VinReport(string vin) {
+    vin = (vin ?? string.Empty).Trim().ToUpperInvariant();
+    if (!VinPattern.IsMatch(vin))
+        return new HttpStatusCodeResult(400, "Invalid VIN");
+
+    var apiKey = Environment.GetEnvironmentVariable("AUTODEALER_API_KEY");
+    using (var client = new HttpClient()) {
+        client.BaseAddress = new Uri("https://api.autodealer.dev/");
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", apiKey);
+        client.DefaultRequestHeaders.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("text/html"));
+
+        var response = await client.GetAsync(
+            "api/service/vin/" + Uri.EscapeDataString(vin) + "/html");
+        var body = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+            return new HttpStatusCodeResult((int)response.StatusCode, body);
+
+        return Content(body, "text/html", Encoding.UTF8);
+    }
+}</code></pre></div>
+
+            <h3 id="jquery">jQuery without the widget</h3>
+            <p>If the customer already uses jQuery, the same server proxy can be called directly.</p>
+            <div class="code-block simple"><pre><code>var vin = "1HGCM82633A004352";
+
+$.ajax({
+  url: "/vehicles/vin-report",
+  data: { vin: vin },
+  dataType: "html",
+  cache: false
+}).done(function (reportHtml) {
+  $("#vehicle-report").html(reportHtml);
+}).fail(function (xhr) {
+  $("#vehicle-report").text(
+    xhr.status === 404 ? "Vehicle not found." : "Unable to load vehicle report."
+  );
+});</code></pre></div>
+
+            <h3 id="curl">cURL</h3>
+            <p>Server-side tools can call the AutoDealer.dev endpoint directly with the bearer credential.</p>
+            <div class="code-block simple"><pre><code>curl --request GET \
+  "https://api.autodealer.dev/api/service/vin/1HGCM82633A004352/html" \
+  --header "Authorization: Bearer $AUTODEALER_API_KEY" \
+  --header "Accept: text/html" \
+  --output vehicle-report.html</code></pre></div>
+
+            <h3 id="dynamic-vin">Change the VIN dynamically</h3>
+            <p>Set the new VIN and call <code>load</code>. The widget aborts an earlier in-flight request before starting the next one.</p>
+            <div class="code-block simple"><pre><code>var report = document.getElementById("vehicle-report");
+var nextVin = document.getElementById("vin-input").value;
+
+AutoDealerVinReport.load(report, nextVin)
+  .then(function () { console.log("Vehicle report rendered"); })
+  .catch(function (error) { console.error(error.message); });</code></pre></div>
+
+            <h3 id="events">Loading, loaded, and error events</h3>
+            <div class="endpoint-list docs-event-list">
+                <div><b>EVENT</b><code>autodealer:loading</code><span>Request is starting</span></div>
+                <div><b>EVENT</b><code>autodealer:loaded</code><span>HTML is rendered</span></div>
+                <div><b>EVENT</b><code>autodealer:error</code><span>Validation or request failed</span></div>
+            </div>
+            <div class="code-block simple"><pre><code>document.getElementById("vehicle-report")
+  .addEventListener("autodealer:loaded", function (event) {
+    console.log("Rendered VIN", event.detail.vin);
+  });</code></pre></div>
+
+            <h3 id="requirements">Integration checklist</h3>
+            <div class="status-table docs-checklist">
+                <div><b>VIN</b><span>Exactly 17 uppercase letters or digits; I, O, and Q are not allowed</span></div>
+                <div><b>URL</b><span>Must contain <code>{vin}</code> and return the API HTML fragment</span></div>
+                <div><b>AUTH</b><span>Send <code>Authorization: Bearer &lt;key&gt;</code> from the server proxy</span></div>
+                <div><b>TYPE</b><span>Request and return <code>text/html; charset=utf-8</code></span></div>
+                <div><b>ERRORS</b><span>Handle 400, 401, 403, 422, 429, and 5xx responses without inserting error text as HTML</span></div>
+            </div>
+
+            <div class="next-doc"><a class="button site-cta" href="@Url.Action("Authentication")"><span>Authentication and API keys</span><i aria-hidden="true">&rarr;</i></a></div>
+        </article>
+    </div>
+</section>
+
+@section scripts {
+<script src="@Url.Content("~/Scripts/autodealer-vin-report.js")"></script>
+<script>
+$(function () {
+    var report = document.getElementById('live-vehicle-report');
+    var $status = $('#vin-widget-demo-status');
+
+    function renderLiveReport() {
+        $status.text('Calling the live HTML endpoint...').removeClass('error success');
+        AutoDealerVinReport.load(report, '1HGCM82633A004352').then(function (result) {
+            var remaining = result.response.headers.get('X-Demo-Remaining');
+            $status.text('Report rendered successfully' + (remaining !== null ? ' - ' + remaining + ' VIN trials left.' : '.')).addClass('success');
+        }).catch(function (error) {
+            $status.text(error.message || 'The vehicle report could not be loaded.').addClass('error');
+        });
+    }
+
+    $('#reload-live-vehicle').on('click', renderLiveReport);
+    renderLiveReport();
+});
+</script>
+}

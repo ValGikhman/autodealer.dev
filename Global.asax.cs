@@ -15,10 +15,15 @@ namespace autodealer.dev {
         protected void Application_Start() {
             GlobalConfiguration.Configure(WebApiConfig.Register); // <— must be here, and BEFORE MVC routes
             UnityConfig.RegisterComponents();
+            RegisterSanitizingModelBinders();
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+        }
+
+        private static void RegisterSanitizingModelBinders() {
+            ModelBinders.Binders.DefaultBinder = new Models.SanitizingModelBinder();
         }
 
         protected void Application_AuthenticateRequest(object sender, EventArgs e) {

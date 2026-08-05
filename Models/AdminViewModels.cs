@@ -4,16 +4,18 @@ using System.ComponentModel.DataAnnotations;
 
 namespace autodealer.dev.Models {
     public sealed class AdminLoginViewModel {
-        [Required]
+        [Required, StringLength(100)]
         [Display(Name = "User ID")]
         public string UserId { get; set; }
 
-        [Required, DataType(DataType.Password)]
+        [Required, StringLength(256), DataType(DataType.Password)]
+        [PreserveInput]
         public string Password { get; set; }
 
         [Display(Name = "Keep me signed in")]
         public bool RememberMe { get; set; }
 
+        [StringLength(2048)]
         public string ReturnUrl { get; set; }
     }
 
@@ -36,7 +38,17 @@ namespace autodealer.dev.Models {
         public string SubscriptionStatus { get; set; }
         public DateTime? PeriodEndUtc { get; set; }
         public int ActiveApiKeyCount { get; set; }
+        public int EmailCount { get; set; }
         public DateTime CreatedUtc { get; set; }
+    }
+
+    public sealed class AdminClientEmailViewModel {
+        public long ClientEmailHistoryId { get; set; }
+        public long ClientId { get; set; }
+        public DateTime SentUtc { get; set; }
+        public string ToEmail { get; set; }
+        public string Subject { get; set; }
+        public string HtmlBody { get; set; }
     }
 
     public sealed class AdminDemoRequestViewModel {

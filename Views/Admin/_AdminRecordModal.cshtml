@@ -10,13 +10,18 @@
                 <button type="button" class="btn-close dashboard-modal-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="dashboard-record-summary">
-                    <span class="dashboard-record-monogram" id="dashboard-record-monogram" aria-hidden="true">AD</span>
-                    <div><strong id="dashboard-record-name"></strong><span id="dashboard-record-caption"></span></div>
-                    <span class="dashboard-record-status" id="dashboard-record-status"></span>
+                <div id="dashboard-record-profile">
+                    <div class="dashboard-record-summary">
+                        <span class="dashboard-record-monogram" id="dashboard-record-monogram" aria-hidden="true">AD</span>
+                        <div><strong id="dashboard-record-name"></strong><span id="dashboard-record-caption"></span></div>
+                        <span class="dashboard-record-status" id="dashboard-record-status"></span>
+                    </div>
+                    <div class="dashboard-record-actions" id="dashboard-record-actions"></div>
+                    <div class="dashboard-record-sections" id="dashboard-record-sections"></div>
                 </div>
-                <div class="dashboard-record-actions" id="dashboard-record-actions"></div>
-                <div class="dashboard-record-sections" id="dashboard-record-sections"></div>
+                <section class="dashboard-email-preview" id="dashboard-email-preview" hidden>
+                    <iframe id="dashboard-email-preview-frame" sandbox="" title="Rendered email preview"></iframe>
+                </section>
             </div>
             <div class="modal-footer">
                 <span>AutoDealer.dev administrative record</span>
@@ -28,3 +33,6 @@
 
 <script type="text/x-pepgrid-template" id="customer-status-template"><span class="dashboard-grid-status">{{SubscriptionStatus}}</span></script>
 <script type="text/x-pepgrid-template" id="demo-status-template"><span class="dashboard-grid-status">{{Status}}</span></script>
+<script type="text/x-pepgrid-template" id="customer-email-toggle-template">{{#if EmailCount}}<button type="button" class="customer-email-toggle" aria-label="Show {{EmailCount}} associated emails" aria-expanded="false"><svg aria-hidden="true"><use href="#icon-mail"></use></svg><span>{{EmailCount}}</span></button>{{/if}}</script>
+<script type="text/x-pepgrid-template" id="customer-email-detail-template"><div class="customer-email-detail"><div class="customer-email-detail-heading"><div><span>EMAIL HISTORY</span><h3>Associated messages</h3></div><button type="button" class="customer-email-collapse" aria-label="Close email history">&times;</button></div><div class="customer-email-grid admin-pep-grid"></div></div></script>
+<script type="text/x-pepgrid-template" id="customer-email-actions-template"><div class="customer-email-actions"><button type="button" data-email-action="view" aria-label="View rendered email">View</button></div></script>

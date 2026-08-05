@@ -13,7 +13,7 @@
     <div class="dashboard-heading"><div><span class="eyebrow dark">CUSTOMER DIRECTORY</span><h2>Dealer accounts.</h2></div><span class="status-badge">@Model.ActiveCustomers active</span></div>
     <section class="admin-customer-panel dashboard-grid-panel" aria-labelledby="customer-grid-title">
         <div class="admin-table-heading"><div><span class="eyebrow dark">ACTIVE CUSTOMERS</span><h2 id="customer-grid-title">Dealer accounts</h2></div><span>@Model.Customers.Count active</span></div>
-        <div id="customer-grid" class="admin-pep-grid" data-url="@Url.Action("CustomerGridData", "Admin")"></div>
+        <div id="customer-grid" class="admin-pep-grid" data-url="@Url.Action("CustomerGridData", "Admin")" data-email-url="@Url.Action("CustomerEmailGridData", "Admin")"></div>
     </section>
 </div></section>
 

@@ -326,6 +326,182 @@
     cursor: pointer;
 }
 
+.admin-dashboard-page .customer-email-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #8e959c;
+    border-radius: 8px;
+    color: #f5f6f7;
+    background: linear-gradient(180deg, #60676f, #50575f);
+    cursor: pointer;
+}
+
+.admin-dashboard-page .customer-email-toggle:hover,
+.admin-dashboard-page .customer-email-toggle:focus-visible,
+.admin-dashboard-page .customer-email-toggle.is-open {
+    border-color: #d1d5d9;
+    background: #6b727a;
+    outline: 0;
+}
+
+.admin-dashboard-page .customer-email-toggle svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+}
+
+.admin-dashboard-page .customer-email-toggle span {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border: 2px solid #565d65;
+    border-radius: 999px;
+    color: #34393f;
+    background: #edf0f2;
+    font: 700 9px/14px var(--mono);
+    text-align: center;
+}
+
+.admin-dashboard-page .pg-grid-table tbody .customer-email-detail-row,
+.admin-dashboard-page .pg-grid-table tbody .customer-email-detail-row:hover {
+    background: #383e45;
+    cursor: default;
+}
+
+.admin-dashboard-page .pg-grid-table tbody .customer-email-detail-row > td {
+    height: auto;
+    padding: 0;
+    border-top: 2px solid #aeb5bd;
+    border-bottom: 2px solid #697078;
+    white-space: normal;
+}
+
+.admin-dashboard-page .customer-email-detail {
+    padding: 18px;
+    background: linear-gradient(145deg, #444b52, #343a40);
+}
+
+.admin-dashboard-page .customer-email-detail-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 12px;
+}
+
+.admin-dashboard-page .customer-email-detail-heading span {
+    color: #b9c0c6;
+    font: 10px/1.4 var(--mono);
+    letter-spacing: .13em;
+}
+
+.admin-dashboard-page .customer-email-detail-heading h3 {
+    margin: 3px 0 0;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.admin-dashboard-page .customer-email-collapse {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid #858c93;
+    border-radius: 50%;
+    color: #f4f5f6;
+    background: #50575f;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.admin-dashboard-page .customer-email-collapse:hover {
+    border-color: #c1c6cb;
+    background: #626971;
+}
+
+.admin-dashboard-page .customer-email-grid .pg-grid-wrapper {
+    overflow: hidden;
+    border: 1px solid #697078;
+    border-radius: 10px;
+}
+
+.admin-dashboard-page .customer-email-grid .pg-search-bar,
+.admin-dashboard-page .customer-email-grid .pg-grid-footer {
+    min-height: 44px;
+    padding: 6px 10px;
+}
+
+.admin-dashboard-page .customer-email-grid .pg-grid-table tbody tr {
+    cursor: default;
+}
+
+.admin-dashboard-page .customer-email-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.admin-dashboard-page .customer-email-actions button {
+    min-height: 28px;
+    padding: 0 8px;
+    border: 1px solid #8e959c;
+    border-radius: 6px;
+    color: #f5f6f7;
+    background: #50575f;
+    cursor: pointer;
+    font: 600 11px/1 var(--sans);
+}
+
+.admin-dashboard-page .customer-email-actions button:hover,
+.admin-dashboard-page .customer-email-actions button:focus-visible {
+    border-color: #c5cacf;
+    background: #656c74;
+    outline: 0;
+}
+
+.admin-dashboard-page .dashboard-email-preview[hidden] {
+    display: none;
+}
+
+.admin-dashboard-page .dashboard-record-modal.dashboard-email-modal .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.admin-dashboard-page .dashboard-record-modal.dashboard-email-modal .modal-content {
+    height: 100%;
+}
+
+.admin-dashboard-page .dashboard-record-modal.dashboard-email-modal .dashboard-email-preview {
+    height: 100%;
+    min-height: 0;
+}
+
+.admin-dashboard-page .dashboard-email-preview iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border: 0;
+    border-radius: 8px;
+    background: #fff;
+}
+
 /* Record detail modal: Bootstrap behavior with the dashboard's graphite skin. */
 .admin-dashboard-page.modal-open {
     overflow: hidden;
@@ -836,4 +1012,9 @@
     .admin-dashboard-page .dashboard-modal-done {
         width: 100%;
     }
+
+    .admin-dashboard-page .customer-email-detail {
+        padding: 12px;
+    }
+
 }

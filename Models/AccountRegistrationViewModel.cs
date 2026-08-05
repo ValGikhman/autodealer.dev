@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Web.Mvc;
 
 namespace autodealer.dev.Models {
+    [Bind(Exclude = "PlanOptions")]
     public class AccountRegistrationViewModel {
         public AccountRegistrationViewModel() {
             PlanOptions = new List<SelectListItem>();
@@ -22,16 +23,20 @@ namespace autodealer.dev.Models {
         public string LastName { get; set; }
 
         [Required, EmailAddress, StringLength(254)]
+        [SanitizeInput(InputSanitizationKind.Email)]
         public string Email { get; set; }
 
-        [Phone, StringLength(32)]
+        [Phone, StringLength(32), RegularExpression(@"^[0-9+().\- xX#]*$", ErrorMessage = "Please enter a valid phone number.")]
+        [SanitizeInput(InputSanitizationKind.Phone)]
         public string Phone { get; set; }
 
         [Required, StringLength(100, MinimumLength = 12)]
         [DataType(DataType.Password)]
+        [PreserveInput]
         public string Password { get; set; }
 
-        [Required]
+        [Required, StringLength(32), RegularExpression(@"^[A-Za-z0-9_-]+$", ErrorMessage = "Please choose a valid plan.")]
+        [SanitizeInput(InputSanitizationKind.Identifier)]
         [Display(Name = "Plan")]
         public string PlanCode { get; set; }
 
@@ -39,6 +44,8 @@ namespace autodealer.dev.Models {
 
         // Set only by a PCI-compliant payment provider's hosted fields/checkout.
         // Raw card number and CVV must never be posted to this application.
+        [StringLength(300), RegularExpression(@"^[A-Za-z0-9._~:+/=\-]*$", ErrorMessage = "The payment token is invalid.")]
+        [SanitizeInput(InputSanitizationKind.Token)]
         public string PaymentMethodToken { get; set; }
 
         [MustBeTrue(ErrorMessage = "Please accept the service terms.")]
@@ -54,14 +61,17 @@ namespace autodealer.dev.Models {
 
     public class AccountLoginViewModel {
         [Required, EmailAddress, StringLength(254)]
+        [SanitizeInput(InputSanitizationKind.Email)]
         public string Email { get; set; }
 
-        [Required, DataType(DataType.Password)]
+        [Required, StringLength(256), DataType(DataType.Password)]
+        [PreserveInput]
         public string Password { get; set; }
 
         [Display(Name = "Keep me signed in")]
         public bool RememberMe { get; set; }
 
+        [StringLength(2048)]
         public string ReturnUrl { get; set; }
     }
 
