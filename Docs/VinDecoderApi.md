@@ -187,7 +187,7 @@ template from a div and renders the returned HTML fragment:
      data-loading-text="Loading vehicle details...">
 </div>
 
-<script src="https://api.autodealer.dev/Scripts/autodealer-vin-report.js"></script>
+<script src="https://autodealer.dev/Scripts/autodealer-vin-report.js"></script>
 ```
 
 The customer can also download this script and serve it with their own
