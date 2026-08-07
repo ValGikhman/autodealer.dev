@@ -22,7 +22,9 @@ namespace autodealer.dev.Models {
         public static DemoQuotaResult Take(string clientIdentity, string vin) {
             var key = "autodealer-vin-demo:" + Hash(clientIdentity ?? "unknown");
             var fresh = new Counter();
-            var existing = Cache.AddOrGetExisting(key, fresh, DateTimeOffset.UtcNow.AddHours(24)) as Counter;
+            var now = DateTimeOffset.UtcNow;
+            var nextUtcDay = new DateTimeOffset(now.UtcDateTime.Date.AddDays(1), TimeSpan.Zero);
+            var existing = Cache.AddOrGetExisting(key, fresh, nextUtcDay) as Counter;
             var counter = existing ?? fresh;
             lock (counter.SyncRoot) {
                 if (counter.Vins.Contains(vin))

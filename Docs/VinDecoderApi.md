@@ -18,6 +18,25 @@ Authorization: Bearer ad_live_KEY_ID.SECRET
 The credential is issued during account creation and is displayed in full only
 once. Keep it in a server-side secret manager, never in browser JavaScript.
 
+### Public demo credential
+
+The only exception is the public demo credential:
+
+```http
+Authorization: Bearer ad_live_demo.keysecret
+```
+
+It is accepted only by the VIN endpoints and does not require a row in
+`ApiKeys`. Each client may decode up to five distinct VINs per UTC day.
+Repeating a VIN already used that day does not consume another slot. Demo
+requests are held in application memory and are not written to `ApiUsageLog` or
+`ApiUsageDaily`.
+
+Every other credential must be an active key in `ApiKeys` with the `vin:read`
+scope. Each accepted registered-key request creates an `ApiUsageLog` row and
+increments the subscription's `ApiUsageDaily` aggregate. Request completion
+records the response status, duration, and error count.
+
 ```http
 GET /api/service/vin/{vin}/html
 Accept: text/html
@@ -182,7 +201,7 @@ template from a div and renders the returned HTML fragment:
 ```html
 <div id="vehicle-report"
      data-autodealer-vin-report
-     data-api-url="/vehicles/vin-report?vin={vin}"
+     data-api-key="ad_live_demo.keysecret"
      data-vin="1HGCM82633A004352"
      data-loading-text="Loading vehicle details...">
 </div>
@@ -193,9 +212,12 @@ template from a div and renders the returned HTML fragment:
 The customer can also download this script and serve it with their own
 versioned site assets.
 
-The literal `{vin}` placeholder is required. The widget validates and
-URL-encodes the VIN, requests `text/html`, handles loading and error states, and
-emits `autodealer:loading`, `autodealer:loaded`, and `autodealer:error` events.
+The widget defaults to `/api/service/vin/{vin}/html`. An optional
+`data-api-url` can provide a different template, which must contain the literal
+`{vin}` placeholder. The widget validates and URL-encodes the VIN, sends the
+`data-api-key` value as a bearer credential, requests `text/html`, handles
+loading and error states, and emits `autodealer:loading`,
+`autodealer:loaded`, and `autodealer:error` events.
 Change a report after the page loads with:
 
 ```javascript
@@ -411,7 +433,10 @@ Errors are returned as JSON and include a `message` property.
 | Status | Meaning |
 | --- | --- |
 | `400 Bad Request` | The VIN is not a valid 17-character VIN. |
+| `401 Unauthorized` | The API key is missing, malformed, invalid, expired, or inactive. |
+| `403 Forbidden` | The registered key does not have the `vin:read` scope. |
 | `404 Not Found` | The endpoint route was not matched. |
+| `429 Too Many Requests` | The registered monthly quota or demo five-VIN daily limit was reached. |
 | `422 Unprocessable Entity` | DataOne returned a decoder error or no matching US style. |
 | `502 Bad Gateway` | DataOne is unavailable or returned an unexpected response. |
 | `500 Internal Server Error` | The VIN decoder service is not configured. |
@@ -430,6 +455,8 @@ The endpoint reads these application settings on the server:
 
 ```xml
 <appSettings>
+  <add key="ApiSecurity:Enabled" value="true" />
+  <add key="DemoApi:Key" value="ad_live_demo.keysecret" />
   <add key="DataOne:AccessKey" value="YOUR_ACCESS_KEY" />
   <add key="DataOne:SecretAccessKey" value="YOUR_SECRET_KEY" />
 </appSettings>
@@ -443,6 +470,9 @@ environment or a protected configuration provider.
 
 - Each endpoint request makes a DataOne decoder request and may count against
   the account's usage allowance.
+- Registered-key responses include `X-Request-Id`, `X-RateLimit-Limit`, and
+  `X-RateLimit-Remaining`. Demo responses include `X-Demo-Limit` and
+  `X-Demo-Remaining`.
 - The endpoint sends `Cache-Control: no-store`; implement a server-side VIN cache
   if repeated decoding should be avoided.
 - Browser calls are same-origin by default. Cross-origin clients require an

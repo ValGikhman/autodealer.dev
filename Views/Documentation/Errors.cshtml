@@ -1,13 +1,13 @@
 @{ ViewBag.Title = "API errors and limits"; }
 <section class="docs-header"><div class="shell"><span class="eyebrow">DOCUMENTATION</span><h1>Errors and limits</h1><p>Consistent JSON authentication errors, endpoint-specific validation, and observable usage headers.</p></div></section>
 <section class="docs-page light-section"><div class="shell docs-layout">@Html.Partial("_DocsNav")<article class="docs-article">
-    <h2>HTTP status codes</h2><div class="status-table full"><div><b>400</b><span>Invalid VIN or malformed request</span></div><div><b>401</b><span>Missing or invalid API key</span></div><div><b>403</b><span>Scope denied</span></div><div><b>422</b><span>The provider could not decode the VIN</span></div><div><b>429</b><span>Monthly request quota reached</span></div><div><b>500</b><span>Service configuration failure</span></div><div><b>502</b><span>Vehicle-data provider unavailable</span></div><div><b>503</b><span>Authentication database unavailable</span></div></div>
+    <h2>HTTP status codes</h2><div class="status-table full"><div><b>400</b><span>Invalid VIN or malformed request</span></div><div><b>401</b><span>Missing or invalid API key</span></div><div><b>403</b><span>Scope denied</span></div><div><b>422</b><span>The provider could not decode the VIN</span></div><div><b>429</b><span>Registered-key monthly quota or demo five-VIN daily limit reached</span></div><div><b>500</b><span>Service configuration failure</span></div><div><b>502</b><span>Vehicle-data provider unavailable</span></div><div><b>503</b><span>Authentication database unavailable</span></div></div>
     <h3>Error envelope</h3><div class="code-block simple"><pre><code>{
   "error": {
     "code": "invalid_api_key",
     "message": "The API key is invalid or inactive."
   }
 }</code></pre></div>
-    <h3>Usage headers</h3><div class="endpoint-list"><div><code>X-Request-Id</code><span>Unique request correlation ID</span></div><div><code>X-RateLimit-Limit</code><span>Plan request allowance</span></div><div><code>X-RateLimit-Remaining</code><span>Requests available in the current period</span></div></div>
-    <h3>Metering behavior</h3><p>Accepted requests are counted atomically before endpoint execution. Completion updates status, latency, and error totals without allowing a telemetry failure to replace the customer response.</p>
+    <h3>Usage headers</h3><div class="endpoint-list"><div><code>X-Request-Id</code><span>Registered request correlation ID</span></div><div><code>X-RateLimit-Limit</code><span>Registered plan request allowance</span></div><div><code>X-RateLimit-Remaining</code><span>Registered requests available in the current period</span></div><div><code>X-Demo-Limit</code><span>Distinct demo VIN allowance: 5</span></div><div><code>X-Demo-Remaining</code><span>Distinct demo VINs remaining for the current UTC day</span></div></div>
+    <h3>Metering behavior</h3><p>Accepted registered-key requests are counted atomically before endpoint execution. Completion updates status, latency, and error totals without allowing a telemetry failure to replace the customer response. Demo requests use only the in-memory daily VIN counter and do not create usage-table rows.</p>
 </article></div></section>

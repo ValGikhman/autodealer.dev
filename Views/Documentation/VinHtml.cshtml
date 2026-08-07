@@ -20,7 +20,7 @@
         @Html.Partial("_DocsNav")
         <article class="docs-article vin-html-docs">
             <h2>Customer implementation</h2>
-            <p>The browser widget reads <code>data-vin</code>, replaces <code>{vin}</code> in <code>data-api-url</code>, requests <code>text/html</code>, and places the trusted API response inside the div.</p>
+            <p>The browser widget reads <code>data-vin</code>, uses <code>/api/service/vin/{vin}/html</code> by default, requests <code>text/html</code>, and places the trusted API response inside the div. Supply <code>data-api-url</code> only to override the endpoint template.</p>
 
             <div class="doc-callout">
                 <b>Keep the production API key server-side</b>
@@ -28,10 +28,10 @@
             </div>
 
             <h3 id="html-markup">1. Add the report div</h3>
-            <p>Use a URL template containing the literal <code>{vin}</code> placeholder. The widget safely URL-encodes the VIN before making the request.</p>
+            <p>The public demo key may be placed in browser markup because it is restricted to five distinct VINs per client per UTC day. The widget safely URL-encodes the VIN before making the request.</p>
             <div class="code-block simple"><pre><code>&lt;div id="vehicle-report"
      data-autodealer-vin-report
-     data-api-url="/vehicles/vin-report?vin={vin}"
+     data-api-key="ad_live_demo.keysecret"
      data-vin="1HGCM82633A004352"
      data-loading-text="Loading vehicle details..."&gt;
 &lt;/div&gt;

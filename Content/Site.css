@@ -2299,6 +2299,142 @@ h1, h2 {
     height: auto
 }
 
+.storefront-rotator {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 9px 9px;
+    background: #090a0b
+}
+
+.storefront-slides {
+    aspect-ratio: 2.04/1
+}
+
+    .storefront-slides img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        animation: storefront-fade .45s ease
+    }
+
+    .storefront-slides img[hidden] {
+        display: none
+    }
+
+@keyframes storefront-fade {
+    from {
+        opacity: .35
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+.storefront-control {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    transform: translateY(-50%);
+    border: 1px solid rgba(255,255,255,.58);
+    border-radius: 50%;
+    color: #fff;
+    background: rgba(9,10,11,.78);
+    box-shadow: 0 4px 14px rgba(0,0,0,.35);
+    cursor: pointer
+}
+
+    .storefront-control span {
+        display: block;
+        width: 11px;
+        height: 11px;
+        border-top: 3px solid currentColor;
+        border-right: 3px solid currentColor
+    }
+
+    .storefront-control:hover, .storefront-control:focus-visible {
+        color: #111;
+        background: #fff;
+        outline: 2px solid #fff;
+        outline-offset: 2px
+    }
+
+.storefront-previous {
+    left: 16px
+}
+
+    .storefront-previous span {
+        transform: translateX(2px) rotate(-135deg)
+    }
+
+.storefront-next {
+    right: 16px
+}
+
+    .storefront-next span {
+        transform: translateX(-2px) rotate(45deg)
+    }
+
+.storefront-indicators {
+    position: absolute;
+    z-index: 2;
+    right: 0;
+    bottom: 14px;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    gap: 8px
+}
+
+    .storefront-indicators button {
+        width: 9px;
+        height: 9px;
+        padding: 0;
+        border: 1px solid rgba(255,255,255,.85);
+        border-radius: 50%;
+        background: rgba(9,10,11,.65);
+        box-shadow: 0 1px 4px rgba(0,0,0,.45);
+        cursor: pointer
+    }
+
+        .storefront-indicators button.active {
+            background: #fff;
+            transform: scale(1.25)
+        }
+
+@media(max-width:600px) {
+    .storefront-control {
+        width: 34px;
+        height: 34px
+    }
+
+        .storefront-control span {
+            width: 9px;
+            height: 9px;
+            border-width: 2px
+        }
+
+    .storefront-previous {
+        left: 8px
+    }
+
+    .storefront-next {
+        right: 8px
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    .storefront-slides img {
+        animation: none
+    }
+}
+
 @media(max-width:760px) {
     .showroom-ad-visual {
         margin-top: 8px
@@ -5647,6 +5783,73 @@ h2, h3 {
     margin-top: 10px
 }
 
+/* Keep the two primary solutions together as a balanced product pair. */
+.solutions-product-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 34px;
+    align-items: stretch
+}
+
+    .solutions-product-grid > article, .solutions-product-grid > article:first-child {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+        border-bottom: 0
+    }
+
+        .solutions-product-grid > article > div {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            align-items: flex-start
+        }
+
+        .solutions-product-grid > article .site-cta {
+            margin-top: auto
+        }
+
+        .light-section .solutions-product-grid .check-list li {
+            display: grid;
+            grid-template-columns: 24px minmax(0,1fr);
+            gap: 10px;
+            align-items: start
+        }
+
+            .light-section .solutions-product-grid .check-list li:before {
+                display: grid;
+                place-items: center;
+                width: 24px;
+                height: 24px;
+                margin: 0;
+                color: #fff;
+                border: 1px solid #163d78;
+                border-radius: 50%;
+                background: #2459a9;
+                box-shadow: 0 3px 9px rgba(25,67,130,.3),inset 0 1px rgba(255,255,255,.32);
+                font-size: 14px;
+                line-height: 1
+            }
+
+        .light-section .solutions-product-grid > article:nth-child(2) .check-list li:before {
+            border-color: #713600;
+            background: #9a4d00;
+            box-shadow: 0 3px 9px rgba(113,54,0,.28),inset 0 1px rgba(255,255,255,.3)
+        }
+
+        .solutions-product-grid .product-visual {
+            width: 100%;
+            min-height: 0
+        }
+
+@media(max-width:820px) {
+    .solutions-product-grid {
+        grid-template-columns: 1fr;
+        gap: 54px
+    }
+}
+
 .site-header .site-nav .site-cta:hover {
     border-color: #707983;
     color: #f4f6f8;
@@ -5664,78 +5867,147 @@ h2, h3 {
 .pricing-plans-grid {
     width: min(1120px,calc(100% - 48px));
     grid-template-columns: repeat(3,minmax(0,1fr));
-    gap: 24px;
+    gap: 22px;
     align-items: stretch
 }
 
     .pricing-plans-grid .price-card {
+        --plan-accent: #5598eb;
+        --plan-accent-soft: rgba(85,152,235,.18);
         min-width: 0;
-        min-height: 510px;
-        padding: 38px 32px;
+        min-height: 430px;
+        padding: 36px 32px 32px;
         display: flex;
         flex-direction: column;
         overflow: visible;
-        border: 1px solid #747b83;
-        border-radius: 18px;
-        background: linear-gradient(155deg,#5c636b,#50575f);
-        box-shadow: 0 22px 48px rgba(20,24,29,.22),inset 0 1px rgba(255,255,255,.07);
-        transition: border-color .2s ease,box-shadow .2s ease
+        isolation: isolate;
+        border: 1px solid rgba(255,255,255,.14);
+        border-radius: 22px;
+        color: #f5f7f9;
+        background: radial-gradient(circle at 100% 0,var(--plan-accent-soft),transparent 36%),linear-gradient(155deg,#2d3339 0%,#181c20 100%);
+        box-shadow: 0 24px 52px rgba(8,11,14,.28),inset 0 1px rgba(255,255,255,.08);
+        transition: transform .25s ease,border-color .25s ease,box-shadow .25s ease
+    }
+
+    .pricing-plans-grid .price-card:nth-child(3n+2) {
+        --plan-accent: #20a58f;
+        --plan-accent-soft: rgba(32,165,143,.17)
+    }
+
+    .pricing-plans-grid .price-card:nth-child(3n+3) {
+        --plan-accent: #d48925;
+        --plan-accent-soft: rgba(212,137,37,.18)
     }
 
         .pricing-plans-grid .price-card:hover {
-            border-color: #9aa2aa;
-            box-shadow: 0 27px 58px rgba(20,24,29,.3),inset 0 1px rgba(255,255,255,.1)
+            z-index: 2;
+            transform: translateY(-7px);
+            border-color: var(--plan-accent);
+            box-shadow: 0 32px 70px rgba(8,11,14,.4),0 0 0 4px var(--plan-accent-soft),inset 0 1px rgba(255,255,255,.1)
         }
 
         .pricing-plans-grid .price-card:after {
             content: "";
             position: absolute;
-            left: 32px;
-            right: 32px;
+            z-index: -1;
+            left: 28px;
+            right: 28px;
             top: 0;
-            height: 3px;
-            border-radius: 0 0 4px 4px;
-            background: #8fc0ff;
-            opacity: .7
-        }
-
-        .pricing-plans-grid .price-card:nth-child(3n+2):after {
-            background: #79e2d2
-        }
-
-        .pricing-plans-grid .price-card:nth-child(3n+3):after {
-            background: #ffd091
+            height: 5px;
+            border-radius: 0 0 8px 8px;
+            background: var(--plan-accent);
+            box-shadow: 0 5px 18px var(--plan-accent-soft)
         }
 
         .pricing-plans-grid .price-card h2 {
-            margin: 24px 0 10px;
-            font-size: 46px;
-            letter-spacing: -2px
+            margin: 46px 0 10px;
+            color: #fff;
+            font-size: clamp(42px,4vw,54px);
+            letter-spacing: -2.8px;
+            line-height: .98
+        }
+
+        .pricing-plans-grid .price-card h2 small {
+            margin-left: 4px;
+            color: #aeb7c0;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0
         }
 
         .pricing-plans-grid .price-card > p {
-            min-height: 72px;
-            margin-bottom: 20px;
-            line-height: 1.65
-        }
-
-        .pricing-plans-grid .price-card > strong {
-            padding: 14px 0;
-            border-top: 1px solid rgba(255,255,255,.1);
+            min-height: 64px;
+            margin: 0 0 22px;
+            color: #b8c0c8;
             font-size: 14px;
-            font-weight: 500
+            line-height: 1.6
         }
 
-        .pricing-plans-grid .price-card ul {
-            min-height: 0;
-            margin: 0 0 28px;
-            padding: 18px 0 0;
-            border-top: 1px solid rgba(255,255,255,.1)
+        .pricing-plans-grid .plan-metrics {
+            margin-bottom: 26px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,.11);
+            border-radius: 12px;
+            background: rgba(255,255,255,.045);
+            box-shadow: inset 0 1px rgba(255,255,255,.055)
+        }
+
+            .pricing-plans-grid .plan-metrics > div {
+                min-width: 0;
+                padding: 17px 16px
+            }
+
+            .pricing-plans-grid .plan-metrics span {
+                display: block;
+                margin-bottom: 7px;
+                overflow: hidden;
+                color: #a6afb8;
+                font-size: 9px;
+                font-weight: 900;
+                letter-spacing: 1.15px;
+                text-overflow: ellipsis;
+                text-transform: uppercase;
+                white-space: nowrap
+            }
+
+            .pricing-plans-grid .plan-metrics strong {
+                display: block;
+                color: #fff;
+                font-size: 22px;
+                font-weight: 850;
+                letter-spacing: -.7px
+            }
+
+        .pricing-plans-grid .price-card .plan-icon {
+            color: var(--plan-accent);
+            border: 1px solid var(--plan-accent-soft);
+            background: var(--plan-accent-soft)
         }
 
         .pricing-plans-grid .price-card .button {
             margin-top: auto;
-            border-radius: 10px
+            min-height: 48px;
+            border-radius: 12px;
+            font-weight: 850;
+            box-shadow: 0 12px 26px rgba(0,0,0,.2)
+        }
+
+        .pricing-plans-grid .price-card .button-outline {
+            color: #f4f6f8;
+            border-color: rgba(255,255,255,.25);
+            background: rgba(255,255,255,.055)
+        }
+
+            .pricing-plans-grid .price-card .button-outline:hover {
+                color: #101418;
+                border-color: var(--plan-accent);
+                background: var(--plan-accent)
+            }
+
+        .pricing-plans-grid .price-card .button-primary {
+            color: #101418;
+            border-color: var(--plan-accent);
+            background: var(--plan-accent)
         }
 
 @media(max-width:980px) {
@@ -5758,20 +6030,26 @@ h2, h3 {
 /* Signed-in customers can identify the plan attached to their subscription. */
 .light-section .price-card.current-plan {
     z-index: 2;
-    border: 2px solid #8fc0ff;
-    background: linear-gradient(145deg,#59636e,#454c54);
-    box-shadow: 0 28px 65px rgba(20,30,44,.34),0 0 0 4px rgba(143,192,255,.11);
-    transform: none
+    border: 2px solid var(--plan-accent);
+    box-shadow: 0 28px 65px rgba(8,11,14,.38),0 0 0 5px var(--plan-accent-soft),inset 0 1px rgba(255,255,255,.1)
 }
 
 .price-card.current-plan .plan-icon {
-    color: #b9d9ff;
-    background: rgba(63,134,238,.18)
+    color: var(--plan-accent);
+    background: var(--plan-accent-soft)
 }
 
 .current-plan-label {
     color: #172131;
     background: #9bc6fb
+}
+
+.pricing-plans-grid .popular-label {
+    padding: 7px 15px;
+    color: #101418;
+    background: var(--plan-accent);
+    box-shadow: 0 8px 20px var(--plan-accent-soft);
+    letter-spacing: 1.25px
 }
 
 .light-section .price-card .current-plan-button {
@@ -5785,10 +6063,16 @@ h2, h3 {
     }
 
 .pricing-plans-grid .price-card.featured-price {
-    border-color: #aeb5bd;
-    background: linear-gradient(155deg,#656d76,#565d65);
-    box-shadow: 0 25px 55px rgba(20,24,29,.3),inset 0 1px rgba(255,255,255,.1);
-    transform: none
+    z-index: 1;
+    border-color: var(--plan-accent);
+    box-shadow: 0 28px 58px rgba(8,11,14,.38),0 0 0 4px var(--plan-accent-soft),inset 0 1px rgba(255,255,255,.1);
+    transform: translateY(-8px)
+}
+
+@media(max-width:760px) {
+    .pricing-plans-grid .price-card.featured-price {
+        transform: none
+    }
 }
 
 .pricing-plans-grid .plan-name {
@@ -5799,13 +6083,13 @@ h2, h3 {
     align-self: flex-start;
     gap: 8px;
     border: 1px solid rgba(255,255,255,.14);
-    border-radius: 7px;
-    color: #f0f2f4;
-    background: rgba(20,24,29,.13);
-    box-shadow: inset 0 1px rgba(255,255,255,.06);
-    font-size: 16px;
-    font-weight: 500;
-    letter-spacing: .55px;
+    border-radius: 999px;
+    color: #eef2f5;
+    background: rgba(255,255,255,.075);
+    box-shadow: inset 0 1px rgba(255,255,255,.08);
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: 1px;
     line-height: 1
 }
 
@@ -5815,50 +6099,24 @@ h2, h3 {
         height: 6px;
         flex: 0 0 6px;
         border-radius: 50%;
-        background: #8fc0ff;
-        box-shadow: 0 0 0 3px rgba(143,192,255,.12)
+        background: var(--plan-accent);
+        box-shadow: 0 0 0 3px var(--plan-accent-soft)
     }
 
-.pricing-plans-grid .price-card:nth-child(3n+2) .plan-name:before {
-    background: #79e2d2;
-    box-shadow: 0 0 0 3px rgba(121,226,210,.12)
-}
-
-.pricing-plans-grid .price-card:nth-child(3n+3) .plan-name:before {
-    background: #ffd091;
-    box-shadow: 0 0 0 3px rgba(255,208,145,.12)
-}
-
-/* Pricing cards share the silver surface treatment. */
+/* Keep pricing text legible if later light-section rules are extended. */
 .pricing-section.light-section .pricing-plans-grid .price-card, .pricing-section.light-section .pricing-plans-grid .price-card.featured-price, .pricing-section.light-section .pricing-plans-grid .price-card.current-plan {
-    color: #111518;
-    border-color: #aeb4ba;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
-    box-shadow: 0 18px 44px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.32)
+    color: #f5f7f9;
+    background: radial-gradient(circle at 100% 0,var(--plan-accent-soft),transparent 36%),linear-gradient(155deg,#2d3339 0%,#181c20 100%)
 }
 
-.pricing-section .pricing-plans-grid .price-card h2, .pricing-section .pricing-plans-grid .price-card > strong {
-    color: #111518
-}
-
-    .pricing-section .pricing-plans-grid .price-card h2 small, .pricing-section .pricing-plans-grid .price-card > p, .pricing-section .pricing-plans-grid .price-card li {
-        color: #293037
-    }
-
-.pricing-section .pricing-plans-grid .price-card > strong, .pricing-section .pricing-plans-grid .price-card ul {
-    border-color: rgba(31,37,42,.2)
+.pricing-section .pricing-plans-grid .price-card h2 {
+    color: #fff
 }
 
 .pricing-section .pricing-plans-grid .plan-name {
-    color: #f0f2f4;
+    color: #eef2f5;
     border-color: rgba(255,255,255,.14);
-    background: rgba(20,24,29,.13);
-    box-shadow: inset 0 1px rgba(255,255,255,.06)
-}
-
-.pricing-section .pricing-plans-grid .price-card .button-outline {
-    color: #171c20;
-    border-color: #4f575f
+    background: rgba(255,255,255,.075)
 }
 
 /* One silver eyebrow treatment across the site. */
@@ -5878,7 +6136,7 @@ h2, h3 {
     font-weight: 700
 }
 
-    .check-list li:before, .light-section .check-list li:before, .pricing-section.light-section .pricing-plans-grid .price-card .check-list li:before {
+    .check-list li:before, .light-section .check-list li:before {
         color: #17633a;
         font-weight: 900
     }
