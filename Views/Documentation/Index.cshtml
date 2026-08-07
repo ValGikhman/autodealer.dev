@@ -4,7 +4,7 @@
     @Html.Partial("_DocsNav")
     <article class="docs-article">
         <h2>Your first API request</h2><p>Create an account, copy the credential shown once, and place it in a server-side environment variable or secrets manager.</p>
-        <div class="doc-callout"><b>Keep credentials private</b><p>Never embed the API key in browser JavaScript, a public mobile bundle, or source control.</p></div>
+        <div class="doc-callout"><b>Keep registered credentials private</b><p>Never embed a registered customer API key in browser JavaScript, a public mobile bundle, or source control. The documented <code>ad_live_demo.keysecret</code> credential is the public, rate-limited exception.</p></div>
         <h3>Decode a vehicle</h3><p>Send a valid 17-character VIN and your bearer credential. VINs are normalized to uppercase and cannot contain I, O, or Q.</p>
         <div class="code-block" id="decode-code-samples"><div class="code-tabs"><button class="active" data-tab="curl">cURL</button><button data-tab="javascript">jQuery</button><button data-tab="csharp">C#</button><button class="copy" data-copy="#decode-code-samples pre:visible">Copy</button></div>
             <pre data-code="curl"><code>curl --request GET "https://api.autodealer.dev/api/service/vin/1HGCM82633A004352/json" 
@@ -27,7 +27,7 @@ var result = await client.GetStringAsync(
             <div class="code-tabs"><button class="active" type="button" data-html-widget-tab="source">HTML</button><button type="button" data-html-widget-tab="render">Render</button><button class="copy" data-copy="#html-widget-code">Copy</button></div>
             <pre data-html-widget-panel="source"><code id="html-widget-code">&lt;div id="vehicle-report"
      data-autodealer-vin-report
-     data-api-url="/vehicles/vin-report?vin={vin}"
+     data-api-key="ad_live_demo.keysecret"
      data-vin="1HGCM82633A004352"
      data-loading-text="Loading vehicle details..."&gt;
 &lt;/div&gt;

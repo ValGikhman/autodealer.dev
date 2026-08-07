@@ -1,9 +1,73 @@
 @{ ViewBag.Title = "Dealer Website"; }
-<section class="page-hero product-hero digital-showroom-hero"><div class="shell two-col"><div><span class="eyebrow">DEALER WEBSITE</span><h1>Your digital showroom, ready to sell.</h1><p>A complete dealership website powered by live inventory and designed around the actions that create real opportunities: search, finance, contact, and schedule.</p><div class="button-row"><a class="button site-cta" href="@Url.Action("RequestDemo", "Solutions")"><span>Request a dealer demo</span><i aria-hidden="true">&rarr;</i></a></div></div><figure class="showroom-ad-visual"><img src="@Url.Content("~/Content/images/vtec-dealer-showroom-ad-v2.png")" alt="V-TEC Solution dealer inventory website presented on desktop and mobile devices" /></figure></div></section>
+<section class="page-hero product-hero digital-showroom-hero"><div class="shell two-col"><div><span class="eyebrow">DEALER WEBSITE</span><h1>Your digital showroom, ready to sell.</h1><p>A complete dealership website powered by live inventory and designed around the actions that create real opportunities: search, finance, contact, and schedule.</p><div class="button-row"><a class="button site-cta" href="@Url.Action("RequestDemo", "Solutions")"><span>Request a dealer demo</span><i aria-hidden="true">&rarr;</i></a><a class="button site-cta" href="https://demo.autodealer.dev" target="_blank" rel="noopener"><span>Live demo</span><i aria-hidden="true">&rarr;</i></a></div></div><figure class="showroom-ad-visual"><img src="@Url.Content("~/Content/images/vtec-dealer-showroom-ad-v2.png")" alt="V-TEC Solution dealer inventory website presented on desktop and mobile devices" /></figure></div></section>
 
 <section class="section light-section storefront-section"><div class="shell"><div class="section-heading"><span class="eyebrow dark">LIVE CUSTOMER EXAMPLE</span><h2>A real dealership. A real selling experience.</h2><p>V-TEC Solution demonstrates the complete storefront in production: 252 vehicles, precise filters, transparent pricing, financing, contact, and test-drive conversion.</p></div>
     <figure class="live-storefront-capture">
-        <div class="capture-browser"><span><i></i><i></i><i></i></span><b>V-TEC Solution / Inventory</b><a href="https://usedcarscincinnati.com/Inventory/All" target="_blank" rel="noopener">View live site &rarr;</a></div>
-        <img src="@Url.Content("~/Content/images/vtec-storefront-reference-v2.png")" alt="V-TEC Solution inventory website with colorful vehicle cards, filters, and transparent pricing" />
+        <div class="capture-browser"><span><i></i><i></i><i></i></span><b>V-TEC Solution / Inventory</b><a href="https://demo.autodealer.dev" target="_blank" rel="noopener">View live site &rarr;</a></div>
+        <div class="storefront-rotator" data-storefront-rotator role="group" aria-roledescription="carousel" aria-label="Dealer storefront and inventory examples">
+            <div class="storefront-slides" aria-live="off">
+                <img class="active" data-storefront-slide src="@Url.Content("~/Content/images/storefront/vtec-storefront-reference.png")" alt="Responsive dealership inventory search with vehicle filters and pricing" />
+                <img data-storefront-slide src="@Url.Content("~/Content/images/storefront/vtec-storefront-reference-1.png")" alt="Dealership vehicle details and customer conversion actions" hidden />
+                <img data-storefront-slide src="@Url.Content("~/Content/images/storefront/vtec-storefront-reference-2.png")" alt="Vehicle detail page with transparent price, gallery, and lead actions" hidden />
+                <img data-storefront-slide src="@Url.Content("~/Content/images/storefront/vtec-storefront-reference-3.png")" alt="Dealer inventory intelligence dashboard and vehicle status reporting" hidden />
+                <img data-storefront-slide src="@Url.Content("~/Content/images/storefront/vtec-storefront-reference-4.png")" alt="Dealer inventory import history and reconciliation tools" hidden />
+            </div>
+            <button class="storefront-control storefront-previous" type="button" data-storefront-previous aria-label="Show previous storefront image"><span aria-hidden="true"></span></button>
+            <button class="storefront-control storefront-next" type="button" data-storefront-next aria-label="Show next storefront image"><span aria-hidden="true"></span></button>
+            <div class="storefront-indicators" aria-label="Choose a storefront image">
+                <button class="active" type="button" data-storefront-go="0" aria-label="Show storefront image 1 of 5" aria-current="true"></button>
+                <button type="button" data-storefront-go="1" aria-label="Show storefront image 2 of 5"></button>
+                <button type="button" data-storefront-go="2" aria-label="Show storefront image 3 of 5"></button>
+                <button type="button" data-storefront-go="3" aria-label="Show storefront image 4 of 5"></button>
+                <button type="button" data-storefront-go="4" aria-label="Show storefront image 5 of 5"></button>
+            </div>
+        </div>
     </figure>
 </div></section>
+
+@section scripts {
+<script>
+    (function () {
+        var rotator = document.querySelector('[data-storefront-rotator]');
+        if (!rotator) return;
+
+        var slides = Array.prototype.slice.call(rotator.querySelectorAll('[data-storefront-slide]'));
+        var indicators = Array.prototype.slice.call(rotator.querySelectorAll('[data-storefront-go]'));
+        var current = 0;
+        var timer;
+
+        function show(index) {
+            current = (index + slides.length) % slides.length;
+            slides.forEach(function (slide, slideIndex) {
+                var active = slideIndex === current;
+                slide.hidden = !active;
+                slide.classList.toggle('active', active);
+            });
+            indicators.forEach(function (indicator, indicatorIndex) {
+                var active = indicatorIndex === current;
+                indicator.classList.toggle('active', active);
+                if (active) indicator.setAttribute('aria-current', 'true');
+                else indicator.removeAttribute('aria-current');
+            });
+        }
+
+        function stop() { window.clearInterval(timer); }
+        function start() {
+            stop();
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+                timer = window.setInterval(function () { show(current + 1); }, 4500);
+        }
+
+        rotator.querySelector('[data-storefront-previous]').addEventListener('click', function () { show(current - 1); start(); });
+        rotator.querySelector('[data-storefront-next]').addEventListener('click', function () { show(current + 1); start(); });
+        indicators.forEach(function (indicator) {
+            indicator.addEventListener('click', function () { show(parseInt(this.getAttribute('data-storefront-go'), 10)); start(); });
+        });
+        rotator.addEventListener('mouseenter', stop);
+        rotator.addEventListener('mouseleave', start);
+        rotator.addEventListener('focusin', stop);
+        rotator.addEventListener('focusout', start);
+        start();
+    }());
+</script>
+}

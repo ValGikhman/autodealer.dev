@@ -56,13 +56,12 @@
                         <h2>Custom</h2>
                     }
                     <p>@plan.DisplayName access for automotive applications and dealership teams.</p>
-                    <strong>@plan.MonthlyRequestQuota.ToString("N0") requests monthly</strong>
-                    <ul class="check-list">
-                        <li>@(plan.MaxApiKeys == 1 ? "1 secure API key" : plan.MaxApiKeys.ToString("N0") + " secure API keys")</li>
-                        <li>VIN Decode API</li>
-                        <li>JSON, XML, and HTML</li>
-                        <li>Usage visibility</li>
-                    </ul>
+                    <div class="plan-metrics">
+                        <div>
+                            <span>Monthly requests</span>
+                            <strong>@plan.MonthlyRequestQuota.ToString("N0")</strong>
+                        </div>
+                    </div>
                     @if (plan.IsCurrentPlan) {
                         <a class="button button-primary current-plan-button" href="@Url.Action("Dashboard", "Account")"><span aria-hidden="true">&#10003;</span> Current plan</a>
                     } else {

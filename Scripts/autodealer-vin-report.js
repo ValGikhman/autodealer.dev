@@ -2,6 +2,7 @@
     'use strict';
 
     var selector = '[data-autodealer-vin-report]';
+    var defaultApiUrl = '/api/service/vin/{vin}/html';
     var vinPattern = /^[A-HJ-NPR-Z0-9]{17}$/;
 
     function messageFromResponse(response, body) {
@@ -14,8 +15,7 @@
     }
 
     function reportUrl(element, vin) {
-        var template = (element.getAttribute('data-api-url') || '').trim();
-        if (!template) throw new Error('A data-api-url value is required.');
+        var template = (element.getAttribute('data-api-url') || defaultApiUrl).trim();
         if (template.indexOf('{vin}') === -1) throw new Error('data-api-url must contain the {vin} placeholder.');
         return template.replace(/\{vin\}/g, encodeURIComponent(vin));
     }
