@@ -7,10 +7,13 @@
         <p>Sign in to review active customers, subscriptions, and API access across the platform.</p>
     </div></div></section>
 <section class="section light-section account-content-section"><div class="shell account-form-shell">
-    <div class="form-card login-card">
-        <span class="form-step">ADMIN SIGN IN</span>
-        <h2>Open the control room</h2>
-        @using (Html.BeginForm("Login", "Admin", FormMethod.Post, new { @class = "account-form", autocomplete = "on" })) {
+    <div class="form-card login-card dashboard-style-form">
+        <div class="dashboard-style-form-header">
+            <span class="form-step">ADMIN SIGN IN</span>
+            <h2>Open the control room</h2>
+            <p>Authenticate with your administrator credentials.</p>
+        </div>
+        @using (Html.BeginForm("Login", "Admin", FormMethod.Post, new { @class = "account-form dashboard-style-form-body", autocomplete = "on" })) {
             @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.ReturnUrl)
             @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
@@ -25,8 +28,7 @@
                 @Html.ValidationMessageFor(m => m.Password)
             </div>
             <label class="check-field remember-field">@Html.CheckBoxFor(m => m.RememberMe)<span>Keep me signed in on this device</span></label>
-            <button class="button button-primary submit-button" type="submit">Sign in as administrator</button>
-            <small class="form-secure">Role-protected session &middot; Password verified using PBKDF2</small>
+            <div class="dashboard-style-form-footer"><small class="form-secure">Role-protected session &middot; Password verified using PBKDF2</small><button class="button button-primary submit-button" type="submit">Sign in as administrator</button></div>
         }
     </div>
 </div></section>

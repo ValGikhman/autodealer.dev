@@ -1,0 +1,133 @@
+<section class="dashboard-subgrid-editor" id="dashboard-subgrid-editor" hidden>
+    <form id="dashboard-subgrid-edit-form" data-account-validation="true" data-email-check-url="@Url.Action("CheckClientEmailAvailability", "Admin")" data-email-exclude-source="#subgrid-edit-id" novalidate>
+        <input type="hidden" id="subgrid-edit-id" />
+
+        <div class="dashboard-subgrid-edit-fields" id="client-edit-fields" hidden>
+            <div class="dashboard-edit-field dashboard-edit-field-readonly dashboard-client-reference-field">
+                <label for="edit-client-number">Client number</label>
+                <input id="edit-client-number" type="text" readonly />
+            </div>
+            <div class="dashboard-edit-field dashboard-edit-field-readonly dashboard-client-reference-field">
+                <label for="edit-client-created">Created</label>
+                <input id="edit-client-created" type="text" readonly />
+            </div>
+            <div class="dashboard-edit-field dashboard-edit-field-wide dashboard-client-business-field">
+                <label for="edit-client-business">Business name</label>
+                <input id="edit-client-business" name="BusinessName" type="text" maxlength="160" required autocomplete="organization" />
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-client-first-name">First name</label>
+                <input id="edit-client-first-name" name="FirstName" type="text" maxlength="80" required autocomplete="given-name" />
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-client-last-name">Last name</label>
+                <input id="edit-client-last-name" name="LastName" type="text" maxlength="80" required autocomplete="family-name" />
+            </div>
+            <div class="dashboard-edit-field dashboard-client-email-field">
+                <label for="edit-client-email">Account email</label>
+                <input id="edit-client-email" name="Email" type="email" maxlength="254" required autocomplete="email" data-email-availability="true" />
+                <small class="email-availability-status" data-email-availability-status aria-live="polite">Email availability will be checked here.</small>
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-client-phone">Phone</label>
+                <input id="edit-client-phone" name="Phone" type="tel" maxlength="32" autocomplete="tel" />
+            </div>
+            <div class="dashboard-edit-field client-edit-only">
+                <label for="edit-client-status">Account status</label>
+                <select id="edit-client-status" name="Status" required></select>
+            </div>
+            <div class="dashboard-edit-field client-edit-only">
+                <label for="edit-client-email-verified">Email verified <span>UTC — optional</span></label>
+                <input id="edit-client-email-verified" name="EmailVerifiedUtc" type="datetime-local" />
+            </div>
+        </div>
+
+        <div class="dashboard-subgrid-edit-fields dashboard-password-fields" id="client-create-fields" hidden>
+            <div class="dashboard-edit-field">
+                <label for="create-client-plan">Starting plan</label>
+                <select id="create-client-plan" name="PlanCode" required></select>
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="create-client-password">Temporary password</label>
+                <input id="create-client-password" name="TemporaryPassword" type="text" minlength="12" maxlength="100" required autocomplete="new-password" data-password-primary="true" />
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="create-client-confirm-password">Confirm temporary password</label>
+                <input id="create-client-confirm-password" name="ConfirmTemporaryPassword" type="text" minlength="12" maxlength="100" required autocomplete="new-password" data-password-confirmation="true" />
+                <small class="password-confirmation-status" data-password-confirmation-status aria-live="polite">Re-enter the password to confirm it.</small>
+            </div>
+            <div class="dashboard-edit-field dashboard-edit-field-wide">
+                <div class="password-policy-panel" data-password-policy-panel>
+                    <div class="password-policy-heading"><span>Secure temporary password</span><small data-password-policy-count aria-live="polite">0 of 6 rules met</small></div>
+                    <ul class="password-policy-checklist" data-password-policy aria-label="Password requirements"><li data-password-rule="length">12–100 characters</li><li data-password-rule="lower">Lowercase letter</li><li data-password-rule="upper">Uppercase letter</li><li data-password-rule="number">Number</li><li data-password-rule="symbol">Symbol</li><li data-password-rule="spaces">No spaces</li></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-subgrid-edit-fields" id="api-key-edit-fields">
+            <div class="dashboard-edit-field dashboard-edit-field-readonly">
+                <label for="edit-api-key-prefix">Key prefix</label>
+                <input id="edit-api-key-prefix" type="text" readonly />
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-api-key-name">Name</label>
+                <input id="edit-api-key-name" name="Name" type="text" maxlength="80" required autocomplete="off" />
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-api-key-status">Status</label>
+                <select id="edit-api-key-status" name="Status" required></select>
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-api-key-scope">Scope</label>
+                <select id="edit-api-key-scope" name="Scopes" required></select>
+            </div>
+            <div class="dashboard-edit-field dashboard-edit-field-wide">
+                <label for="edit-api-key-subscription">Subscription</label>
+                <select id="edit-api-key-subscription" name="SubscriptionId" required></select>
+            </div>
+            <div class="dashboard-edit-field dashboard-edit-field-wide">
+                <label for="edit-api-key-expires">Expires <span>UTC — optional</span></label>
+                <input id="edit-api-key-expires" name="ExpiresUtc" type="datetime-local" />
+            </div>
+        </div>
+
+        <div class="dashboard-subgrid-edit-fields" id="subscription-edit-fields" hidden>
+            <div class="dashboard-edit-field">
+                <label for="edit-subscription-plan">Plan</label>
+                <select id="edit-subscription-plan" name="PlanId" required></select>
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-subscription-status">Status</label>
+                <select id="edit-subscription-status" name="Status" required></select>
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-subscription-start">Period starts <span>UTC</span></label>
+                <input id="edit-subscription-start" name="CurrentPeriodStartUtc" type="datetime-local" required />
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-subscription-end">Period ends <span>UTC</span></label>
+                <input id="edit-subscription-end" name="CurrentPeriodEndUtc" type="datetime-local" required />
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-subscription-cancel">Cancel at period end</label>
+                <select id="edit-subscription-cancel" name="CancelAtPeriodEnd"><option value="false">No</option><option value="true">Yes</option></select>
+            </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-subscription-provider">Provider subscription ID</label>
+                <input id="edit-subscription-provider" name="ProviderSubscriptionId" type="text" maxlength="200" autocomplete="off" />
+            </div>
+        </div>
+
+        <div class="dashboard-subgrid-edit-error" id="dashboard-subgrid-edit-error" role="alert" hidden></div>
+        <div class="dashboard-client-create-result" id="dashboard-client-create-result" hidden>
+            <strong id="dashboard-client-create-message"></strong>
+            <div><span>Client number</span><code id="created-client-number"></code><button type="button" data-copy-target="created-client-number">Copy</button></div>
+            <div><span>Temporary password</span><code id="created-client-password"></code><button type="button" data-copy-target="created-client-password">Copy</button></div>
+            <div><span>Primary API key</span><code id="created-client-api-key"></code><button type="button" data-copy-target="created-client-api-key">Copy</button></div>
+        </div>
+        <div class="dashboard-subgrid-edit-actions">
+            <span id="dashboard-subgrid-edit-note">Double-check the values before saving.</span>
+            <div><button type="button" class="dashboard-modal-done" id="dashboard-subgrid-edit-cancel" data-bs-dismiss="modal">Cancel</button><button type="submit" class="customer-api-issue" id="dashboard-subgrid-edit-save">Save changes</button></div>
+        </div>
+    </form>
+</section>

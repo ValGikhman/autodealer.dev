@@ -13,6 +13,7 @@ namespace autodealer.dev.Services {
         private static readonly IDictionary<EmailTemplateName, string> TemplateFiles =
             new Dictionary<EmailTemplateName, string> {
                 { EmailTemplateName.ApiCredentials, "api-credentials.html" },
+                { EmailTemplateName.AdditionalApiKey, "additional-api-key.html" },
                 { EmailTemplateName.NewApiAccount, "new-api-account.html" },
                 { EmailTemplateName.DealerDemoOwnerNotification, "dealer-demo-owner.html" },
                 { EmailTemplateName.DealerDemoCustomerConfirmation, "dealer-demo-confirmation.html" },

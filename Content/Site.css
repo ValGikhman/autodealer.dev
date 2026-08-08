@@ -152,9 +152,9 @@ h1, h2 {
 
 .site-header {
     height: 76px;
-    position: absolute;
-    inset: 0 0 auto;
-    z-index: 20;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     border-bottom: 1px solid rgba(255,255,255,.1)
 }
 
@@ -4227,6 +4227,63 @@ body:not(.home-page):not(.account-page) {
         color: #7d8998
     }
 
+    .dashboard-section .dashboard-grid article.payment-required-card {
+        border: 2px solid #d52f2f;
+        background: linear-gradient(145deg,#fff5f5,#ffe2e2);
+        box-shadow: 0 16px 38px rgba(166,28,28,.2),0 0 0 4px rgba(213,47,47,.08)
+    }
+
+        .dashboard-section .dashboard-grid article.payment-required-card > span:not(.metric-icon),
+        .dashboard-section .dashboard-grid article.payment-required-card small {
+            color: #982727
+        }
+
+        .dashboard-section .dashboard-grid article.payment-required-card strong {
+            margin-top: 28px;
+            color: #7c1717
+        }
+
+        .dashboard-section .dashboard-grid article.payment-required-card .metric-icon {
+            color: #b42323;
+            background: rgba(180,35,35,.13)
+        }
+
+    .dashboard-section .status-badge.payment-required-status {
+        color: #8f2020;
+        border-color: #e2a0a0;
+        background: #fff0f0
+    }
+
+.payment-information-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    margin-top: 16px;
+    padding: 9px 14px;
+    border: 1px solid #7e1717;
+    border-radius: 7px;
+    color: #fff;
+    background: linear-gradient(180deg,#bd3030,#991f1f);
+    box-shadow: 0 7px 16px rgba(126,23,23,.22);
+    cursor: pointer;
+    font: 600 12px var(--sans);
+    text-decoration: none
+}
+
+    .payment-information-button:hover,
+    .payment-information-button:focus-visible {
+        color: #fff;
+        background: linear-gradient(180deg,#a92424,#7e1717);
+        outline: 2px solid rgba(165,35,35,.25);
+        outline-offset: 2px
+    }
+
+    .payment-information-button:disabled {
+        opacity: .72;
+        cursor: not-allowed
+    }
+
     .dashboard-section .dashboard-footer {
         border-color: var(--light-line);
         background: #fff
@@ -7106,3 +7163,489 @@ body .form-card .button.button-primary.submit-button {
     .hero-proof span:before, .home-page .hero-proof span:before {
         color: #20262b
     }
+
+/* Shared live account-credential validation. */
+.password-form-row {
+    margin-bottom: 0
+}
+
+.password-policy-panel {
+    position: relative;
+    margin: 0 0 16px;
+    padding: 11px 12px 12px;
+    overflow: hidden;
+    border: 1px solid #c4cbd1;
+    border-radius: 11px;
+    color: #4e5963;
+    background: linear-gradient(145deg,rgba(255,255,255,.72),rgba(232,236,239,.58));
+    box-shadow: inset 0 1px rgba(255,255,255,.8),0 6px 16px rgba(44,52,58,.07);
+    transition: border-color .2s ease,box-shadow .2s ease
+}
+
+.password-policy-panel:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(90deg,#9ca5ad,#d9dde0 48%,#9ca5ad);
+    opacity: .72
+}
+
+.password-policy-panel.is-active {
+    border-color: #9aa4ad;
+    box-shadow: inset 0 1px rgba(255,255,255,.8),0 7px 18px rgba(44,52,58,.1)
+}
+
+.password-policy-panel.is-complete {
+    border-color: #5b9c75;
+    background: linear-gradient(145deg,rgba(240,250,244,.88),rgba(220,239,228,.65))
+}
+
+.password-policy-panel.is-complete:after {
+    background: linear-gradient(90deg,#4b976a,#87c39f 50%,#4b976a);
+    opacity: 1
+}
+
+.password-policy-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 9px
+}
+
+.password-policy-heading span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #303840;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .02em
+}
+
+.password-policy-heading span:before {
+    content: "\2713";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #aab2b9;
+    border-radius: 7px 7px 9px 9px;
+    color: #69747d;
+    background: rgba(255,255,255,.55);
+    font-size: 11px;
+    box-shadow: inset 0 1px rgba(255,255,255,.75)
+}
+
+.password-policy-panel.is-complete .password-policy-heading span:before {
+    border-color: #38835a;
+    color: #fff;
+    background: #38835a
+}
+
+.password-policy-heading small {
+    color: #6b7680;
+    font: 700 10px/1.2 var(--mono);
+    letter-spacing: .035em
+}
+
+.password-policy-panel.is-complete .password-policy-heading small {
+    color: #267148
+}
+
+.password-policy-checklist {
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none
+}
+
+.password-policy-checklist li {
+    position: relative;
+    min-height: 29px;
+    padding: 6px 7px 6px 29px;
+    border: 1px solid rgba(137,147,156,.35);
+    border-radius: 7px;
+    color: #616c75;
+    background: rgba(255,255,255,.32);
+    font-size: 11px;
+    font-weight: 650;
+    line-height: 1.35;
+    transition: color .16s ease,border-color .16s ease,background .16s ease
+}
+
+.password-policy-checklist li:before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #a7b0b8;
+    border-radius: 50%;
+    color: #fff;
+    background: rgba(255,255,255,.4);
+    font-weight: 900;
+    line-height: 12px;
+    text-align: center;
+    transform: translateY(-50%)
+}
+
+.password-policy-checklist li.is-valid {
+    border-color: rgba(41,143,84,.38);
+    color: #176c3c;
+    background: rgba(70,170,111,.11)
+}
+
+.password-policy-checklist li.is-valid:before {
+    content: "\2713";
+    border-color: #298f54;
+    color: #fff;
+    background: #298f54;
+    font-size: 9px
+}
+
+.password-policy-checklist li.is-invalid {
+    border-color: rgba(174,57,67,.3);
+    color: #91303a;
+    background: rgba(192,62,73,.08)
+}
+
+.password-policy-checklist li.is-invalid:before {
+    content: "\00d7";
+    border-color: #b43b46;
+    color: #fff;
+    background: #b43b46;
+    font-size: 12px;
+    line-height: 11px
+}
+
+.email-availability-status,
+.password-confirmation-status {
+    display: block;
+    min-height: 17px;
+    margin-top: 4px;
+    color: #697681;
+    font-size: 11px;
+    line-height: 1.4
+}
+
+.email-availability-status.is-valid,
+.password-confirmation-status.is-valid {
+    color: #16723d
+}
+
+.email-availability-status.is-valid:before,
+.password-confirmation-status.is-valid:before {
+    content: "\2713\00a0";
+    font-weight: 900
+}
+
+.email-availability-status.is-invalid,
+.password-confirmation-status.is-invalid {
+    color: #a12f37
+}
+
+.email-availability-status.is-invalid:before,
+.password-confirmation-status.is-invalid:before {
+    content: "\00d7\00a0";
+    font-size: 14px;
+    font-weight: 900
+}
+
+.email-availability-status.is-checking:before {
+    content: "\2026\00a0";
+    font-weight: 900
+}
+
+input.availability-valid {
+    border-color: #29975a !important
+}
+
+input.availability-invalid {
+    border-color: #c33e48 !important
+}
+
+@media (max-width:760px) {
+    .password-policy-checklist {
+        grid-template-columns: repeat(2,minmax(0,1fr))
+    }
+}
+
+/* Public account and dealer-demo forms share the administrative modal skin. */
+.account-content-section .dashboard-style-form.form-card {
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #858c93;
+    border-radius: 16px;
+    color: #edf0f2;
+    background: #484e56;
+    box-shadow: 0 34px 90px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.06)
+}
+
+.dashboard-style-form-header {
+    position: relative;
+    padding: 18px 24px 16px;
+    border-bottom: 1px solid #697078;
+    color: #edf0f2;
+    background: linear-gradient(130deg,#596068,#41474f)
+}
+
+.dashboard-style-form-header:after {
+    content: "";
+    position: absolute;
+    right: 12%;
+    bottom: 0;
+    width: 220px;
+    height: 1px;
+    background: linear-gradient(90deg,transparent,#d8dce0,transparent)
+}
+
+.account-content-section .dashboard-style-form-header .form-step {
+    display: block;
+    color: #bac1c7;
+    font: 10px/1.4 var(--mono);
+    letter-spacing: .14em
+}
+
+.account-content-section .dashboard-style-form-header h2 {
+    margin: 5px 0 3px;
+    color: #fff;
+    font-size: 28px;
+    line-height: 1.15
+}
+
+.account-content-section .dashboard-style-form-header p {
+    margin: 0;
+    color: #c5cbd0;
+    font-size: 14px
+}
+
+.dashboard-style-form-body {
+    margin: 0;
+    padding: 16px 24px 0;
+    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%)
+}
+
+.dashboard-style-form .form-row {
+    gap: 14px
+}
+
+.dashboard-style-form .form-field {
+    margin-top: 14px
+}
+
+.account-content-section .dashboard-style-form .form-field label,
+.account-content-section .dashboard-style-form .check-field {
+    display: block;
+    margin-bottom: 6px;
+    color: #30363b;
+    font: 600 12px/1.3 var(--sans)
+}
+
+.account-content-section .dashboard-style-form .form-field input,
+.account-content-section .dashboard-style-form .form-field select,
+.account-content-section .dashboard-style-form .form-field textarea {
+    width: 100%;
+    max-width: none;
+    border: 1px solid #656c73;
+    border-radius: 8px;
+    color: #f4f6f7;
+    background: #4d545b;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.22);
+    font: 14px/1.4 var(--sans)
+}
+
+.account-content-section .dashboard-style-form .form-field input,
+.account-content-section .dashboard-style-form .form-field select {
+    min-height: 43px;
+    padding: 9px 12px
+}
+
+.account-content-section .dashboard-style-form .form-field textarea {
+    min-height: 96px;
+    padding: 10px 12px;
+    resize: vertical
+}
+
+.account-content-section .dashboard-style-form .form-field input::placeholder,
+.account-content-section .dashboard-style-form .form-field textarea::placeholder {
+    color: #b6bdc3;
+    opacity: .72
+}
+
+.account-content-section .dashboard-style-form .form-field select option {
+    color: #f4f6f7;
+    background: #4d545b
+}
+
+.account-content-section .dashboard-style-form .form-field input:focus,
+.account-content-section .dashboard-style-form .form-field select:focus,
+.account-content-section .dashboard-style-form .form-field textarea:focus {
+    border-color: #d4d8dc;
+    outline: 2px solid rgba(255,255,255,.24);
+    outline-offset: 1px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.22)
+}
+
+.account-content-section .dashboard-style-form .form-field input:-webkit-autofill,
+.account-content-section .dashboard-style-form .form-field input:-webkit-autofill:hover,
+.account-content-section .dashboard-style-form .form-field input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f4f6f7;
+    -webkit-box-shadow: 0 0 0 1000px #4d545b inset;
+    caret-color: #f4f6f7
+}
+
+.dashboard-style-form .password-policy-checklist {
+    color: #343a40
+}
+
+.dashboard-style-form .password-policy-panel {
+    border-color: #7a8289;
+    background: linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.09));
+    box-shadow: inset 0 1px rgba(255,255,255,.2),0 7px 18px rgba(0,0,0,.11)
+}
+
+.dashboard-style-form .password-policy-heading span,
+.dashboard-style-form .password-policy-heading small,
+.dashboard-style-form .password-policy-checklist li {
+    color: #343a40
+}
+
+.dashboard-style-form .password-policy-panel.is-complete .password-policy-heading small,
+.dashboard-style-form .password-policy-checklist li.is-valid {
+    color: #155f36
+}
+
+.dashboard-style-form .email-availability-status,
+.dashboard-style-form .password-confirmation-status {
+    color: #343a40
+}
+
+.dashboard-style-form .email-availability-status.is-invalid,
+.dashboard-style-form .password-confirmation-status.is-invalid {
+    color: #7f171d;
+    font-weight: 700
+}
+
+.dashboard-style-form .email-availability-status.is-valid,
+.dashboard-style-form .password-confirmation-status.is-valid {
+    color: #155f36;
+    font-weight: 700
+}
+
+.dashboard-style-form .validation-summary,
+.dashboard-style-form .field-validation-error {
+    color: #7f171d;
+    font-weight: 700
+}
+
+.dashboard-style-form .legal-consent-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    margin: 16px 0 0
+}
+
+.dashboard-style-form .remember-field {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 14px 0 0;
+    color: #30363b;
+    cursor: pointer
+}
+
+.dashboard-style-form .remember-field input {
+    flex: 0 0 auto;
+    margin: 0;
+    accent-color: #4d545b
+}
+
+.dashboard-style-form .remember-field span {
+    line-height: 1.4
+}
+
+.dashboard-style-form .legal-consent-field input {
+    margin-top: 2px;
+    accent-color: #4d545b
+}
+
+.dashboard-style-form .legal-consent-field a {
+    color: #252b31;
+    font-weight: 700
+}
+
+.dashboard-style-form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 18px -24px 0;
+    padding: 10px 24px;
+    border-top: 1px solid #697078;
+    color: #c0c6cb;
+    background: #41474f
+}
+
+.account-content-section .dashboard-style-form-footer .form-secure,
+.account-content-section .dashboard-style-form-footer .form-secure a {
+    max-width: 560px;
+    margin: 0;
+    color: #c0c6cb;
+    font: 10px/1.5 var(--mono);
+    letter-spacing: .03em
+}
+
+.dashboard-style-form .dashboard-style-form-footer .submit-button {
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 36px;
+    margin: 0;
+    padding: 0 15px;
+    border: 1px solid #85858e;
+    border-radius: 7px;
+    color: #f5f6f7;
+    background: linear-gradient(180deg,#92999f,#626970);
+    box-shadow: none;
+    font: 600 12px/1 var(--sans);
+    white-space: nowrap
+}
+
+.dashboard-style-form .dashboard-style-form-footer .submit-button:hover,
+.dashboard-style-form .dashboard-style-form-footer .submit-button:focus-visible {
+    filter: brightness(.9);
+    outline: 0;
+    transform: none
+}
+
+@media (max-width:760px) {
+    .account-content-section .dashboard-style-form.form-card {
+        border-radius: 12px
+    }
+
+    .dashboard-style-form-header,
+    .dashboard-style-form-body {
+        padding-right: 20px;
+        padding-left: 20px
+    }
+
+    .dashboard-style-form-footer {
+        align-items: stretch;
+        flex-direction: column;
+        margin-right: -20px;
+        margin-left: -20px;
+        padding-right: 20px;
+        padding-left: 20px
+    }
+
+    .dashboard-style-form .dashboard-style-form-footer .submit-button {
+        width: 100%
+    }
+}

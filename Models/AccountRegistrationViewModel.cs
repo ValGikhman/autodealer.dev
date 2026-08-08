@@ -30,10 +30,15 @@ namespace autodealer.dev.Models {
         [SanitizeInput(InputSanitizationKind.Phone)]
         public string Phone { get; set; }
 
-        [Required, StringLength(100, MinimumLength = 12)]
+        [Required, StringLength(PasswordPolicy.MaximumLength, MinimumLength = PasswordPolicy.MinimumLength), PasswordPolicy]
         [DataType(DataType.Password)]
         [PreserveInput]
         public string Password { get; set; }
+
+        [Required, DataType(DataType.Password), System.ComponentModel.DataAnnotations.Compare("Password", ErrorMessage = "The password confirmation does not match.")]
+        [PreserveInput]
+        [Display(Name = "Confirm password")]
+        public string ConfirmPassword { get; set; }
 
         [Required, StringLength(32), RegularExpression(@"^[A-Za-z0-9_-]+$", ErrorMessage = "Please choose a valid plan.")]
         [SanitizeInput(InputSanitizationKind.Identifier)]
@@ -85,6 +90,8 @@ namespace autodealer.dev.Models {
         public int MonthlyRequestQuota { get; set; }
         public DateTime? CurrentPeriodEndUtc { get; set; }
         public int ActiveApiKeyCount { get; set; }
+        public bool PaymentRequired { get; set; }
+        public string PaymentUrl { get; set; }
     }
 
     public sealed class MustBeTrueAttribute : ValidationAttribute, IClientValidatable {

@@ -1,0 +1,10 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><style>{{EMAIL_CSS}}</style></head>
+<body>
+<table role="presentation" class="email-page" width="100%" cellspacing="0" cellpadding="0"><tr><td class="email-page-cell" align="center">
+<table role="presentation" class="email-card" width="640" cellspacing="0" cellpadding="0">
+<tr><td class="email-header">{{AUTODEALER_LOGO}}<div class="email-eyebrow">NEW API CREDENTIAL</div><h1 class="email-title">A new API key was issued.</h1><p class="email-intro">Hi {{FIRST_NAME}}, a new credential is ready for your AutoDealer.dev workspace.</p></td></tr>
+<tr><td class="email-content"><h2 class="email-heading">Store this key securely</h2><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td class="detail-label">Client</td><td class="detail-value">{{CLIENT_NUMBER}}</td></tr><tr><td class="detail-label">Plan</td><td class="detail-value">{{PLAN_CODE}}</td></tr><tr><td class="detail-label">Key name</td><td class="detail-value">{{KEY_NAME}}</td></tr></table><p class="email-copy">This is the only email containing the complete credential. Store it in a secret manager and revoke it immediately if it may have been exposed.</p><pre class="email-code">{{API_KEY}}</pre><div class="email-note">Send the key as <code>Authorization: Bearer &lt;key&gt;</code>. Never publish it in browser code or source control.</div></td></tr>
+</table></td></tr></table>
+</body></html>

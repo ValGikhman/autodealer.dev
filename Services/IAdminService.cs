@@ -5,5 +5,13 @@ namespace autodealer.dev.Services {
         bool Authenticate(string userId, string password);
         AdminDashboardViewModel GetDashboard();
         System.Collections.Generic.IReadOnlyList<AdminClientEmailViewModel> GetClientEmails(long clientId);
+        AdminCustomerAccountDetailViewModel GetClientAccountDetails(long clientId);
+        AdminClientCreateViewModel GetNewClientDefaults();
+        AdminClientEditViewModel GetClientForEdit(long clientId);
+        AdminClientEditViewModel UpdateClient(AdminClientEditViewModel model);
+        AdminApiKeyEditViewModel GetApiKeyForEdit(long apiKeyId);
+        AdminApiKeyEditViewModel UpdateApiKey(AdminApiKeyEditViewModel model);
+        AdminSubscriptionEditViewModel GetSubscriptionForEdit(long subscriptionId);
+        AdminSubscriptionEditViewModel UpdateSubscription(AdminSubscriptionEditViewModel model);
     }
 }

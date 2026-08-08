@@ -11,7 +11,27 @@
         var profileElement = document.getElementById('dashboard-record-profile');
         var emailPreviewElement = document.getElementById('dashboard-email-preview');
         var emailPreviewFrame = document.getElementById('dashboard-email-preview-frame');
-        var expandedEmailDetail = null;
+        var subgridEditorElement = document.getElementById('dashboard-subgrid-editor');
+        var subgridEditForm = document.getElementById('dashboard-subgrid-edit-form');
+        var subgridEditError = document.getElementById('dashboard-subgrid-edit-error');
+        var subgridEditSave = document.getElementById('dashboard-subgrid-edit-save');
+        var subgridEditNote = document.getElementById('dashboard-subgrid-edit-note');
+        var subgridEditCancel = document.getElementById('dashboard-subgrid-edit-cancel');
+        var clientEditFields = document.getElementById('client-edit-fields');
+        var clientCreateFields = document.getElementById('client-create-fields');
+        var clientCreateResult = document.getElementById('dashboard-client-create-result');
+        var apiKeyEditFields = document.getElementById('api-key-edit-fields');
+        var subscriptionEditFields = document.getElementById('subscription-edit-fields');
+        var keyIssueModalElement = document.getElementById('issue-api-key-modal');
+        var keyIssueModal = window.bootstrap.Modal.getOrCreateInstance(keyIssueModalElement);
+        var keyIssueForm = document.getElementById('issue-api-key-form');
+        var keyIssueName = document.getElementById('issue-api-key-name');
+        var keyIssueSubmit = document.getElementById('issue-api-key-submit');
+        var keyIssueError = document.getElementById('issue-api-key-error');
+        var pendingKeyIssue = null;
+        var pendingSubgridEdit = null;
+        var subgridEditSequence = 0;
+        var expandedCustomerDetail = null;
 
         function responseData(response) { return response && response.Data ? response.Data : []; }
         function clearEmailPreview() {
@@ -22,6 +42,278 @@
             var template = document.getElementById(id);
             return template ? template.innerHTML.trim() : '';
         }
+        function setSelectOptions(select, options, selectedValue) {
+            select.innerHTML = '';
+            (options || []).forEach(function (option) {
+                var element = document.createElement('option');
+                element.value = option.Value;
+                element.textContent = option.Text;
+                element.selected = String(option.Value) === String(selectedValue);
+                select.appendChild(element);
+            });
+        }
+        function notifyInput(element) {
+            if (element) element.dispatchEvent(new window.Event('input', { bubbles: true }));
+        }
+        function setEditFieldsActive(container, active) {
+            container.hidden = !active;
+            Array.prototype.forEach.call(container.querySelectorAll('input, select, textarea'), function (field) {
+                field.disabled = !active;
+            });
+        }
+        function setClientEditOnlyActive(active) {
+            Array.prototype.forEach.call(clientEditFields.querySelectorAll('.client-edit-only'), function (container) {
+                container.hidden = !active;
+                Array.prototype.forEach.call(container.querySelectorAll('input, select, textarea'), function (field) {
+                    field.disabled = !active;
+                });
+            });
+        }
+        function resetRecordModalPanels() {
+            modalElement.classList.remove('dashboard-email-modal', 'dashboard-subgrid-edit-modal', 'dashboard-new-client-modal');
+            profileElement.hidden = true;
+            emailPreviewElement.hidden = true;
+            subgridEditorElement.hidden = true;
+            clearEmailPreview();
+        }
+        function showSubgridEditError(message) {
+            subgridEditError.textContent = message || 'The record could not be loaded.';
+            subgridEditError.hidden = false;
+        }
+        function openSubgridEditor(kind, item, gridElement, clientId, detailUrl, separator) {
+            var isNewClient = kind === 'client-new';
+            var isClient = kind === 'client' || isNewClient;
+            var isApiKey = kind === 'api';
+            var editUrl = $('#customer-grid').data(isNewClient ? 'new-client-url' : isClient ? 'edit-client-url' : isApiKey ? 'edit-api-key-url' : 'edit-subscription-url');
+            var recordId = isNewClient ? null : isClient ? item.ClientId : isApiKey ? item.ApiKeyId : item.SubscriptionId;
+            var requestSequence = ++subgridEditSequence;
+
+            pendingSubgridEdit = null;
+            resetRecordModalPanels();
+            modalElement.classList.add('dashboard-subgrid-edit-modal');
+            if (isNewClient) modalElement.classList.add('dashboard-new-client-modal');
+            text('dashboard-record-kicker', isNewClient ? 'NEW DEALER ACCOUNT' : isClient ? 'DEALER ACCOUNT' : isApiKey ? 'API KEY RECORD' : 'SUBSCRIPTION RECORD');
+            text('dashboard-record-title', isNewClient ? 'Create a new customer' : isClient ? 'Edit dealer account' : isApiKey ? 'Edit API key' : 'Edit subscription');
+            text('dashboard-record-subtitle', isNewClient ? 'Generating a fresh client number...' : 'Loading record #' + recordId + '...');
+            subgridEditNote.textContent = isClient
+                ? isNewClient ? 'A 14-day trial and primary API key will be created automatically.' : 'Changing account status affects customer access.'
+                : isApiKey ? 'Changing key status affects API access immediately.'
+                    : 'Double-check status and billing dates before saving.';
+            subgridEditError.hidden = true;
+            clientCreateResult.hidden = true;
+            subgridEditSave.disabled = true;
+            subgridEditSave.hidden = false;
+            subgridEditSave.textContent = 'Save changes';
+            subgridEditCancel.textContent = 'Cancel';
+            subgridEditorElement.hidden = false;
+            setEditFieldsActive(clientEditFields, false);
+            setEditFieldsActive(clientCreateFields, false);
+            setEditFieldsActive(apiKeyEditFields, false);
+            setEditFieldsActive(subscriptionEditFields, false);
+            recordModal.show();
+
+            $.getJSON(editUrl, isNewClient ? {} : { id: recordId }).done(function (response) {
+                if (requestSequence !== subgridEditSequence) return;
+                pendingSubgridEdit = {
+                    kind: kind,
+                    id: recordId,
+                    editUrl: editUrl,
+                    gridElement: gridElement,
+                    clientId: clientId,
+                    detailUrl: detailUrl,
+                    separator: separator
+                };
+                document.getElementById('subgrid-edit-id').value = recordId;
+                text('dashboard-record-subtitle', isClient
+                    ? isNewClient ? 'Create the account, trial subscription, login, and primary credential.' : 'Update the customer identity, contact information, and account access.'
+                    : isApiKey ? 'Update the credential lifecycle and access settings.'
+                        : 'Update billing state, plan, and service period. All dates are UTC.');
+                setEditFieldsActive(clientEditFields, isClient);
+                setClientEditOnlyActive(isClient && !isNewClient);
+                setEditFieldsActive(clientCreateFields, isNewClient);
+                setEditFieldsActive(apiKeyEditFields, isApiKey);
+                setEditFieldsActive(subscriptionEditFields, !isClient && !isApiKey);
+
+                if (isClient) {
+                    document.getElementById('edit-client-number').value = response.ClientNumber || '';
+                    document.getElementById('edit-client-created').value = response.CreatedUtc || '';
+                    document.getElementById('edit-client-business').value = response.BusinessName || '';
+                    document.getElementById('edit-client-first-name').value = response.FirstName || '';
+                    document.getElementById('edit-client-last-name').value = response.LastName || '';
+                    document.getElementById('edit-client-email').value = response.Email || '';
+                    document.getElementById('edit-client-phone').value = response.Phone || '';
+                    document.getElementById('edit-client-email-verified').value = response.EmailVerifiedUtc || '';
+                    if (isNewClient) {
+                        document.getElementById('edit-client-created').value = 'Assigned when saved';
+                        document.getElementById('create-client-password').value = response.TemporaryPassword || '';
+                        document.getElementById('create-client-confirm-password').value = response.TemporaryPassword || '';
+                        setSelectOptions(document.getElementById('create-client-plan'), response.PlanOptions, response.PlanCode);
+                        notifyInput(document.getElementById('create-client-password'));
+                        notifyInput(document.getElementById('create-client-confirm-password'));
+                    } else {
+                        setSelectOptions(document.getElementById('edit-client-status'), response.StatusOptions, response.Status);
+                    }
+                    notifyInput(document.getElementById('edit-client-email'));
+                    document.getElementById('edit-client-business').focus();
+                } else if (isApiKey) {
+                    document.getElementById('edit-api-key-prefix').value = response.KeyPrefix || '';
+                    document.getElementById('edit-api-key-name').value = response.Name || '';
+                    document.getElementById('edit-api-key-expires').value = response.ExpiresUtc || '';
+                    setSelectOptions(document.getElementById('edit-api-key-status'), response.StatusOptions, response.Status);
+                    setSelectOptions(document.getElementById('edit-api-key-scope'), response.ScopeOptions, response.Scopes);
+                    setSelectOptions(document.getElementById('edit-api-key-subscription'), response.SubscriptionOptions, response.SubscriptionId);
+                    document.getElementById('edit-api-key-name').focus();
+                } else {
+                    document.getElementById('edit-subscription-start').value = response.CurrentPeriodStartUtc || '';
+                    document.getElementById('edit-subscription-end').value = response.CurrentPeriodEndUtc || '';
+                    document.getElementById('edit-subscription-cancel').value = response.CancelAtPeriodEnd ? 'true' : 'false';
+                    document.getElementById('edit-subscription-provider').value = response.ProviderSubscriptionId || '';
+                    setSelectOptions(document.getElementById('edit-subscription-plan'), response.PlanOptions, response.PlanId);
+                    setSelectOptions(document.getElementById('edit-subscription-status'), response.StatusOptions, response.Status);
+                    document.getElementById('edit-subscription-plan').focus();
+                }
+                subgridEditSave.disabled = false;
+            }).fail(function (xhr) {
+                if (requestSequence !== subgridEditSequence) return;
+                var response = xhr.responseJSON || {};
+                showSubgridEditError(response.Message || 'The record could not be loaded.');
+            });
+        }
+
+        subgridEditForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            if (!pendingSubgridEdit || !subgridEditForm.checkValidity()) {
+                subgridEditForm.reportValidity();
+                return;
+            }
+
+            var context = pendingSubgridEdit;
+            var data = $(subgridEditForm).serializeArray();
+            if (context.kind !== 'client-new')
+                data.push({ name: context.kind === 'client' ? 'ClientId' : context.kind === 'api' ? 'ApiKeyId' : 'SubscriptionId', value: context.id });
+            if (context.kind === 'client-new')
+                data.push({ name: 'ClientNumber', value: document.getElementById('edit-client-number').value });
+            data.push({
+                name: '__RequestVerificationToken',
+                value: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value
+            });
+            subgridEditSave.disabled = true;
+            subgridEditSave.textContent = 'Saving...';
+            subgridEditError.hidden = true;
+
+            $.ajax({ url: context.editUrl, method: 'POST', dataType: 'json', data: data }).done(function (response) {
+                if (context.kind === 'client-new') {
+                    setEditFieldsActive(clientEditFields, false);
+                    setEditFieldsActive(clientCreateFields, false);
+                    text('dashboard-record-title', 'Customer created');
+                    text('dashboard-record-subtitle', response.Message || 'The new dealer account is ready.');
+                    document.getElementById('dashboard-client-create-message').textContent = response.Message || '';
+                    document.getElementById('created-client-number').textContent = response.ClientNumber || '';
+                    document.getElementById('created-client-password').textContent = response.TemporaryPassword || '';
+                    document.getElementById('created-client-api-key').textContent = response.ApiKey || '';
+                    clientCreateResult.hidden = false;
+                    subgridEditSave.hidden = true;
+                    subgridEditCancel.textContent = 'Done';
+                    subgridEditNote.textContent = 'These credentials are shown once. Store them securely.';
+                    $('#customer-grid').pepGrid('refresh');
+                    return;
+                }
+                recordModal.hide();
+                if (context.kind === 'client' || context.kind === 'subscription') {
+                    $('#customer-grid').pepGrid('refresh');
+                    return;
+                }
+                $.getJSON(context.detailUrl + context.separator + $.param({ clientId: context.clientId })).done(function (updated) {
+                    if (context.gridElement.parentNode) $(context.gridElement).pepGrid('setData', updated.ApiKeys || []);
+                });
+            }).fail(function (xhr) {
+                var response = xhr.responseJSON || {};
+                showSubgridEditError(response.Message || 'The record could not be saved.');
+            }).always(function () {
+                subgridEditSave.disabled = false;
+                subgridEditSave.textContent = 'Save changes';
+            });
+        });
+
+        clientCreateResult.addEventListener('click', function (event) {
+            var button = event.target.closest('[data-copy-target]');
+            if (!button) return;
+            var value = document.getElementById(button.getAttribute('data-copy-target')).textContent;
+            if (!value) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(value).then(function () { button.textContent = 'Copied'; });
+            } else {
+                var range = document.createRange();
+                var selection = window.getSelection();
+                range.selectNodeContents(document.getElementById(button.getAttribute('data-copy-target')));
+                selection.removeAllRanges();
+                selection.addRange(range);
+                document.execCommand('copy');
+                selection.removeAllRanges();
+                button.textContent = 'Copied';
+            }
+        });
+        function openKeyIssueModal(context) {
+            pendingKeyIssue = context;
+            keyIssueForm.reset();
+            keyIssueError.hidden = true;
+            keyIssueError.textContent = '';
+            keyIssueSubmit.disabled = false;
+            keyIssueSubmit.textContent = 'Issue API key';
+            keyIssueModal.show();
+            window.setTimeout(function () { keyIssueName.focus(); keyIssueName.select(); }, 180);
+        }
+
+        keyIssueForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            if (!pendingKeyIssue || !keyIssueForm.checkValidity()) {
+                keyIssueForm.reportValidity();
+                return;
+            }
+
+            var context = pendingKeyIssue;
+            var keyName = keyIssueName.value.trim() || 'Additional key';
+            keyIssueSubmit.disabled = true;
+            keyIssueSubmit.textContent = 'Issuing...';
+            keyIssueError.hidden = true;
+
+            $.ajax({
+                url: $('#customer-grid').data('issue-key-url'),
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    __RequestVerificationToken: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value,
+                    clientId: context.detail.dataItem.ClientId,
+                    name: keyName
+                }
+            }).done(function (response) {
+                keyIssueModal.hide();
+                context.issueResult.classList.remove('is-error');
+                context.issueResult.querySelector('span').textContent = response.Message + ' This full key is shown once:';
+                context.issueResult.querySelector('code').textContent = response.ApiKey;
+                context.issueResult.hidden = false;
+                context.detail.dataItem.ApiKeyCount = Number(context.detail.dataItem.ApiKeyCount || 0) + 1;
+                context.toggle.querySelector('span').textContent = context.detail.dataItem.ApiKeyCount;
+                $.getJSON(context.detailUrl + context.separator + $.param({ clientId: context.detail.dataItem.ClientId })).done(function (updated) {
+                    if (context.detailRow.parentNode) $(context.detailRow).find('.customer-api-grid').pepGrid('setData', updated.ApiKeys || []);
+                });
+                pendingKeyIssue = null;
+            }).fail(function (xhr) {
+                var response = xhr.responseJSON || {};
+                keyIssueError.textContent = response.Message || 'The API key could not be issued.';
+                keyIssueError.hidden = false;
+            }).always(function () {
+                keyIssueSubmit.disabled = false;
+                keyIssueSubmit.textContent = 'Issue API key';
+            });
+        });
+
+        $(keyIssueModalElement).on('hidden.bs.modal', function () {
+            pendingKeyIssue = null;
+            keyIssueError.hidden = true;
+            keyIssueError.textContent = '';
+        });
+
         function text(id, value) { document.getElementById(id).textContent = value == null ? '' : value; }
         function valueOrEmpty(value) { return value == null || String(value).trim() === '' ? 'Not provided' : String(value); }
         function initials(value) {
@@ -93,10 +385,8 @@
             actionsElement.appendChild(action);
         }
         function prepareModal(item, type) {
-            modalElement.classList.remove('dashboard-email-modal');
+            resetRecordModalPanels();
             profileElement.hidden = false;
-            emailPreviewElement.hidden = true;
-            clearEmailPreview();
             sectionsElement.innerHTML = '';
             actionsElement.innerHTML = '';
             var isCustomer = type === 'customer';
@@ -125,6 +415,7 @@
                     { label: 'Plan', value: item.PlanName },
                     { label: 'Status', value: item.SubscriptionStatus },
                     { label: 'Period ends', value: item.PeriodEnd },
+                    { label: 'API keys', value: item.ApiKeyCount },
                     { label: 'Active API keys', value: item.ActiveApiKeyCount }
                 ]);
             } else {
@@ -153,20 +444,20 @@
             recordModal.show();
         }
 
-        function closeEmailDetail() {
-            if (!expandedEmailDetail) return;
-            if (expandedEmailDetail.toggle) {
-                expandedEmailDetail.toggle.setAttribute('aria-expanded', 'false');
-                expandedEmailDetail.toggle.classList.remove('is-open');
+        function closeCustomerDetail() {
+            if (!expandedCustomerDetail) return;
+            if (expandedCustomerDetail.toggle) {
+                expandedCustomerDetail.toggle.setAttribute('aria-expanded', 'false');
+                expandedCustomerDetail.toggle.classList.remove('is-open');
             }
-            if (expandedEmailDetail.row && expandedEmailDetail.row.parentNode)
-                expandedEmailDetail.row.parentNode.removeChild(expandedEmailDetail.row);
-            expandedEmailDetail = null;
+            if (expandedCustomerDetail.row && expandedCustomerDetail.row.parentNode)
+                expandedCustomerDetail.row.parentNode.removeChild(expandedCustomerDetail.row);
+            expandedCustomerDetail = null;
         }
 
         function showEmailPreview(item) {
+            resetRecordModalPanels();
             modalElement.classList.add('dashboard-email-modal');
-            profileElement.hidden = true;
             emailPreviewElement.hidden = false;
             text('dashboard-record-kicker', 'MESSAGE PREVIEW');
             text('dashboard-record-title', item.Subject || 'Email message');
@@ -178,9 +469,16 @@
         }
 
         $(modalElement).on('hidden.bs.modal', function () {
+            subgridEditSequence += 1;
+            pendingSubgridEdit = null;
             clearEmailPreview();
-            modalElement.classList.remove('dashboard-email-modal');
+            modalElement.classList.remove('dashboard-email-modal', 'dashboard-subgrid-edit-modal');
             emailPreviewElement.hidden = true;
+            subgridEditorElement.hidden = true;
+            subgridEditError.hidden = true;
+            clientCreateResult.hidden = true;
+            subgridEditSave.hidden = false;
+            subgridEditCancel.textContent = 'Cancel';
             profileElement.hidden = false;
         });
 
@@ -190,11 +488,11 @@
             detail.event.preventDefault();
             detail.event.stopPropagation();
 
-            if (expandedEmailDetail && expandedEmailDetail.ownerRow === detail.rowElement) {
-                closeEmailDetail();
+            if (expandedCustomerDetail && expandedCustomerDetail.ownerRow === detail.rowElement && expandedCustomerDetail.kind === 'email') {
+                closeCustomerDetail();
                 return;
             }
-            closeEmailDetail();
+            closeCustomerDetail();
 
             var detailRow = document.createElement('tr');
             detailRow.className = 'customer-email-detail-row';
@@ -205,16 +503,16 @@
             detail.rowElement.parentNode.insertBefore(detailRow, detail.rowElement.nextSibling);
             toggle.setAttribute('aria-expanded', 'true');
             toggle.classList.add('is-open');
-            expandedEmailDetail = { ownerRow: detail.rowElement, row: detailRow, toggle: toggle };
+            expandedCustomerDetail = { ownerRow: detail.rowElement, row: detailRow, toggle: toggle, kind: 'email' };
 
-            detailRow.querySelector('.customer-email-collapse').addEventListener('click', closeEmailDetail);
+            detailRow.querySelector('.customer-email-collapse').addEventListener('click', closeCustomerDetail);
 
             var emailUrl = $('#customer-grid').data('email-url');
             var separator = String(emailUrl).indexOf('?') >= 0 ? '&' : '?';
             $(detailRow).find('.customer-email-grid').pepGrid({
                 url: emailUrl + separator + $.param({ clientId: detail.dataItem.ClientId }),
                 schema: { data: responseData }, height: null, pageable: false, pageSize: 20,
-                resizable: false, autozoomable: true, exportToExcel: false, exportToPdf: false,
+                resizable: false, autozoomable: true, showSearch: false, exportToExcel: false, exportToPdf: false,
                 defaultSort: [{ field: 'SentSort', dir: 'desc' }],
                 onCellClick: function (emailDetail) {
                     var action = emailDetail.event.target.closest('[data-email-action]');
@@ -223,6 +521,8 @@
                     emailDetail.event.stopPropagation();
                     showEmailPreview(emailDetail.dataItem);
                 },
+                onCellDblClick: function (emailDetail) { showEmailPreview(emailDetail.dataItem); },
+                onRowDblClick: function (emailDetail) { showEmailPreview(emailDetail.dataItem); },
                 columns: [
                     { field: 'Sent', title: 'Sent', width: '24%' },
                     { field: 'ToEmail', title: 'To', width: '26%' },
@@ -232,27 +532,169 @@
             });
         }
 
+        function expandCustomerAccount(detail, kind) {
+            var isApiKeys = kind === 'api';
+            var toggle = detail.event.target.closest(isApiKeys ? '.customer-api-toggle' : '.customer-subscription-toggle');
+            if (!toggle) return;
+            detail.event.preventDefault();
+            detail.event.stopPropagation();
+
+            if (expandedCustomerDetail && expandedCustomerDetail.ownerRow === detail.rowElement && expandedCustomerDetail.kind === kind) {
+                closeCustomerDetail();
+                return;
+            }
+            closeCustomerDetail();
+
+            var detailRow = document.createElement('tr');
+            detailRow.className = 'customer-email-detail-row customer-account-detail-row';
+            var detailCell = document.createElement('td');
+            detailCell.colSpan = detail.rowElement.children.length;
+            detailCell.innerHTML = templateHtml(isApiKeys ? 'customer-api-detail-template' : 'customer-subscription-detail-template');
+            detailRow.appendChild(detailCell);
+            detail.rowElement.parentNode.insertBefore(detailRow, detail.rowElement.nextSibling);
+            toggle.setAttribute('aria-expanded', 'true');
+            toggle.classList.add('is-open');
+            expandedCustomerDetail = { ownerRow: detail.rowElement, row: detailRow, toggle: toggle, kind: kind };
+            detailRow.querySelector('.customer-email-collapse').addEventListener('click', closeCustomerDetail);
+
+            var detailUrl = $('#customer-grid').data('account-detail-url');
+            var separator = String(detailUrl).indexOf('?') >= 0 ? '&' : '?';
+            if (isApiKeys) {
+                var issueButton = detailRow.querySelector('.customer-api-issue');
+                var issueResult = detailRow.querySelector('.customer-api-issue-result');
+                var copyButton = detailRow.querySelector('.customer-api-copy');
+                issueButton.addEventListener('click', function () {
+                    issueResult.hidden = true;
+                    openKeyIssueModal({
+                        detail: detail,
+                        detailRow: detailRow,
+                        toggle: toggle,
+                        issueResult: issueResult,
+                        detailUrl: detailUrl,
+                        separator: separator
+                    });
+                });
+                copyButton.addEventListener('click', function () {
+                    var value = issueResult.querySelector('code').textContent;
+                    if (!value) return;
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(value).then(function () { copyButton.textContent = 'Copied'; });
+                    } else {
+                        var selection = window.getSelection();
+                        var range = document.createRange();
+                        range.selectNodeContents(issueResult.querySelector('code'));
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        document.execCommand('copy');
+                        selection.removeAllRanges();
+                        copyButton.textContent = 'Copied';
+                    }
+                });
+            }
+            $.getJSON(detailUrl + separator + $.param({ clientId: detail.dataItem.ClientId }))
+                .done(function (response) {
+                    if (!detailRow.parentNode) return;
+                    if (isApiKeys) {
+                        var apiGridElement = detailRow.querySelector('.customer-api-grid');
+                        $(apiGridElement).pepGrid({
+                            data: response.ApiKeys || [], height: null, pageable: false, pageSize: 100,
+                            resizable: false, autozoomable: true, showSearch: false, exportToExcel: false, exportToPdf: false,
+                            defaultSort: [{ field: 'CreatedSort', dir: 'desc' }],
+                            onCellDblClick: function (apiDetail) {
+                                openSubgridEditor('api', apiDetail.dataItem, apiGridElement, detail.dataItem.ClientId, detailUrl, separator);
+                            },
+                            onRowDblClick: function (apiDetail) {
+                                openSubgridEditor('api', apiDetail.dataItem, apiGridElement, detail.dataItem.ClientId, detailUrl, separator);
+                            },
+                            columns: [
+                                { field: 'ApiKeyId', title: 'ID', width: '7%' },
+                                { field: 'Name', title: 'Name', width: '16%' },
+                                { field: 'KeyPrefix', title: 'Key prefix', width: '15%' },
+                                { field: 'Scopes', title: 'Scopes', width: '14%' },
+                                { field: 'Status', title: 'Status', width: '11%', template: '#customer-key-status-template' },
+                                { field: 'Created', title: 'Created', width: '18%' },
+                                { field: 'LastUsed', title: 'Last used', width: '19%' }
+                            ]
+                        });
+                    } else {
+                        var subscriptionGridElement = detailRow.querySelector('.customer-subscription-grid');
+                        $(subscriptionGridElement).pepGrid({
+                            data: response.Subscriptions || [], height: null, pageable: false, pageSize: 100,
+                            resizable: false, autozoomable: true, showSearch: false, exportToExcel: false, exportToPdf: false,
+                            defaultSort: [{ field: 'PeriodEndSort', dir: 'desc' }],
+                            onCellDblClick: function (subscriptionDetail) {
+                                openSubgridEditor('subscription', subscriptionDetail.dataItem, subscriptionGridElement, detail.dataItem.ClientId, detailUrl, separator);
+                            },
+                            onRowDblClick: function (subscriptionDetail) {
+                                openSubgridEditor('subscription', subscriptionDetail.dataItem, subscriptionGridElement, detail.dataItem.ClientId, detailUrl, separator);
+                            },
+                            columns: [
+                                { field: 'SubscriptionId', title: 'ID', width: '7%' },
+                                { field: 'PlanName', title: 'Plan', width: '15%' },
+                                { field: 'Status', title: 'Status', width: '12%', template: '#customer-subscription-status-template' },
+                                { field: 'Quota', title: 'Quota', width: '10%' },
+                                { field: 'PeriodStart', title: 'Period starts', width: '19%' },
+                                { field: 'PeriodEnd', title: 'Period ends', width: '19%' },
+                                { field: 'CancelAtPeriodEnd', title: 'Cancel', width: '8%' },
+                                { field: 'ProviderSubscription', title: 'Provider ID', width: '15%' }
+                            ]
+                        });
+                    }
+                })
+                .fail(function () {
+                    if (!detailRow.parentNode) return;
+                    detailRow.querySelector('.customer-account-detail').insertAdjacentHTML('beforeend', '<p class="customer-account-error">Account details could not be loaded.</p>');
+                });
+        }
+
         var $customerGrid = $('#customer-grid');
         if ($customerGrid.length) {
+            function ensureNewCustomerToolbarButton() {
+                var customerSearchBar = $customerGrid[0].querySelector('.pg-search-bar');
+                if (!customerSearchBar || customerSearchBar.querySelector('.admin-new-customer')) {
+                    return;
+                }
+
+                var newCustomerButton = document.createElement('button');
+                newCustomerButton.type = 'button';
+                newCustomerButton.className = 'admin-new-customer';
+                newCustomerButton.textContent = 'New customer';
+                newCustomerButton.addEventListener('click', function () {
+                    openSubgridEditor('client-new', {}, document.getElementById('customer-grid'), null, null, null);
+                });
+
+                var searchInputGroup = customerSearchBar.querySelector('.pg-search-input-group');
+                customerSearchBar.insertBefore(newCustomerButton, searchInputGroup || customerSearchBar.firstChild);
+            }
+
             $customerGrid.pepGrid({
                 url: $customerGrid.data('url'), schema: { data: responseData }, height: null, pageable: false, pageSize: 100,
                 resizable: false, autozoomable: true, exportToExcel: false, exportToPdf: false,
                 defaultSort: [{ field: 'CreatedSort', dir: 'desc' }],
-                onDataBound: function () { expandedEmailDetail = null; },
+                onDataBound: function () {
+                    expandedCustomerDetail = null;
+                    ensureNewCustomerToolbarButton();
+                },
                 onCellClick: function (detail) {
                     if (detail.field === 'EmailCount') expandCustomerEmails(detail);
+                    if (detail.field === 'ApiKeyCount') expandCustomerAccount(detail, 'api');
+                    if (detail.field === 'SubscriptionCount') expandCustomerAccount(detail, 'subscription');
                 },
                 onCellDblClick: function (detail) {
-                    if (detail.field !== 'EmailCount') prepareModal(detail.dataItem, 'customer');
+                    if (detail.field !== 'EmailCount' && detail.field !== 'ApiKeyCount' && detail.field !== 'SubscriptionCount')
+                        openSubgridEditor('client', detail.dataItem, document.getElementById('customer-grid'), detail.dataItem.ClientId, null, null);
                 },
-                onRowDblClick: function (detail) { prepareModal(detail.dataItem, 'customer'); },
+                onRowDblClick: function (detail) {
+                    openSubgridEditor('client', detail.dataItem, document.getElementById('customer-grid'), detail.dataItem.ClientId, null, null);
+                },
                 columns: [
-                    { field: 'BusinessName', title: 'Customer', width: '19%' },
-                    { field: 'ClientNumber', title: 'Client number', width: '18%' },
-                    { field: 'ContactName', title: 'Contact', width: '18%' },
-                    { field: 'Email', title: 'Email', width: '20%' },
-                    { field: 'PlanName', title: 'Plan', width: '17%' },
-                    { field: 'EmailCount', title: 'Mail', width: '8%', sortable: false, filterable: false, template: '#customer-email-toggle-template' }
+                    { field: 'BusinessName', title: 'Customer', width: '16%' },
+                    { field: 'ClientNumber', title: 'Client number', width: '14%' },
+                    { field: 'ContactName', title: 'Contact', width: '15%' },
+                    { field: 'Email', title: 'Email', width: '19%' },
+                    { field: 'ApiKeyCount', title: 'API keys', width: '12%', sortable: false, filterable: false, template: '#customer-api-toggle-template' },
+                    { field: 'SubscriptionCount', title: 'Subscription', width: '14%', sortable: false, filterable: false, template: '#customer-subscription-toggle-template' },
+                    { field: 'EmailCount', title: 'Mail', width: '10%', sortable: false, filterable: false, template: '#customer-email-toggle-template' }
                 ]
             });
         }

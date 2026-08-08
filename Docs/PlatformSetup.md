@@ -73,3 +73,25 @@ them to activate, renew, pause, or cancel subscriptions.
 3. The full key is returned once and sent by email when SMTP is configured.
 4. Subsequent API calls authenticate the key hash and enforce its scope and plan.
 5. Request and daily usage rows provide per-client metering and billing inputs.
+
+## Trial-expiration job
+
+Run `Database/003_ClientEmailHistory.sql` and
+`Database/004_TrialExpirationAutomation.sql`, then set `Billing:PaymentUrl` in
+`Web.config` to the authenticated hosted-payment flow. Do not point it at a form
+that posts raw card data to this application.
+
+Run the job manually from the application directory:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Invoke-TrialExpiration.ps1
+```
+
+Schedule that command hourly or daily with Windows Task Scheduler under an
+identity that can read the deployed configuration and update the application
+database. The job serializes concurrent runs, changes newly expired `trialing`
+subscriptions to `paused`, emails the customer, and records the rendered message
+in `ClientEmailHistory`. Failed deliveries remain eligible for retry after 60
+minutes. Use `-WhatIf` to list work without changing status or sending email,
+and use `-ConnectionName` when the machine-based connection selection is not
+appropriate.

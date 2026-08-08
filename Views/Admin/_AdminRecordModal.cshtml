@@ -7,7 +7,7 @@
                     <h2 class="modal-title" id="dashboard-record-title">Account details</h2>
                     <p id="dashboard-record-subtitle"></p>
                 </div>
-                <button type="button" class="btn-close dashboard-modal-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                <button type="button" class="btn-close dashboard-modal-close" data-bs-dismiss="modal" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 7l10 10M17 7L7 17" /></svg></button>
             </div>
             <div class="modal-body">
                 <div id="dashboard-record-profile">
@@ -22,6 +22,7 @@
                 <section class="dashboard-email-preview" id="dashboard-email-preview" hidden>
                     <iframe id="dashboard-email-preview-frame" sandbox="" title="Rendered email preview"></iframe>
                 </section>
+                @Html.Partial("_AdminSubgridEdit")
             </div>
             <div class="modal-footer">
                 <span>AutoDealer.dev administrative record</span>
@@ -31,8 +32,34 @@
     </div>
 </div>
 
+<div class="modal fade dashboard-record-modal dashboard-key-issue-modal" id="issue-api-key-modal" tabindex="-1" aria-labelledby="issue-api-key-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" id="issue-api-key-form">
+            <div class="modal-header dashboard-record-header">
+                <div><span class="dashboard-record-kicker">API CREDENTIAL</span><h2 class="modal-title" id="issue-api-key-title">Issue a new API key</h2><p>Name the credential so it can be identified later.</p></div>
+                <button type="button" class="btn-close dashboard-modal-close" data-bs-dismiss="modal" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 7l10 10M17 7L7 17" /></svg></button>
+            </div>
+            <div class="modal-body">
+                <label class="dashboard-key-name-label" for="issue-api-key-name">API key name</label>
+                <input class="dashboard-key-name-input" id="issue-api-key-name" name="name" type="text" maxlength="80" value="Additional key" required autocomplete="off" />
+                <p class="dashboard-key-issue-help">The complete key will be emailed to the customer and displayed once after creation.</p>
+                <div class="dashboard-key-issue-error" id="issue-api-key-error" hidden></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="dashboard-modal-done" data-bs-dismiss="modal">Cancel</button><button type="submit" class="customer-api-issue" id="issue-api-key-submit">Issue API key</button></div>
+        </form>
+    </div>
+</div>
+
+<div class="dashboard-antiforgery" hidden>@Html.AntiForgeryToken()</div>
+
 <script type="text/x-pepgrid-template" id="customer-status-template"><span class="dashboard-grid-status">{{SubscriptionStatus}}</span></script>
 <script type="text/x-pepgrid-template" id="demo-status-template"><span class="dashboard-grid-status">{{Status}}</span></script>
 <script type="text/x-pepgrid-template" id="customer-email-toggle-template">{{#if EmailCount}}<button type="button" class="customer-email-toggle" aria-label="Show {{EmailCount}} associated emails" aria-expanded="false"><svg aria-hidden="true"><use href="#icon-mail"></use></svg><span>{{EmailCount}}</span></button>{{/if}}</script>
 <script type="text/x-pepgrid-template" id="customer-email-detail-template"><div class="customer-email-detail"><div class="customer-email-detail-heading"><div><span>EMAIL HISTORY</span><h3>Associated messages</h3></div><button type="button" class="customer-email-collapse" aria-label="Close email history">&times;</button></div><div class="customer-email-grid admin-pep-grid"></div></div></script>
 <script type="text/x-pepgrid-template" id="customer-email-actions-template"><div class="customer-email-actions"><button type="button" data-email-action="view" aria-label="View rendered email">View</button></div></script>
+<script type="text/x-pepgrid-template" id="customer-api-toggle-template"><button type="button" class="customer-api-toggle" aria-label="Show {{ApiKeyCount}} API keys" aria-expanded="false"><svg aria-hidden="true"><use href="#icon-key"></use></svg><span>{{ApiKeyCount}}</span></button></script>
+<script type="text/x-pepgrid-template" id="customer-subscription-toggle-template"><button type="button" class="customer-subscription-toggle" aria-label="{{SubscriptionStatus}} subscription; show {{SubscriptionCount}} subscription records" aria-expanded="false"><svg aria-hidden="true"><use href="#icon-plan"></use></svg><span class="badge bg-{{SubscriptionBadgeClass}}">{{SubscriptionCount}}</span></button></script>
+<script type="text/x-pepgrid-template" id="customer-api-detail-template"><div class="customer-account-detail"><div class="customer-email-detail-heading"><div><span>ACCOUNT ACCESS</span><h3>API keys</h3></div><div class="customer-detail-heading-actions"><button type="button" class="customer-api-issue">Issue API key</button><button type="button" class="customer-email-collapse" aria-label="Close API keys">&times;</button></div></div><div class="customer-api-issue-result" hidden><span></span><code></code><button type="button" class="customer-api-copy">Copy key</button></div><section class="customer-account-grid-section"><div class="customer-api-grid admin-pep-grid"></div></section></div></script>
+<script type="text/x-pepgrid-template" id="customer-subscription-detail-template"><div class="customer-account-detail"><div class="customer-email-detail-heading"><div><span>BILLING ACCESS</span><h3>Subscription history</h3></div><button type="button" class="customer-email-collapse" aria-label="Close subscriptions">&times;</button></div><section class="customer-account-grid-section"><div class="customer-subscription-grid admin-pep-grid"></div></section></div></script>
+<script type="text/x-pepgrid-template" id="customer-key-status-template"><span class="dashboard-grid-status">{{Status}}</span></script>
+<script type="text/x-pepgrid-template" id="customer-subscription-status-template"><span class="dashboard-grid-status badge bg-{{StatusBadgeClass}}">{{Status}}</span></script>
