@@ -205,22 +205,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\bootstrap-grid.css" />
-    <Content Include="Content\bootstrap-grid.min.css" />
-    <Content Include="Content\bootstrap-grid.rtl.css" />
-    <Content Include="Content\bootstrap-grid.rtl.min.css" />
-    <Content Include="Content\bootstrap-reboot.css" />
-    <Content Include="Content\bootstrap-reboot.min.css" />
-    <Content Include="Content\bootstrap-reboot.rtl.css" />
-    <Content Include="Content\bootstrap-reboot.rtl.min.css" />
-    <Content Include="Content\bootstrap-utilities.css" />
-    <Content Include="Content\bootstrap-utilities.min.css" />
-    <Content Include="Content\bootstrap-utilities.rtl.css" />
-    <Content Include="Content\bootstrap-utilities.rtl.min.css" />
-    <Content Include="Content\bootstrap.css" />
-    <Content Include="Content\bootstrap.min.css" />
-    <Content Include="Content\bootstrap.rtl.css" />
-    <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Database\001_AutoDealerPlatform.sql" />
@@ -233,12 +217,7 @@
     <Content Include="Content\email.css" />
     <Content Include="Content\pepTools\pepGrid.css" />
     <Content Include="Content\Site.css" />
-    <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
-    <Content Include="Scripts\bootstrap.esm.js" />
-    <Content Include="Scripts\bootstrap.esm.min.js" />
-    <Content Include="Scripts\bootstrap.js" />
-    <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\Admin\adminDashboard.js" />
     <Content Include="Scripts\accountCredentialValidation.js" />
     <Content Include="Scripts\passwordVisibility.js" />
@@ -249,22 +228,15 @@
     <None Include="Data\autodealer_dev.dbml.layout">
       <DependentUpon>autodealer_dev.dbml</DependentUpon>
     </None>
-    <None Include="Scripts\jquery-3.7.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.1.js" />
-    <Content Include="Scripts\jquery-3.7.1.min.js" />
-    <Content Include="Scripts\jquery-3.7.1.slim.js" />
-    <Content Include="Scripts\jquery-3.7.1.slim.min.js" />
-    <None Include="Scripts\jquery.validate-vsdoc.js" />
     <Content Include="Scripts\jquery.validate.js" />
-    <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
-    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
-    <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Shared\_WorkspaceFields.cshtml" />
+    <Content Include="Views\Shared\_WorkspaceConfirmation.cshtml" />
     <Content Include="Views\Shared\_InventorySizeOptions.cshtml" />
     <Content Include="Views\Shared\_LegalTermsPrivacy.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
@@ -301,11 +273,9 @@
     <Content Include="Content\images\storefront\vtec-storefront-reference-2.png" />
     <Content Include="Content\images\storefront\vtec-storefront-reference-3.png" />
     <Content Include="Content\images\storefront\vtec-storefront-reference-4.png" />
-    <Content Include="Content\images\vtec-vehicle-details-preview.png" />
-    <Content Include="Content\images\vin-html-api-response.png" />
     <Content Include="Content\images\vin-html-api-promo-v2.png" />
     <Content Include="Content\images\autodealer-logo.png" />
-    <Content Include="Content\images\autodealer-logo-dark.png" />
+    <Content Include="Content\images\autodealer-logo-light.png" />
     <Content Include="Templates\Emails\api-credentials.html" />
     <Content Include="Templates\Emails\email-verification.html" />
     <Content Include="Templates\Emails\additional-api-key.html" />
@@ -326,39 +296,14 @@
     <Folder Include="App_Data\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\bootstrap.rtl.min.css.map" />
-    <Content Include="Content\bootstrap.rtl.css.map" />
-    <Content Include="Content\bootstrap.min.css.map" />
-    <Content Include="Content\bootstrap.css.map" />
-    <Content Include="Content\bootstrap-utilities.rtl.min.css.map" />
-    <Content Include="Content\bootstrap-utilities.rtl.css.map" />
-    <Content Include="Content\bootstrap-utilities.min.css.map" />
-    <Content Include="Content\bootstrap-utilities.css.map" />
-    <Content Include="Content\bootstrap-reboot.rtl.min.css.map" />
-    <Content Include="Content\bootstrap-reboot.rtl.css.map" />
-    <Content Include="Content\bootstrap-reboot.min.css.map" />
-    <Content Include="Content\bootstrap-reboot.css.map" />
-    <Content Include="Content\bootstrap-grid.rtl.min.css.map" />
-    <Content Include="Content\bootstrap-grid.rtl.css.map" />
-    <Content Include="Content\bootstrap-grid.min.css.map" />
-    <Content Include="Content\bootstrap-grid.css.map" />
     <None Include="packages.config" />
     <None Include="Docs\VinDecoderApi.md" />
     <None Include="Docs\PlatformSetup.md" />
-    <None Include="Database\001_AutoDealerPlatform.sql" />
     <None Include="Data\autodealer_dev.dbml">
       <Generator>MSLinqToSQLGenerator</Generator>
       <LastGenOutput>autodealer_dev.designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </None>
-    <Content Include="Scripts\bootstrap.min.js.map" />
-    <Content Include="Scripts\bootstrap.js.map" />
-    <Content Include="Scripts\bootstrap.esm.min.js.map" />
-    <Content Include="Scripts\bootstrap.esm.js.map" />
-    <Content Include="Scripts\bootstrap.bundle.min.js.map" />
-    <Content Include="Scripts\bootstrap.bundle.js.map" />
-    <Content Include="Scripts\jquery-3.7.1.slim.min.map" />
-    <Content Include="Scripts\jquery-3.7.1.min.map" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\CommonUnit.csproj">

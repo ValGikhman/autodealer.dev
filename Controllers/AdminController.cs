@@ -194,7 +194,6 @@ namespace autodealer.dev.Controllers {
                 var result = clientAccountService.Create(model, clientNumber, true);
                 return Json(new {
                     Ok = true,
-                    result.ClientNumber,
                     result.Email,
                     result.VerificationEmailSent,
                     Message = result.VerificationEmailSent
