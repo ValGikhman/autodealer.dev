@@ -1,3 +1,45 @@
 @{ ViewBag.Title = "Something went wrong"; ViewBag.BodyClass = "content-page error-page"; ViewBag.Robots = "noindex,nofollow"; }
-<section class="site-hero page-hero error-hero"><div class="shell site-hero-shell narrow"><div class="hero-copy"><span class="eyebrow">SYSTEM STATUS / ERROR</span><h1>That request hit a roadblock.</h1><p>The request could not be completed. Try again or return to the main site.</p><div class="button-row centered-row"><a class="button button-primary" href="@Url.Action("Index", "Home")">Return home &rarr;</a><a class="button button-secondary" href="mailto:support@autodealer.dev">Contact support</a></div></div></div></section>
-<section class="section light-section error-help-section"><div class="shell"><div class="section-heading"><span class="eyebrow">NEXT STEPS</span><h2>Get back on the road.</h2><p>Most interruptions are temporary. Retry the request, review the documentation, or send the support team the URL and time of the error.</p></div><div class="feature-grid three"><article class="feature-card"><span class="feature-icon">01</span><h3>Try again</h3><p>Return to the previous page and repeat the request.</p></article><article class="feature-card"><span class="feature-icon">02</span><h3>Check the docs</h3><p>Review authentication requirements, formats, and error responses.</p><a class="text-link" href="@Url.Action("Errors", "Documentation")">Open error reference &rarr;</a></article><article class="feature-card"><span class="feature-icon">03</span><h3>Contact support</h3><p>Include the page URL and approximate time so the request can be investigated.</p><a class="text-link" href="mailto:support@autodealer.dev">support@autodealer.dev &rarr;</a></article></div></div></section>
+<section class="site-hero page-hero error-hero">
+    <div class="shell site-hero-shell narrow">
+        <div class="hero-copy">
+            <span class="eyebrow">SYSTEM STATUS / ERROR</span>
+            <h1>That request hit a roadblock.</h1>
+            <p>The request could not be completed. Try again or return to the main site.</p>
+            <div class="button-row centered-row">
+                <a class="button button-primary" href="@Url.Action("Index", "Home")">Return home &rarr;</a>
+                <a class="button button-secondary" href="mailto:support@autodealer.dev">Contact support</a>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="section light-section error-help-section">
+    <div class="shell">
+        <div class="section-heading">
+            <span class="eyebrow">NEXT STEPS</span>
+            <h2>Get back on the road.</h2>
+            <p>
+                Most interruptions are temporary. Retry the request, review the documentation, or send the
+                support team the URL and time of the error.
+            </p>
+        </div>
+        <div class="feature-grid three">
+            <article class="feature-card">
+                <span class="feature-icon">01</span>
+                <h3>Try again</h3>
+                <p>Return to the previous page and repeat the request.</p>
+            </article>
+            <article class="feature-card">
+                <span class="feature-icon">02</span>
+                <h3>Check the docs</h3>
+                <p>Review authentication requirements, formats, and error responses.</p>
+                <a class="text-link" href="@Url.Action("Errors", "Documentation")">Open error reference &rarr;</a>
+            </article>
+            <article class="feature-card">
+                <span class="feature-icon">03</span>
+                <h3>Contact support</h3>
+                <p>Include the page URL and approximate time so the request can be investigated.</p>
+                <a class="text-link" href="mailto:support@autodealer.dev">support@autodealer.dev &rarr;</a>
+            </article>
+        </div>
+    </div>
+</section>

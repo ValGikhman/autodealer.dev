@@ -15,6 +15,7 @@
         var subgridEditForm = document.getElementById('dashboard-subgrid-edit-form');
         var subgridEditError = document.getElementById('dashboard-subgrid-edit-error');
         var subgridEditSave = document.getElementById('dashboard-subgrid-edit-save');
+        var subgridEditSaveIcon = document.getElementById('dashboard-subgrid-edit-save-icon');
         var subgridEditNote = document.getElementById('dashboard-subgrid-edit-note');
         var subgridEditCancel = document.getElementById('dashboard-subgrid-edit-cancel');
         var deleteClientOpen = document.getElementById('dashboard-client-delete-open');
@@ -81,6 +82,23 @@
             var label = button.querySelector('span');
             if (label) label.textContent = value;
             else button.textContent = value;
+        }
+        function subgridSubmitLabel(kind, submitting) {
+            if (kind === 'client-new') {
+                return submitting ? 'Creating account...' : 'Create account and issue key';
+            }
+            if (kind === 'subscription-new') {
+                return submitting ? 'Creating...' : 'Create subscription';
+            }
+            return submitting ? 'Saving...' : 'Save changes';
+        }
+        function setSubgridSubmitIcon(kind) {
+            var iconId = kind === 'client-new'
+                ? '#icon-user-add'
+                : kind === 'subscription-new'
+                    ? '#icon-plan'
+                    : '#icon-save';
+            subgridEditSaveIcon.setAttribute('href', iconId);
         }
         function setIconButtonLabel(button, value) {
             var label = button.querySelector('span');
@@ -154,14 +172,18 @@
             text('dashboard-record-title', isNewClient ? 'Create a new customer' : isClient ? 'Edit dealer account' : isApiKey ? 'Edit API key' : isNewSubscription ? 'Create a new subscription' : 'Edit subscription');
             text('dashboard-record-subtitle', isNewClient ? 'Generating a fresh client number...' : isNewSubscription ? 'Preparing subscription defaults...' : 'Loading record #' + recordId + '...');
             subgridEditNote.textContent = isClient
-                ? isNewClient ? 'A 14-day trial and primary API key will be created automatically.' : 'Changing account status affects customer access.'
+                ? isNewClient
+                    ? 'A 14-day trial will begin after the customer confirms their email. ' +
+                        'Their primary API key will then be issued securely.'
+                    : 'Changing account status affects customer access.'
                 : isApiKey ? 'Changing key status affects API access immediately.'
                     : isNewSubscription ? 'Review the plan, status, and billing period before creating the subscription.' : 'Double-check status and billing dates before saving.';
             subgridEditError.hidden = true;
             clientCreateResult.hidden = true;
             subgridEditSave.disabled = true;
             subgridEditSave.hidden = false;
-            setButtonLabel(subgridEditSave, isNewSubscription ? 'Create subscription' : 'Save changes');
+            setButtonLabel(subgridEditSave, subgridSubmitLabel(kind, false));
+            setSubgridSubmitIcon(kind);
             deleteClientOpen.hidden = true;
             setIconButtonLabel(subgridEditCancel, 'Cancel');
             subgridEditorElement.hidden = false;
@@ -265,7 +287,7 @@
                 value: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value
             });
             subgridEditSave.disabled = true;
-            setButtonLabel(subgridEditSave, context.kind === 'subscription-new' ? 'Creating...' : 'Saving...');
+            setButtonLabel(subgridEditSave, subgridSubmitLabel(context.kind, true));
             subgridEditError.hidden = true;
 
             $.ajax({ url: context.editUrl, method: 'POST', dataType: 'json', data: data }).done(function (response) {
@@ -299,7 +321,7 @@
                 showSubgridEditError(response.Message || 'The record could not be saved.');
             }).always(function () {
                 subgridEditSave.disabled = false;
-                setButtonLabel(subgridEditSave, context.kind === 'subscription-new' ? 'Create subscription' : 'Save changes');
+                setButtonLabel(subgridEditSave, subgridSubmitLabel(context.kind, false));
             });
         });
 

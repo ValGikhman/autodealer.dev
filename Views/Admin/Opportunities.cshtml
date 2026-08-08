@@ -5,16 +5,35 @@
     @Styles.Render("~/bundles/admin-css")
 }
 
-<section class="site-hero page-hero dashboard-hero admin-hero"><div class="shell site-hero-shell"><div class="hero-copy">
-    <span class="eyebrow">ADMIN CONTROL ROOM</span><h1>New opportunities.</h1><p>@Model.DemoRequests.Count recent dealer demo requests</p>
-</div></div></section>
-<section class="section light-section dashboard-section"><div class="shell">
-    <div class="section-heading"><span class="eyebrow">OPPORTUNITY DIRECTORY</span><h2>Prospective dealers.</h2><span class="status-badge">@Model.DemoRequests.Count recent</span></div>
+<section class="site-hero page-hero dashboard-hero admin-hero">
+    <div class="shell site-hero-shell">
+        <div class="hero-copy">
+    <span class="eyebrow">ADMIN CONTROL ROOM</span>
+    <h1>New opportunities.</h1>
+    <p>@Model.DemoRequests.Count recent dealer demo requests</p>
+</div>
+</div>
+</section>
+<section class="section light-section dashboard-section">
+    <div class="shell">
+    <div class="section-heading">
+        <span class="eyebrow">OPPORTUNITY DIRECTORY</span>
+        <h2>Prospective dealers.</h2>
+        <span class="status-badge">@Model.DemoRequests.Count recent</span>
+    </div>
     <section class="admin-customer-panel dashboard-grid-panel" aria-labelledby="demo-grid-title">
-        <div class="admin-table-heading"><div><span class="eyebrow">DEALER DEMO REQUESTS</span><h2 id="demo-grid-title">New opportunities</h2></div><span>@Model.DemoRequests.Count recent</span></div>
-        <div id="demo-request-grid" class="admin-pep-grid" data-url="@Url.Action("DemoRequestGridData", "Admin")" data-new-url="@Url.Action("NewDemoRequest", "Admin")" data-edit-url="@Url.Action("EditDemoRequest", "Admin")" data-delete-url="@Url.Action("DeleteDemoRequest", "Admin")"></div>
+        <div class="admin-table-heading">
+            <div>
+                <span class="eyebrow">DEALER DEMO REQUESTS</span>
+                <h2 id="demo-grid-title">New opportunities</h2>
+            </div>
+            <span>@Model.DemoRequests.Count recent</span>
+        </div>
+        <div id="demo-request-grid" class="admin-pep-grid" data-url="@Url.Action("DemoRequestGridData", "Admin")" data-new-url="@Url.Action("NewDemoRequest", "Admin")" data-edit-url="@Url.Action("EditDemoRequest", "Admin")" data-delete-url="@Url.Action("DeleteDemoRequest", "Admin")">
+        </div>
     </section>
-</div></section>
+</div>
+</section>
 
 @Html.Partial("_AdminRecordModal")
 

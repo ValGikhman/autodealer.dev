@@ -17,11 +17,17 @@ namespace autodealer.dev.Controllers {
         private readonly IAdminService adminService;
         private readonly IApiKeyIssuanceService apiKeyIssuanceService;
         private readonly IClientAccountService clientAccountService;
+        private readonly IPlanService planService;
 
-        public AdminController(IAdminService adminService, IApiKeyIssuanceService apiKeyIssuanceService, IClientAccountService clientAccountService) {
+        public AdminController(
+            IAdminService adminService,
+            IApiKeyIssuanceService apiKeyIssuanceService,
+            IClientAccountService clientAccountService,
+            IPlanService planService) {
             this.adminService = adminService;
             this.apiKeyIssuanceService = apiKeyIssuanceService;
             this.clientAccountService = clientAccountService;
+            this.planService = planService;
         }
 
         [AllowAnonymous]
@@ -89,10 +95,13 @@ namespace autodealer.dev.Controllers {
                 customer.ApiKeyCount,
                 customer.SubscriptionCount,
                 customer.EmailCount,
-                PeriodEnd = customer.PeriodEndUtc.HasValue ? customer.PeriodEndUtc.Value.ToString("MMM d, yyyy") : "N/A",
+                PeriodEnd = customer.PeriodEndUtc.HasValue
+                    ? customer.PeriodEndUtc.Value.ToString("MMM d, yyyy")
+                    : "N/A",
                 Created = customer.CreatedUtc.ToString("MMM d, yyyy"),
                 CreatedSort = customer.CreatedUtc.ToString("o"),
-                ContactHref = "mailto:" + customer.Email + "?subject=" + Uri.EscapeDataString("Your AutoDealer.dev account")
+                ContactHref = "mailto:" + customer.Email + "?subject=" +
+                    Uri.EscapeDataString("Your AutoDealer.dev account")
             });
             return Json(new { Data = rows }, JsonRequestBehavior.AllowGet);
         }
@@ -109,9 +118,15 @@ namespace autodealer.dev.Controllers {
                 key.Status,
                 Created = key.CreatedUtc.ToString("MMM d, yyyy HH:mm 'UTC'"),
                 CreatedSort = key.CreatedUtc.ToString("o"),
-                LastUsed = key.LastUsedUtc.HasValue ? key.LastUsedUtc.Value.ToString("MMM d, yyyy HH:mm 'UTC'") : "Never",
-                Expires = key.ExpiresUtc.HasValue ? key.ExpiresUtc.Value.ToString("MMM d, yyyy HH:mm 'UTC'") : "No expiration",
-                Revoked = key.RevokedUtc.HasValue ? key.RevokedUtc.Value.ToString("MMM d, yyyy HH:mm 'UTC'") : string.Empty
+                LastUsed = key.LastUsedUtc.HasValue
+                    ? key.LastUsedUtc.Value.ToString("MMM d, yyyy HH:mm 'UTC'")
+                    : "Never",
+                Expires = key.ExpiresUtc.HasValue
+                    ? key.ExpiresUtc.Value.ToString("MMM d, yyyy HH:mm 'UTC'")
+                    : "No expiration",
+                Revoked = key.RevokedUtc.HasValue
+                    ? key.RevokedUtc.Value.ToString("MMM d, yyyy HH:mm 'UTC'")
+                    : string.Empty
             });
             var subscriptions = details.Subscriptions.Select(subscription => new {
                 subscription.SubscriptionId,
@@ -125,7 +140,9 @@ namespace autodealer.dev.Controllers {
                 PeriodEnd = subscription.CurrentPeriodEndUtc.ToString("MMM d, yyyy HH:mm 'UTC'"),
                 PeriodEndSort = subscription.CurrentPeriodEndUtc.ToString("o"),
                 CancelAtPeriodEnd = subscription.CancelAtPeriodEnd ? "Yes" : "No",
-                ProviderSubscription = string.IsNullOrWhiteSpace(subscription.ProviderSubscriptionId) ? "Not connected" : subscription.ProviderSubscriptionId,
+                ProviderSubscription = string.IsNullOrWhiteSpace(subscription.ProviderSubscriptionId)
+                    ? "Not connected"
+                    : subscription.ProviderSubscriptionId,
                 Created = subscription.CreatedUtc.ToString("MMM d, yyyy HH:mm 'UTC'")
             });
             return Json(new { ApiKeys = apiKeys, Subscriptions = subscriptions }, JsonRequestBehavior.AllowGet);
@@ -157,7 +174,10 @@ namespace autodealer.dev.Controllers {
             }
             catch (SqlException) {
                 Response.StatusCode = 503;
-                return Json(new { Ok = false, Message = "The API key could not be issued because the database is temporarily unavailable." });
+                return Json(new {
+                    Ok = false,
+                    Message = "The API key could not be issued because the database is temporarily unavailable."
+                });
             }
         }
 
@@ -167,12 +187,16 @@ namespace autodealer.dev.Controllers {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
             Response.Cache.SetNoStore();
             try {
-                var model = adminService.GetNewClientDefaults();
+                var defaults = adminService.GetNewClientDefaults();
+                var model = new AccountRegistrationViewModel { PlanCode = defaults.PlanCode };
+                planService.PopulatePlanOptions(model);
+                if (model.PlanOptions.Count == 0)
+                    throw new InvalidOperationException("No active subscription plans are available.");
                 return Json(new {
                     Ok = true,
                     Entity = "clientNew",
-                    model.ClientNumber,
-                    model.TemporaryPassword,
+                    defaults.ClientNumber,
+                    defaults.TemporaryPassword,
                     model.PlanCode,
                     model.PlanOptions
                 }, JsonRequestBehavior.AllowGet);
@@ -207,7 +231,10 @@ namespace autodealer.dev.Controllers {
             }
             catch (SqlException) {
                 Response.StatusCode = 503;
-                return Json(new { Ok = false, Message = "The customer could not be created because the database is temporarily unavailable." });
+                return Json(new {
+                    Ok = false,
+                    Message = "The customer could not be created because the database is temporarily unavailable."
+                });
             }
         }
 
@@ -267,7 +294,10 @@ namespace autodealer.dev.Controllers {
             }
             catch (SqlException) {
                 Response.StatusCode = 503;
-                return Json(new { Ok = false, Message = "The dealer account could not be updated because the database is temporarily unavailable." });
+                return Json(new {
+                    Ok = false,
+                    Message = "The dealer account could not be updated because the database is temporarily unavailable."
+                });
             }
         }
 
@@ -299,12 +329,16 @@ namespace autodealer.dev.Controllers {
             catch (SqlException ex) {
                 Response.StatusCode = 503;
                 var message = ex.Number == 229
-                    ? "The application database user cannot delete client records. Run Database/005_AdminClientDeletionPermissions.sql against the production database."
+                    ? "The application database user cannot delete client records. " +
+                        "Run Database/005_AdminClientDeletionPermissions.sql against the production database."
                         : ex.Number == 547
-                            ? "A related database table currently prevents this client from being deleted. No records were removed."
+                            ? "A related database table currently prevents this client from being deleted. " +
+                                "No records were removed."
                             : ex.Number == -2
-                                ? "Client deletion timed out. No records were removed; try again after database activity has settled."
-                                : "The customer could not be deleted because the database operation failed (SQL " + ex.Number + "). No records were removed.";
+                                ? "Client deletion timed out. No records were removed; " +
+                                    "try again after database activity has settled."
+                                : "The customer could not be deleted because the database operation failed " +
+                                    "(SQL " + ex.Number + "). No records were removed.";
                 return Json(new { Ok = false, Message = message });
             }
         }
@@ -343,7 +377,10 @@ namespace autodealer.dev.Controllers {
             }
             catch (SqlException) {
                 Response.StatusCode = 503;
-                return Json(new { Ok = false, Message = "The API key could not be updated because the database is temporarily unavailable." });
+                return Json(new {
+                    Ok = false,
+                    Message = "The API key could not be updated because the database is temporarily unavailable."
+                });
             }
         }
 
@@ -353,7 +390,9 @@ namespace autodealer.dev.Controllers {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
             Response.Cache.SetNoStore();
             try {
-                return Json(SubscriptionEditResponse(adminService.GetNewSubscriptionDefaults(clientId)), JsonRequestBehavior.AllowGet);
+                return Json(
+                    SubscriptionEditResponse(adminService.GetNewSubscriptionDefaults(clientId)),
+                    JsonRequestBehavior.AllowGet);
             }
             catch (KeyNotFoundException ex) {
                 Response.StatusCode = 404;
@@ -385,7 +424,10 @@ namespace autodealer.dev.Controllers {
             }
             catch (SqlException) {
                 Response.StatusCode = 503;
-                return Json(new { Ok = false, Message = "The subscription could not be created because the database is temporarily unavailable." });
+                return Json(new {
+                    Ok = false,
+                    Message = "The subscription could not be created because the database is temporarily unavailable."
+                });
             }
         }
 
@@ -395,7 +437,9 @@ namespace autodealer.dev.Controllers {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
             Response.Cache.SetNoStore();
             try {
-                return Json(SubscriptionEditResponse(adminService.GetSubscriptionForEdit(id)), JsonRequestBehavior.AllowGet);
+                return Json(
+                    SubscriptionEditResponse(adminService.GetSubscriptionForEdit(id)),
+                    JsonRequestBehavior.AllowGet);
             }
             catch (KeyNotFoundException ex) {
                 Response.StatusCode = 404;
@@ -423,7 +467,10 @@ namespace autodealer.dev.Controllers {
             }
             catch (SqlException) {
                 Response.StatusCode = 503;
-                return Json(new { Ok = false, Message = "The subscription could not be updated because the database is temporarily unavailable." });
+                return Json(new {
+                    Ok = false,
+                    Message = "The subscription could not be updated because the database is temporarily unavailable."
+                });
             }
         }
 
@@ -530,7 +577,9 @@ namespace autodealer.dev.Controllers {
         private ActionResult EditValidationFailure() {
             Response.StatusCode = 400;
             var message = ModelState.Values.SelectMany(x => x.Errors)
-                .Select(x => string.IsNullOrWhiteSpace(x.ErrorMessage) && x.Exception != null ? x.Exception.Message : x.ErrorMessage)
+                .Select(x => string.IsNullOrWhiteSpace(x.ErrorMessage) && x.Exception != null
+                    ? x.Exception.Message
+                    : x.ErrorMessage)
                 .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
             return Json(new { Ok = false, Message = message ?? "Review the highlighted values and try again." });
         }
@@ -594,7 +643,10 @@ namespace autodealer.dev.Controllers {
                 request.PrimaryGoal,
                 request.LocationCount,
                 request.InventorySize,
-                Inventory = request.InventorySize + (request.LocationCount.HasValue ? " / " + request.LocationCount.Value + " location" + (request.LocationCount.Value == 1 ? "" : "s") : string.Empty),
+                Inventory = request.InventorySize + (request.LocationCount.HasValue
+                    ? " / " + request.LocationCount.Value + " location" +
+                        (request.LocationCount.Value == 1 ? "" : "s")
+                    : string.Empty),
                 request.Message,
                 request.PreferredContact,
                 request.Status,
@@ -610,7 +662,9 @@ namespace autodealer.dev.Controllers {
         [AdminAuthorize]
         [HttpGet]
         public ActionResult NewDemoRequest() {
-            return Json(DemoRequestEditResponse(adminService.GetNewDemoRequestDefaults(), true), JsonRequestBehavior.AllowGet);
+            return Json(
+                DemoRequestEditResponse(adminService.GetNewDemoRequestDefaults(), true),
+                JsonRequestBehavior.AllowGet);
         }
 
         [AdminAuthorize]
@@ -627,7 +681,10 @@ namespace autodealer.dev.Controllers {
             }
             catch (SqlException) {
                 Response.StatusCode = 503;
-                return Json(new { Ok = false, Message = "The opportunity could not be created because the database is temporarily unavailable." });
+                return Json(new {
+                    Ok = false,
+                    Message = "The opportunity could not be created because the database is temporarily unavailable."
+                });
             }
         }
 
@@ -635,7 +692,9 @@ namespace autodealer.dev.Controllers {
         [HttpGet]
         public ActionResult EditDemoRequest(Guid id) {
             try {
-                return Json(DemoRequestEditResponse(adminService.GetDemoRequestForEdit(id), false), JsonRequestBehavior.AllowGet);
+                return Json(
+                    DemoRequestEditResponse(adminService.GetDemoRequestForEdit(id), false),
+                    JsonRequestBehavior.AllowGet);
             }
             catch (KeyNotFoundException ex) {
                 Response.StatusCode = 404;
@@ -657,7 +716,10 @@ namespace autodealer.dev.Controllers {
             }
             catch (ChangeConflictException) {
                 Response.StatusCode = 409;
-                return Json(new { Ok = false, Message = "This opportunity changed while it was being edited. Refresh the grid and try again." });
+                return Json(new {
+                    Ok = false,
+                    Message = "This opportunity changed while it was being edited. Refresh the grid and try again."
+                });
             }
             catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException) {
                 Response.StatusCode = 400;
@@ -666,12 +728,15 @@ namespace autodealer.dev.Controllers {
             catch (SqlException ex) {
                 Response.StatusCode = 503;
                 var message = ex.Number == 547
-                    ? "The production opportunity-status constraint is out of date. Run the latest Database/005_AdminClientDeletionPermissions.sql, then try again."
+                    ? "The production opportunity-status constraint is out of date. " +
+                        "Run the latest Database/005_AdminClientDeletionPermissions.sql, then try again."
                     : ex.Number == 229
-                        ? "The AUTODEALER database user cannot update opportunity records. Grant UPDATE on dbo.DealerDemoRequests to the production user."
+                        ? "The AUTODEALER database user cannot update opportunity records. " +
+                            "Grant UPDATE on dbo.DealerDemoRequests to the production user."
                         : ex.Number == 8152 || ex.Number == 2628
                             ? "One of the opportunity values is longer than the database column allows."
-                            : "The opportunity could not be updated because the database operation failed (SQL " + ex.Number + ").";
+                            : "The opportunity could not be updated because the database operation failed " +
+                                "(SQL " + ex.Number + ").";
                 return Json(new { Ok = false, Message = message });
             }
         }
@@ -684,11 +749,17 @@ namespace autodealer.dev.Controllers {
             Response.Cache.SetNoStore();
             if (!confirmDelete) {
                 Response.StatusCode = 400;
-                return Json(new { Ok = false, Message = "Check the confirmation box before deleting this opportunity." });
+                return Json(new {
+                    Ok = false,
+                    Message = "Check the confirmation box before deleting this opportunity."
+                });
             }
             try {
                 var businessName = adminService.DeleteDemoRequest(requestId);
-                return Json(new { Ok = true, Message = businessName + " was permanently removed from new opportunities." });
+                return Json(new {
+                    Ok = true,
+                    Message = businessName + " was permanently removed from new opportunities."
+                });
             }
             catch (KeyNotFoundException ex) {
                 Response.StatusCode = 404;
@@ -701,10 +772,13 @@ namespace autodealer.dev.Controllers {
             catch (SqlException ex) {
                 Response.StatusCode = 503;
                 var message = ex.Number == 229
-                    ? "The application database user cannot delete opportunity records. Run Database/005_AdminClientDeletionPermissions.sql against the production database."
+                    ? "The application database user cannot delete opportunity records. " +
+                        "Run Database/005_AdminClientDeletionPermissions.sql against the production database."
                     : ex.Number == 547
-                        ? "A related database record currently prevents this opportunity from being deleted. No records were removed."
-                        : "The opportunity could not be deleted because the database operation failed (SQL " + ex.Number + "). No records were removed.";
+                        ? "A related database record currently prevents this opportunity from being deleted. " +
+                            "No records were removed."
+                        : "The opportunity could not be deleted because the database operation failed " +
+                            "(SQL " + ex.Number + "). No records were removed.";
                 return Json(new { Ok = false, Message = message });
             }
         }

@@ -1,8 +1,34 @@
 @{ ViewBag.Title = "VIN Decode API"; var demoApiKey = System.Configuration.ConfigurationManager.AppSettings["DemoApi:Key"] ?? "ad_live_demo.keysecret"; }
-<section class="site-hero page-hero product-hero"><div class="shell site-hero-shell two-col"><div class="hero-copy"><span class="eyebrow">VIN DECODE API</span><h1>Every VIN. Every detail.</h1><p>Decode any VIN into a complete, application-ready vehicle record.</p><div class="button-row"><a class="button site-cta" href="@Url.Action("Register", "Account")"><span>Get an API key</span><i aria-hidden="true">&rarr;</i></a><a class="button button-secondary" href="@Url.Action("Index", "Documentation")">View reference</a></div></div><figure class="showroom-ad-visual vin-hero-visual"><img src="@Url.Content("~/Content/images/vin-html-api-promo-v2.png")" width="1536" height="1024" fetchpriority="high" decoding="async" alt="Responsive VIN Decode API report presented on desktop and mobile devices" /></figure></div></section>
+<section class="site-hero page-hero product-hero">
+    <div class="shell site-hero-shell two-col">
+        <div class="hero-copy">
+            <span class="eyebrow">VIN DECODE API</span>
+            <h1>Every VIN. Every detail.</h1>
+            <p>Decode any VIN into a complete, application-ready vehicle record.</p>
+            <div class="button-row">
+                <a class="button site-cta" href="@Url.Action("Register", "Account")">
+                    <span>Get an API key</span>
+                    <i aria-hidden="true">&rarr;</i>
+                </a>
+                <a class="button button-secondary" href="@Url.Action("Index", "Documentation")">View reference</a>
+            </div>
+        </div>
+        <figure class="showroom-ad-visual vin-hero-visual">
+            <img src="@Url.Content("~/Content/images/vin-html-api-promo-v2.png")" width="1536" height="1024" fetchpriority="high" decoding="async" alt="Responsive VIN Decode API report presented on desktop and mobile devices" />
+        </figure>
+    </div>
+</section>
 
-<section class="section light-section vin-playground-section"><div class="shell">
-    <div class="section-heading playground-heading"><span class="eyebrow">LIVE API PLAYGROUND</span><h2>Everything returned. Nothing guessed.</h2><p>Choose a format, enter a 17-character VIN, and call the real endpoint. JSON and XML are shown as source; HTML is rendered as a vehicle report.</p></div>
+<section class="section light-section vin-playground-section">
+    <div class="shell">
+    <div class="section-heading playground-heading">
+        <span class="eyebrow">LIVE API PLAYGROUND</span>
+        <h2>Everything returned. Nothing guessed.</h2>
+        <p>
+            Choose a format, enter a 17-character VIN, and call the real endpoint. JSON and XML are shown as
+            source; HTML is rendered as a vehicle report.
+        </p>
+    </div>
     <div class="vin-playground">
         <form class="vin-demo-form" id="vin-demo-form">
             <div class="vin-format-tabs" role="tablist" aria-label="Response format">
@@ -11,22 +37,55 @@
                 <button type="button" data-vin-format="html" role="tab" aria-selected="false">HTML</button>
             </div>
             <div class="vin-demo-fields">
-                <label><span>VIN NUMBER</span><input id="demo-vin" name="vin" value="1HGCM82633A004352" maxlength="17" autocomplete="off" spellcheck="false" required /></label>
-                <label><span>API KEY <small>5 VIN TRIALS</small></span><input id="demo-api-key" name="apiKey" type="text" value="@demoApiKey" autocomplete="off" /></label>
+                <label>
+                    <span>VIN NUMBER</span>
+                    <input id="demo-vin" name="vin" value="1HGCM82633A004352" maxlength="17" autocomplete="off" spellcheck="false" required />
+                </label>
+                <label>
+                    <span>API KEY <small>5 VIN TRIALS</small>
+                    </span>
+                    <input id="demo-api-key" name="apiKey" type="text" value="@demoApiKey" autocomplete="off" />
+                </label>
                 <button class="button button-primary" type="submit">Run API call</button>
             </div>
-            <div class="vin-endpoint"><b>GET</b><code id="vin-endpoint">/api/service/vin/1HGCM82633A004352/json</code></div>
+            <div class="vin-endpoint">
+                <b>GET</b>
+                <code id="vin-endpoint">/api/service/vin/1HGCM82633A004352/json</code>
+            </div>
         </form>
 
         <div class="vin-demo-response">
-            <div class="vin-response-head"><span><i></i><b id="vin-response-title">JSON response</b></span><div><em id="vin-demo-status">Ready</em><button type="button" id="copy-vin-response">Copy</button></div></div>
-            <pre class="vin-source-panel" data-vin-panel="json"><code id="vin-json-output">Run the API call to see the real JSON response.</code></pre>
-            <pre class="vin-source-panel" data-vin-panel="xml" hidden><code id="vin-xml-output">Run the API call to see the real XML response.</code></pre>
-            <pre class="vin-source-panel" data-vin-panel="html" hidden><code id="vin-html-source">Run the API call to see the real HTML response.</code></pre>
-            <div class="vin-html-panel" id="vin-html-output" hidden><div class="html-sample-card"><span>HTML PREVIEW</span><h3>Vehicle decode report</h3><p>Run the API call to render the complete responsive HTML fragment here.</p></div></div>
+            <div class="vin-response-head">
+                <span>
+                    <i>
+                    </i>
+                    <b id="vin-response-title">JSON response</b>
+                </span>
+                <div>
+                    <em id="vin-demo-status">Ready</em>
+                    <button type="button" id="copy-vin-response">Copy</button>
+                </div>
+            </div>
+            <pre class="vin-source-panel" data-vin-panel="json">
+                <code id="vin-json-output">Run the API call to see the real JSON response.</code>
+            </pre>
+            <pre class="vin-source-panel" data-vin-panel="xml" hidden>
+                <code id="vin-xml-output">Run the API call to see the real XML response.</code>
+            </pre>
+            <pre class="vin-source-panel" data-vin-panel="html" hidden>
+                <code id="vin-html-source">Run the API call to see the real HTML response.</code>
+            </pre>
+            <div class="vin-html-panel" id="vin-html-output" hidden>
+                <div class="html-sample-card">
+                    <span>HTML PREVIEW</span>
+                    <h3>Vehicle decode report</h3>
+                    <p>Run the API call to render the complete responsive HTML fragment here.</p>
+                </div>
+            </div>
         </div>
     </div>
-</div></section>
+</div>
+</section>
 
 @section scripts {
 <script>

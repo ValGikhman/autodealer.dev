@@ -1,10 +1,8 @@
 using autodealer.dev.Models;
 using autodealer.dev.Services;
 using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Web;
 using System.Web.Security;
 using System.Web.Mvc;
@@ -23,8 +21,10 @@ namespace autodealer.dev.Controllers {
         public ActionResult Register(string plan) {
             if (User.IsInRole("Admin")) return RedirectToAction("Dashboard", "Admin");
             if (Request.IsAuthenticated) return RedirectToAction("Dashboard");
-            var model = new AccountRegistrationViewModel { PlanCode = (plan ?? string.Empty).Trim().ToUpperInvariant() };
-            PopulatePlanOptions(model);
+            var model = new AccountRegistrationViewModel {
+                PlanCode = (plan ?? string.Empty).Trim().ToUpperInvariant()
+            };
+            planService.PopulatePlanOptions(model);
             return View(model);
         }
 
@@ -32,7 +32,7 @@ namespace autodealer.dev.Controllers {
         [ValidateAntiForgeryToken]
         public ActionResult Register(AccountRegistrationViewModel model) {
             if (!ModelState.IsValid) {
-                PopulatePlanOptions(model);
+                planService.PopulatePlanOptions(model);
                 return View(model);
             }
             try {
@@ -50,7 +50,7 @@ namespace autodealer.dev.Controllers {
             }
             model.Password = null;
             model.ConfirmPassword = null;
-            PopulatePlanOptions(model);
+            planService.PopulatePlanOptions(model);
             return View(model);
         }
 
@@ -114,7 +114,9 @@ namespace autodealer.dev.Controllers {
             try {
                 var account = accountService.Authenticate(model.Email, model.Password);
                 if (account == null) {
-                    ModelState.AddModelError("", "The email or password is incorrect, or the account is temporarily locked.");
+                    ModelState.AddModelError(
+                        "",
+                        "The email or password is incorrect, or the account is temporarily locked.");
                     model.Password = null;
                     return View(model);
                 }
@@ -155,21 +157,5 @@ namespace autodealer.dev.Controllers {
             return RedirectToAction("Index", "Home");
         }
 
-        private void PopulatePlanOptions(AccountRegistrationViewModel model) {
-            try {
-                var plans = planService.GetActivePlans();
-                if (!plans.Any(x => string.Equals(x.PlanCode, model.PlanCode, StringComparison.OrdinalIgnoreCase)))
-                    model.PlanCode = plans.Select(x => x.PlanCode).FirstOrDefault();
-
-                model.PlanOptions = plans.Select(x => new SelectListItem {
-                    Value = x.PlanCode,
-                    Text = x.DisplayName.ToUpperInvariant() + " (" + (x.MonthlyPrice.HasValue ? x.MonthlyPrice.Value.ToString("$0.##") : "Custom") + ")",
-                    Selected = string.Equals(x.PlanCode, model.PlanCode, StringComparison.OrdinalIgnoreCase)
-                }).ToList();
-            }
-            catch (SqlException) {
-                model.PlanOptions = new List<SelectListItem>();
-            }
-        }
     }
 }

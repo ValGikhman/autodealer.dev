@@ -30,7 +30,10 @@ namespace autodealer.dev.Services {
                 !int.TryParse(iterationsValue, out iterations) || iterations < 100000)
                 throw new InvalidOperationException("Administrator authentication is not configured correctly.");
 
-            var userMatches = string.Equals((userId ?? string.Empty).Trim(), configuredUser, StringComparison.OrdinalIgnoreCase);
+            var userMatches = string.Equals(
+                (userId ?? string.Empty).Trim(),
+                configuredUser,
+                StringComparison.OrdinalIgnoreCase);
             byte[] salt;
             byte[] expectedHash;
             try {
@@ -42,7 +45,11 @@ namespace autodealer.dev.Services {
             }
 
             byte[] candidateHash;
-            using (var derive = new Rfc2898DeriveBytes(password ?? string.Empty, salt, iterations, HashAlgorithmName.SHA256))
+            using (var derive = new Rfc2898DeriveBytes(
+                password ?? string.Empty,
+                salt,
+                iterations,
+                HashAlgorithmName.SHA256))
                 candidateHash = derive.GetBytes(expectedHash.Length);
 
             return userMatches && FixedTimeEquals(candidateHash, expectedHash);
@@ -90,7 +97,9 @@ namespace autodealer.dev.Services {
 
                 var customerRows = new List<AdminCustomerViewModel>();
                 foreach (var client in clients) {
-                    var subscription = subscriptions.ContainsKey(client.ClientId) ? subscriptions[client.ClientId] : null;
+                    var subscription = subscriptions.ContainsKey(client.ClientId)
+                        ? subscriptions[client.ClientId]
+                        : null;
                     customerRows.Add(new AdminCustomerViewModel {
                         ClientId = client.ClientId,
                         ClientNumber = client.ClientNumber,
@@ -102,7 +111,9 @@ namespace autodealer.dev.Services {
                         PeriodEndUtc = subscription == null ? (DateTime?)null : subscription.CurrentPeriodEndUtc,
                         ActiveApiKeyCount = keyCounts.ContainsKey(client.ClientId) ? keyCounts[client.ClientId] : 0,
                         ApiKeyCount = allKeyCounts.ContainsKey(client.ClientId) ? allKeyCounts[client.ClientId] : 0,
-                        SubscriptionCount = subscriptionCounts.ContainsKey(client.ClientId) ? subscriptionCounts[client.ClientId] : 0,
+                        SubscriptionCount = subscriptionCounts.ContainsKey(client.ClientId)
+                            ? subscriptionCounts[client.ClientId]
+                            : 0,
                         EmailCount = emailCounts.ContainsKey(client.ClientId) ? emailCounts[client.ClientId] : 0,
                         CreatedUtc = client.CreatedUtc
                     });
@@ -217,20 +228,15 @@ namespace autodealer.dev.Services {
                         break;
                     }
                 }
-                if (clientNumber == null) throw new InvalidOperationException("A unique client number could not be generated. Try again.");
+                if (clientNumber == null)
+                    throw new InvalidOperationException(
+                        "A unique client number could not be generated. Try again.");
 
-                var plans = context.Plans.Where(x => x.IsActive)
-                    .OrderBy(x => x.MonthlyPrice)
-                    .ThenBy(x => x.DisplayName)
-                    .Select(x => new AdminEditOptionViewModel { Value = x.PlanCode, Text = x.DisplayName + " (" + x.PlanCode + ")" })
-                    .ToList();
-                if (plans.Count == 0) throw new InvalidOperationException("No active subscription plans are available.");
                 return new AdminClientCreateViewModel {
                     ClientNumber = clientNumber,
                     TemporaryPassword = ClientNumberGenerator.GenerateTemporaryPassword(),
                     ConfirmTemporaryPassword = null,
-                    PlanCode = plans[0].Value,
-                    PlanOptions = plans
+                    PlanOptions = new List<AdminEditOptionViewModel>()
                 };
             }
         }
@@ -245,11 +251,14 @@ namespace autodealer.dev.Services {
             var email = (model.Email ?? string.Empty).Trim().ToLowerInvariant();
             var phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim();
             var status = (model.Status ?? string.Empty).Trim().ToLowerInvariant();
-            if (businessName.Length == 0 || businessName.Length > 160) throw new ArgumentException("Enter a business name of 160 characters or fewer.");
+            if (businessName.Length == 0 || businessName.Length > 160)
+                throw new ArgumentException("Enter a business name of 160 characters or fewer.");
             if (firstName.Length == 0 || firstName.Length > 80 || lastName.Length == 0 || lastName.Length > 80)
                 throw new ArgumentException("Enter both contact names using 80 characters or fewer.");
-            if (email.Length == 0 || email.Length > 254) throw new ArgumentException("Enter a valid account email address.");
-            if (phone != null && phone.Length > 32) throw new ArgumentException("Enter a phone number of 32 characters or fewer.");
+            if (email.Length == 0 || email.Length > 254)
+                throw new ArgumentException("Enter a valid account email address.");
+            if (phone != null && phone.Length > 32)
+                throw new ArgumentException("Enter a phone number of 32 characters or fewer.");
             if (status != "pending" && status != "active" && status != "suspended" && status != "closed")
                 throw new ArgumentException("Select a valid dealer account status.");
 
@@ -289,17 +298,21 @@ namespace autodealer.dev.Services {
                         var businessName = client.BusinessName;
 
                         context.ApiUsageLogs.DeleteAllOnSubmit(context.ApiUsageLogs.Where(x => x.ClientId == clientId));
-                        context.ApiUsageDailies.DeleteAllOnSubmit(context.ApiUsageDailies.Where(x => x.ClientId == clientId));
+                        context.ApiUsageDailies.DeleteAllOnSubmit(
+                            context.ApiUsageDailies.Where(x => x.ClientId == clientId));
                         context.SubmitChanges();
 
                         context.ApiKeys.DeleteAllOnSubmit(context.ApiKeys.Where(x => x.ClientId == clientId));
                         context.SubmitChanges();
 
-                        context.PaymentProfiles.DeleteAllOnSubmit(context.PaymentProfiles.Where(x => x.ClientId == clientId));
-                        context.ClientCredentials.DeleteAllOnSubmit(context.ClientCredentials.Where(x => x.ClientId == clientId));
+                        context.PaymentProfiles.DeleteAllOnSubmit(
+                            context.PaymentProfiles.Where(x => x.ClientId == clientId));
+                        context.ClientCredentials.DeleteAllOnSubmit(
+                            context.ClientCredentials.Where(x => x.ClientId == clientId));
                         context.SubmitChanges();
 
-                        context.Subscriptions.DeleteAllOnSubmit(context.Subscriptions.Where(x => x.ClientId == clientId));
+                        context.Subscriptions.DeleteAllOnSubmit(
+                            context.Subscriptions.Where(x => x.ClientId == clientId));
                         context.SubmitChanges();
 
                         context.Clients.DeleteOnSubmit(client);
@@ -344,7 +357,8 @@ namespace autodealer.dev.Services {
             if (requestId == Guid.Empty) throw new ArgumentException("Select a valid opportunity.");
             EnsureDatabaseConfigured();
             using (var context = new AutoDealerDataContext(connectionString)) {
-                var request = context.GetTable<DealerDemoRequestRecord>().SingleOrDefault(x => x.RequestId == requestId);
+                var request = context.GetTable<DealerDemoRequestRecord>()
+                    .SingleOrDefault(x => x.RequestId == requestId);
                 if (request == null) throw new KeyNotFoundException("The opportunity could not be found.");
                 return MapDemoRequestEdit(request);
             }
@@ -361,21 +375,35 @@ namespace autodealer.dev.Services {
             var website = string.IsNullOrWhiteSpace(model.CurrentWebsite) ? null : model.CurrentWebsite.Trim();
             var inventorySize = (model.InventorySize ?? string.Empty).Trim();
             var primaryGoal = (model.PrimaryGoal ?? string.Empty).Trim();
-            var preferredContact = string.Equals(model.PreferredContact, "Phone", StringComparison.OrdinalIgnoreCase) ? "Phone" : "Email";
+            var preferredContact = string.Equals(
+                model.PreferredContact,
+                "Phone",
+                StringComparison.OrdinalIgnoreCase)
+                    ? "Phone"
+                    : "Email";
             var message = (model.Message ?? string.Empty).Trim();
             var status = (model.Status ?? string.Empty).Trim().ToLowerInvariant();
 
-            if (businessName.Length == 0 || businessName.Length > 160) throw new ArgumentException("Enter a business name of 160 characters or fewer.");
-            if (contactName.Length == 0 || contactName.Length > 160) throw new ArgumentException("Enter a contact name of 160 characters or fewer.");
-            if (email.Length == 0 || email.Length > 254) throw new ArgumentException("Enter a valid contact email address.");
-            if (phone != null && phone.Length > 32) throw new ArgumentException("Enter a phone number of 32 characters or fewer.");
-            if (preferredContact == "Phone" && phone == null) throw new ArgumentException("Enter a phone number when phone is the preferred contact method.");
-            if (website != null && website.Length > 300) throw new ArgumentException("Enter a website of 300 characters or fewer.");
+            if (businessName.Length == 0 || businessName.Length > 160)
+                throw new ArgumentException("Enter a business name of 160 characters or fewer.");
+            if (contactName.Length == 0 || contactName.Length > 160)
+                throw new ArgumentException("Enter a contact name of 160 characters or fewer.");
+            if (email.Length == 0 || email.Length > 254)
+                throw new ArgumentException("Enter a valid contact email address.");
+            if (phone != null && phone.Length > 32)
+                throw new ArgumentException("Enter a phone number of 32 characters or fewer.");
+            if (preferredContact == "Phone" && phone == null)
+                throw new ArgumentException("Enter a phone number when phone is the preferred contact method.");
+            if (website != null && website.Length > 300)
+                throw new ArgumentException("Enter a website of 300 characters or fewer.");
             if (!model.LocationCount.HasValue || model.LocationCount.Value < 1 || model.LocationCount.Value > 1000)
                 throw new ArgumentException("Enter a location count between 1 and 1000.");
-            if (inventorySize.Length == 0 || inventorySize.Length > 80) throw new ArgumentException("Enter an inventory size of 80 characters or fewer.");
-            if (primaryGoal.Length == 0 || primaryGoal.Length > 120) throw new ArgumentException("Enter a primary goal of 120 characters or fewer.");
-            if (message.Length == 0 || message.Length > 3000) throw new ArgumentException("Enter an opportunity message of 3000 characters or fewer.");
+            if (inventorySize.Length == 0 || inventorySize.Length > 80)
+                throw new ArgumentException("Enter an inventory size of 80 characters or fewer.");
+            if (primaryGoal.Length == 0 || primaryGoal.Length > 120)
+                throw new ArgumentException("Enter a primary goal of 120 characters or fewer.");
+            if (message.Length == 0 || message.Length > 3000)
+                throw new ArgumentException("Enter an opportunity message of 3000 characters or fewer.");
             if (status != "new" && status != "active" && status != "postponed" && status != "closed")
                 throw new ArgumentException("Select a valid opportunity status.");
 
@@ -426,17 +454,23 @@ namespace autodealer.dev.Services {
             var name = (model.Name ?? string.Empty).Trim();
             var scopes = (model.Scopes ?? string.Empty).Trim().ToLowerInvariant();
             var status = (model.Status ?? string.Empty).Trim().ToLowerInvariant();
-            if (name.Length == 0 || name.Length > 80) throw new ArgumentException("Enter an API key name of 80 characters or fewer.");
+            if (name.Length == 0 || name.Length > 80)
+                throw new ArgumentException("Enter an API key name of 80 characters or fewer.");
             if (scopes != "vin:read") throw new ArgumentException("Select a supported API scope.");
-            if (status != "active" && status != "revoked" && status != "expired") throw new ArgumentException("Select a valid API key status.");
+            if (status != "active" && status != "revoked" && status != "expired")
+                throw new ArgumentException("Select a valid API key status.");
             if (status == "active" && model.ExpiresUtc.HasValue && model.ExpiresUtc.Value <= DateTime.UtcNow)
-                throw new ArgumentException("An active API key must have a future expiration date or no expiration date.");
+                throw new ArgumentException(
+                    "An active API key must have a future expiration date or no expiration date.");
 
             using (var context = new AutoDealerDataContext(connectionString)) {
                 var apiKey = context.ApiKeys.SingleOrDefault(x => x.ApiKeyId == model.ApiKeyId);
                 if (apiKey == null) throw new KeyNotFoundException("The API key could not be found.");
-                var subscriptionExists = context.Subscriptions.Any(x => x.SubscriptionId == model.SubscriptionId && x.ClientId == apiKey.ClientId);
-                if (!subscriptionExists) throw new ArgumentException("Select a subscription belonging to this customer.");
+                var subscriptionExists = context.Subscriptions.Any(x =>
+                    x.SubscriptionId == model.SubscriptionId &&
+                    x.ClientId == apiKey.ClientId);
+                if (!subscriptionExists)
+                    throw new ArgumentException("Select a subscription belonging to this customer.");
 
                 var now = DateTime.UtcNow;
                 apiKey.Name = name;
@@ -448,7 +482,10 @@ namespace autodealer.dev.Services {
                     : (DateTime?)null;
                 if (status == "revoked") apiKey.RevokedUtc = apiKey.RevokedUtc ?? now;
                 else apiKey.RevokedUtc = null;
-                if (status == "expired" && (!apiKey.ExpiresUtc.HasValue || apiKey.ExpiresUtc.Value > now)) apiKey.ExpiresUtc = now;
+                if (status == "expired" &&
+                    (!apiKey.ExpiresUtc.HasValue || apiKey.ExpiresUtc.Value > now)) {
+                    apiKey.ExpiresUtc = now;
+                }
                 context.SubmitChanges();
                 return MapApiKeyEdit(context, apiKey);
             }
@@ -460,7 +497,9 @@ namespace autodealer.dev.Services {
                 if (!context.Clients.Any(x => x.ClientId == clientId))
                     throw new KeyNotFoundException("The dealer account could not be found.");
                 var plan = context.Plans.Where(x => x.IsActive).OrderBy(x => x.PlanId).FirstOrDefault();
-                if (plan == null) throw new InvalidOperationException("Create or activate a subscription plan before adding a subscription.");
+                if (plan == null)
+                    throw new InvalidOperationException(
+                        "Create or activate a subscription plan before adding a subscription.");
                 var now = DateTime.UtcNow;
                 return new AdminSubscriptionEditViewModel {
                     ClientId = clientId,
@@ -493,7 +532,9 @@ namespace autodealer.dev.Services {
                     CurrentPeriodStartUtc = DateTime.SpecifyKind(model.CurrentPeriodStartUtc, DateTimeKind.Utc),
                     CurrentPeriodEndUtc = DateTime.SpecifyKind(model.CurrentPeriodEndUtc, DateTimeKind.Utc),
                     CancelAtPeriodEnd = model.CancelAtPeriodEnd,
-                    ProviderSubscriptionId = string.IsNullOrWhiteSpace(model.ProviderSubscriptionId) ? null : model.ProviderSubscriptionId.Trim(),
+                    ProviderSubscriptionId = string.IsNullOrWhiteSpace(model.ProviderSubscriptionId)
+                        ? null
+                        : model.ProviderSubscriptionId.Trim(),
                     CreatedUtc = now,
                     UpdatedUtc = now
                 };
@@ -521,11 +562,14 @@ namespace autodealer.dev.Services {
             using (var context = new AutoDealerDataContext(connectionString)) {
                 var subscription = context.Subscriptions.SingleOrDefault(x => x.SubscriptionId == model.SubscriptionId);
                 if (subscription == null) throw new KeyNotFoundException("The subscription could not be found.");
-                if (!context.Plans.Any(x => x.PlanId == model.PlanId)) throw new ArgumentException("Select a valid subscription plan.");
+                if (!context.Plans.Any(x => x.PlanId == model.PlanId))
+                    throw new ArgumentException("Select a valid subscription plan.");
 
                 subscription.PlanId = model.PlanId;
                 subscription.Status = status;
-                subscription.CurrentPeriodStartUtc = DateTime.SpecifyKind(model.CurrentPeriodStartUtc, DateTimeKind.Utc);
+                subscription.CurrentPeriodStartUtc = DateTime.SpecifyKind(
+                    model.CurrentPeriodStartUtc,
+                    DateTimeKind.Utc);
                 subscription.CurrentPeriodEndUtc = DateTime.SpecifyKind(model.CurrentPeriodEndUtc, DateTimeKind.Utc);
                 subscription.CancelAtPeriodEnd = model.CancelAtPeriodEnd;
                 subscription.ProviderSubscriptionId = string.IsNullOrWhiteSpace(model.ProviderSubscriptionId)
@@ -595,14 +639,19 @@ namespace autodealer.dev.Services {
 
         private static string ValidateSubscription(AdminSubscriptionEditViewModel model) {
             var status = (model.Status ?? string.Empty).Trim().ToLowerInvariant();
-            if (status != "trialing" && status != "active" && status != "past_due" && status != "paused" && status != "canceled")
+            if (status != "trialing" &&
+                status != "active" &&
+                status != "past_due" &&
+                status != "paused" &&
+                status != "canceled")
                 throw new ArgumentException("Select a valid subscription status.");
             if (model.CurrentPeriodEndUtc <= model.CurrentPeriodStartUtc)
                 throw new ArgumentException("The period end must be later than the period start.");
             return status;
         }
 
-        private static IReadOnlyList<AdminEditOptionViewModel> GetSubscriptionPlanOptions(AutoDealerDataContext context) {
+        private static IReadOnlyList<AdminEditOptionViewModel> GetSubscriptionPlanOptions(
+            AutoDealerDataContext context) {
             return context.Plans
                 .OrderByDescending(x => x.IsActive)
                 .ThenBy(x => x.DisplayName)
@@ -614,7 +663,9 @@ namespace autodealer.dev.Services {
                 }).ToList();
         }
 
-        private static AdminSubscriptionEditViewModel MapSubscriptionEdit(AutoDealerDataContext context, Subscription subscription) {
+        private static AdminSubscriptionEditViewModel MapSubscriptionEdit(
+            AutoDealerDataContext context,
+            Subscription subscription) {
             return new AdminSubscriptionEditViewModel {
                 SubscriptionId = subscription.SubscriptionId,
                 ClientId = subscription.ClientId,
@@ -678,7 +729,10 @@ namespace autodealer.dev.Services {
                         var email = reader.GetString(3);
                         var phone = reader.IsDBNull(4) ? null : reader.GetString(4);
                         var website = reader.IsDBNull(5) ? null : reader.GetString(5);
-                        var prefersPhone = string.Equals(preferredContact, "Phone", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(phone);
+                        var prefersPhone = string.Equals(
+                            preferredContact,
+                            "Phone",
+                            StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(phone);
                         requests.Add(new AdminDemoRequestViewModel {
                             RequestId = reader.GetGuid(0),
                             BusinessName = reader.GetString(1),
@@ -694,7 +748,9 @@ namespace autodealer.dev.Services {
                             Message = reader.GetString(10),
                             Status = reader.GetString(11),
                             CreatedUtc = reader.GetDateTime(12),
-                            ContactHref = prefersPhone ? PhoneHref(phone) : EmailHref(email, reader.GetString(1), reader.GetString(2)),
+                            ContactHref = prefersPhone
+                                ? PhoneHref(phone)
+                                : EmailHref(email, reader.GetString(1), reader.GetString(2)),
                             ContactAction = prefersPhone ? "Call" : "Reply"
                         });
                     }
@@ -706,7 +762,8 @@ namespace autodealer.dev.Services {
         private static string WebsiteHref(string website) {
             if (string.IsNullOrWhiteSpace(website)) return null;
             var value = website.Trim();
-            return value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || value.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+            return value.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                value.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
                 ? value
                 : "https://" + value;
         }
@@ -714,14 +771,19 @@ namespace autodealer.dev.Services {
         private static string PhoneHref(string phone) {
             var normalized = new StringBuilder();
             foreach (var character in phone ?? string.Empty) {
-                if (char.IsDigit(character) || (character == '+' && normalized.Length == 0)) normalized.Append(character);
+                if (char.IsDigit(character) ||
+                    (character == '+' && normalized.Length == 0)) {
+                    normalized.Append(character);
+                }
             }
             return "tel:" + normalized;
         }
 
         private static string EmailHref(string email, string businessName, string contactName) {
             return "mailto:" + email + "?subject=" + Uri.EscapeDataString("Your AutoDealer.dev dealer demo") +
-                "&body=" + Uri.EscapeDataString("Hi " + contactName + ",\r\n\r\nThank you for reaching out about " + businessName + ". ");
+                "&body=" + Uri.EscapeDataString(
+                    "Hi " + contactName + ",\r\n\r\n" +
+                    "Thank you for reaching out about " + businessName + ". ");
         }
 
         private static bool FixedTimeEquals(byte[] left, byte[] right) {

@@ -1,17 +1,54 @@
 @model autodealer.dev.Models.AccountRegistrationViewModel
-@{ ViewBag.Title = "Create your account"; ViewBag.BodyClass = "account-page"; ViewBag.IncludeValidation = true; }
-<section class="site-hero page-hero"><div class="shell site-hero-shell"><div class="hero-copy"><span class="eyebrow">CREATE YOUR WORKSPACE</span><h1>Get your API key. Start building.</h1><p>Start a 14-day trial with live credentials&mdash;no payment method required.</p></div></div></section>
-<section class="section light-section account-content-section"><div class="shell account-form-shell wide-form-shell">
-    <div class="form-card dashboard-style-form">
-        <div class="dashboard-style-form-header"><span class="form-step">ACCOUNT DETAILS</span><h2>Create your workspace</h2><p>Set up the customer identity, secure login, and starting subscription.</p></div>
-        @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "account-form dashboard-style-form-body", autocomplete = "on", data_account_validation = "true", data_email_check_url = Url.Action("CheckEmailAvailability", "Account") })) {
-            @Html.AntiForgeryToken()
-            @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
-            @Html.Partial("_WorkspaceFields", Model)
-            <div class="dashboard-style-form-footer"><small class="form-secure">Protected by TLS &middot; API secrets are displayed once</small><button class="button button-primary submit-button" type="submit">Create account and issue key</button></div>
-        }
+@{
+    ViewBag.Title = "Create your account";
+    ViewBag.BodyClass = "account-page";
+    ViewBag.IncludeValidation = true;
+}
+<section class="site-hero page-hero">
+    <div class="shell site-hero-shell">
+        <div class="hero-copy">
+            <span class="eyebrow">CREATE YOUR WORKSPACE</span>
+            <h1>Get your API key. Start building.</h1>
+            <p>Start a 14-day trial with live credentials&mdash;no payment method required.</p>
+        </div>
     </div>
-</div></section>
+</section>
+<section class="section light-section account-content-section">
+    <div class="shell account-form-shell wide-form-shell">
+        <div class="form-card dashboard-style-form">
+            <div class="dashboard-style-form-header">
+                <span class="form-step">ACCOUNT DETAILS</span>
+                <h2>Create your workspace</h2>
+                <p>Set up the customer identity, secure login, and starting subscription.</p>
+            </div>
+            @using (Html.BeginForm(
+                "Register",
+                "Account",
+                FormMethod.Post,
+                new {
+                    @class = "account-form dashboard-style-form-body",
+                    autocomplete = "on",
+                    data_account_validation = "true",
+                    data_email_check_url = Url.Action("CheckEmailAvailability", "Account")
+                })) {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
+                @Html.Partial("_WorkspaceFields", Model)
+                <div class="dashboard-style-form-footer">
+                    <small class="form-secure">
+                        Protected by TLS &middot; Credentials are issued after email verification
+                    </small>
+                    <button class="button button-primary submit-button" type="submit">
+                        <svg class="account-create-icon" aria-hidden="true">
+                            <use href="#icon-user-add"></use>
+                        </svg>
+                        <span>Create account and issue key</span>
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</section>
 
 @section scripts {
     @Scripts.Render("~/bundles/account-validation")

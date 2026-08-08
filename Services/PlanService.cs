@@ -2,7 +2,9 @@ using autodealer.dev.Data;
 using autodealer.dev.Models;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Web.Mvc;
 
 namespace autodealer.dev.Services {
     public sealed class PlanService : IPlanService {
@@ -52,6 +54,29 @@ namespace autodealer.dev.Services {
 
                 if (plans.Count > 1) plans[plans.Count / 2].IsRecommended = true;
                 return plans;
+            }
+        }
+
+        public void PopulatePlanOptions(AccountRegistrationViewModel model) {
+            if (model == null) throw new ArgumentNullException("model");
+
+            try {
+                var plans = GetActivePlans();
+                if (!plans.Any(x => string.Equals(x.PlanCode, model.PlanCode, StringComparison.OrdinalIgnoreCase)))
+                    model.PlanCode = plans.Select(x => x.PlanCode).FirstOrDefault();
+
+                model.PlanOptions = plans.Select(x => new SelectListItem {
+                    Value = x.PlanCode,
+                    Text = x.DisplayName.ToUpperInvariant() + " (" +
+                        (x.MonthlyPrice.HasValue
+                            ? x.MonthlyPrice.Value.ToString("$0.##")
+                            : "Custom") + ")",
+                    Selected = string.Equals(x.PlanCode, model.PlanCode, StringComparison.OrdinalIgnoreCase)
+                }).ToList();
+            }
+            catch (SqlException) {
+                model.PlanCode = null;
+                model.PlanOptions = new List<SelectListItem>();
             }
         }
     }

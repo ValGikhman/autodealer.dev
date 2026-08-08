@@ -1,43 +1,194 @@
 @model autodealer.dev.Models.DealerDemoRequestViewModel
 @{ ViewBag.Title = "Request a dealer demo"; ViewBag.IncludeValidation = true; }
-<section class="site-hero page-hero demo-request-hero"><div class="shell site-hero-shell"><div class="hero-copy"><span class="eyebrow">DEALER PLATFORM DEMO</span><h1>See your dealership differently.</h1><p>Tell us about your dealership and we&rsquo;ll tailor the demo to your goals.</p></div></div></section>
+<section class="site-hero page-hero demo-request-hero">
+    <div class="shell site-hero-shell">
+        <div class="hero-copy">
+            <span class="eyebrow">DEALER PLATFORM DEMO</span>
+            <h1>See your dealership differently.</h1>
+            <p>Tell us about your dealership and we&rsquo;ll tailor the demo to your goals.</p>
+        </div>
+    </div>
+</section>
 
-<section class="section light-section account-content-section demo-request-section"><div class="shell demo-request-grid">
+<section class="section light-section account-content-section demo-request-section">
+    <div class="shell demo-request-grid">
     <aside class="demo-brief">
         <h2>Useful from the first conversation.</h2>
-        <p>This is not a generic product tour. We will focus on the parts of your operation that can create the clearest customer and business impact.</p>
+        <p>
+            This is not a generic product tour. We will focus on the parts of your operation that can create the
+            clearest customer and business impact.
+        </p>
         <div class="demo-steps">
-            <article><strong>Your current experience</strong><span>Website, inventory sources, lead flow, and operational friction.</span></article>
-            <article><strong>A relevant walkthrough</strong><span>Customer storefront, vehicle details, integrations, and dealer tools.</span></article>
-            <article><strong>Practical next steps</strong><span>Scope, rollout approach, and the right plan for your dealership.</span></article>
+            <article>
+                <strong>Your current experience</strong>
+                <span>Website, inventory sources, lead flow, and operational friction.</span>
+            </article>
+            <article>
+                <strong>A relevant walkthrough</strong>
+                <span>Customer storefront, vehicle details, integrations, and dealer tools.</span>
+            </article>
+            <article>
+                <strong>Practical next steps</strong>
+                <span>Scope, rollout approach, and the right plan for your dealership.</span>
+            </article>
         </div>
     </aside>
 
     <div class="form-card demo-request-card dashboard-style-form">
-        <div class="dashboard-style-form-header"><span class="form-step">REQUEST YOUR DEMO</span><h2>Tell us about your dealership</h2><p>Share the essentials so we can prepare a relevant conversation.</p></div>
-        @using (Html.BeginForm("RequestDemo", "Solutions", FormMethod.Post, new { @class = "account-form dashboard-style-form-body", autocomplete = "on" })) {
+        <div class="dashboard-style-form-header">
+            <span class="form-step">REQUEST YOUR DEMO</span>
+            <h2>Tell us about your dealership</h2>
+            <p>Share the essentials so we can prepare a relevant conversation.</p>
+        </div>
+        @using (Html.BeginForm(
+            "RequestDemo",
+            "Solutions",
+            FormMethod.Post,
+            new {
+                @class = "account-form dashboard-style-form-body",
+                autocomplete = "on"
+            })) {
             @Html.AntiForgeryToken()
             @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
-            <div class="demo-honeypot" aria-hidden="true">@Html.LabelFor(m => m.CompanyWebsite)@Html.TextBoxFor(m => m.CompanyWebsite, new { tabindex = "-1", autocomplete = "off" })</div>
-            <div class="form-field">@Html.LabelFor(m => m.BusinessName)@Html.TextBoxFor(m => m.BusinessName, new { placeholder = "Northstar Motors", autocomplete = "organization" })@Html.ValidationMessageFor(m => m.BusinessName)</div>
-            <div class="form-row">
-                <div class="form-field">@Html.LabelFor(m => m.ContactName)@Html.TextBoxFor(m => m.ContactName, new { placeholder = "Alex Morgan", autocomplete = "name" })@Html.ValidationMessageFor(m => m.ContactName)</div>
-                <div class="form-field">@Html.LabelFor(m => m.Email)@Html.TextBoxFor(m => m.Email, new { type = "email", placeholder = "alex@dealership.com", autocomplete = "email" })@Html.ValidationMessageFor(m => m.Email)</div>
+            <div class="demo-honeypot" aria-hidden="true">
+                @Html.LabelFor(m => m.CompanyWebsite)
+                @Html.TextBoxFor(m => m.CompanyWebsite, new {
+                    tabindex = "-1",
+                    autocomplete = "off"
+                })
+            </div>
+            <div class="form-field">
+                @Html.LabelFor(m => m.BusinessName)
+                @Html.TextBoxFor(m => m.BusinessName, new {
+                    placeholder = "Northstar Motors",
+                    autocomplete = "organization"
+                })
+                @Html.ValidationMessageFor(m => m.BusinessName)
             </div>
             <div class="form-row">
-                <div class="form-field">@Html.LabelFor(m => m.Phone)@Html.TextBoxFor(m => m.Phone, new { type = "tel", placeholder = "(555) 012-3456", autocomplete = "tel" })@Html.ValidationMessageFor(m => m.Phone)</div>
-                <div class="form-field">@Html.LabelFor(m => m.CurrentWebsite)@Html.TextBoxFor(m => m.CurrentWebsite, new { placeholder = "www.yourdealership.com", autocomplete = "url" })@Html.ValidationMessageFor(m => m.CurrentWebsite)</div>
+                <div class="form-field">
+                    @Html.LabelFor(m => m.ContactName)
+                    @Html.TextBoxFor(m => m.ContactName, new {
+                        placeholder = "Alex Morgan",
+                        autocomplete = "name"
+                    })
+                    @Html.ValidationMessageFor(m => m.ContactName)
+                </div>
+                <div class="form-field">
+                    @Html.LabelFor(m => m.Email)
+                    @Html.TextBoxFor(m => m.Email, new {
+                        type = "email",
+                        placeholder = "alex@dealership.com",
+                        autocomplete = "email"
+                    })
+                    @Html.ValidationMessageFor(m => m.Email)
+                </div>
             </div>
             <div class="form-row">
-                <div class="form-field">@Html.LabelFor(m => m.LocationCount)@Html.TextBoxFor(m => m.LocationCount, new { type = "number", min = "1", max = "1000" })@Html.ValidationMessageFor(m => m.LocationCount)</div>
-                <div class="form-field">@Html.LabelFor(m => m.InventorySize)<select id="InventorySize" name="InventorySize" required data-val="true" data-val-required="Please choose an inventory size.">@Html.Partial("_InventorySizeOptions", Model.InventorySize ?? string.Empty)</select>@Html.ValidationMessageFor(m => m.InventorySize)</div>
+                <div class="form-field">
+                    @Html.LabelFor(m => m.Phone)
+                    @Html.TextBoxFor(m => m.Phone, new {
+                        type = "tel",
+                        placeholder = "(555) 012-3456",
+                        autocomplete = "tel"
+                    })
+                    @Html.ValidationMessageFor(m => m.Phone)
+                </div>
+                <div class="form-field">
+                    @Html.LabelFor(m => m.CurrentWebsite)
+                    @Html.TextBoxFor(m => m.CurrentWebsite, new {
+                        placeholder = "www.yourdealership.com",
+                        autocomplete = "url"
+                    })
+                    @Html.ValidationMessageFor(m => m.CurrentWebsite)
+                </div>
             </div>
             <div class="form-row">
-                <div class="form-field">@Html.LabelFor(m => m.PrimaryGoal)@Html.DropDownListFor(m => m.PrimaryGoal, new[] { new SelectListItem { Text = "Select your primary goal", Value = "" }, new SelectListItem { Text = "Replace our dealer website", Value = "Replace our dealer website" }, new SelectListItem { Text = "Improve inventory merchandising", Value = "Improve inventory merchandising" }, new SelectListItem { Text = "Generate more qualified leads", Value = "Generate more qualified leads" }, new SelectListItem { Text = "Connect vehicle data by API", Value = "Connect vehicle data by API" }, new SelectListItem { Text = "Support multiple locations", Value = "Support multiple locations" }, new SelectListItem { Text = "Explore the complete platform", Value = "Explore the complete platform" } })@Html.ValidationMessageFor(m => m.PrimaryGoal)</div>
-                <div class="form-field">@Html.LabelFor(m => m.PreferredContact)@Html.DropDownListFor(m => m.PreferredContact, new[] { new SelectListItem { Text = "Email", Value = "Email" }, new SelectListItem { Text = "Phone", Value = "Phone" } })@Html.ValidationMessageFor(m => m.PreferredContact)</div>
+                <div class="form-field">
+                    @Html.LabelFor(m => m.LocationCount)
+                    @Html.TextBoxFor(m => m.LocationCount, new {
+                        type = "number",
+                        min = "1",
+                        max = "1000"
+                    })
+                    @Html.ValidationMessageFor(m => m.LocationCount)
+                </div>
+                <div class="form-field">
+                    @Html.LabelFor(m => m.InventorySize)
+                    <select id="InventorySize"
+                            name="InventorySize"
+                            required
+                            data-val="true"
+                            data-val-required="Please choose an inventory size.">
+                        @Html.Partial("_InventorySizeOptions", Model.InventorySize ?? string.Empty)
+                    </select>
+                    @Html.ValidationMessageFor(m => m.InventorySize)
+                </div>
             </div>
-            <div class="form-field">@Html.LabelFor(m => m.Message)@Html.TextAreaFor(m => m.Message, new { rows = "3", placeholder = "Tell us about your current setup, what is not working, and what a successful rollout would look like." })@Html.ValidationMessageFor(m => m.Message)</div>
-            <div class="dashboard-style-form-footer"><small class="form-secure legal-form-note">Your information is used only to respond to this request. Review our <a href="@Url.Action("Legal", "Home")#service-terms" data-legal-modal data-legal-section="service-terms">Service Terms</a> and <a href="@Url.Action("Legal", "Home")#privacy-policy" data-legal-modal data-legal-section="privacy-policy">Privacy Policy</a>.</small><button class="button button-primary submit-button" type="submit">Request my dealer demo</button></div>
+            <div class="form-row">
+                <div class="form-field">
+                    @Html.LabelFor(m => m.PrimaryGoal)
+                    @Html.DropDownListFor(m => m.PrimaryGoal, new[] {
+                        new SelectListItem {
+                            Text = "Select your primary goal",
+                            Value = ""
+                        },
+                        new SelectListItem {
+                            Text = "Replace our dealer website",
+                            Value = "Replace our dealer website"
+                        },
+                        new SelectListItem {
+                            Text = "Improve inventory merchandising",
+                            Value = "Improve inventory merchandising"
+                        },
+                        new SelectListItem {
+                            Text = "Generate more qualified leads",
+                            Value = "Generate more qualified leads"
+                        },
+                        new SelectListItem {
+                            Text = "Connect vehicle data by API",
+                            Value = "Connect vehicle data by API"
+                        },
+                        new SelectListItem {
+                            Text = "Support multiple locations",
+                            Value = "Support multiple locations"
+                        },
+                        new SelectListItem {
+                            Text = "Explore the complete platform",
+                            Value = "Explore the complete platform"
+                        }
+                    })
+                    @Html.ValidationMessageFor(m => m.PrimaryGoal)
+                </div>
+                <div class="form-field">
+                    @Html.LabelFor(m => m.PreferredContact)
+                    @Html.DropDownListFor(m => m.PreferredContact, new[] {
+                        new SelectListItem {
+                            Text = "Email",
+                            Value = "Email"
+                        },
+                        new SelectListItem {
+                            Text = "Phone",
+                            Value = "Phone"
+                        }
+                    })
+                    @Html.ValidationMessageFor(m => m.PreferredContact)
+                </div>
+            </div>
+            <div class="form-field">
+                @Html.LabelFor(m => m.Message)
+                @Html.TextAreaFor(m => m.Message, new {
+                    rows = "3",
+                    placeholder = "Tell us about your current setup, what is not working, " +
+                        "and what a successful rollout would look like."
+                })
+                @Html.ValidationMessageFor(m => m.Message)
+            </div>
+            <div class="dashboard-style-form-footer">
+                <small class="form-secure legal-form-note">Your information is used only to respond to this request. Review our <a href="@Url.Action("Legal", "Home")#service-terms" data-legal-modal data-legal-section="service-terms">Service Terms</a> and <a href="@Url.Action("Legal", "Home")#privacy-policy" data-legal-modal data-legal-section="privacy-policy">Privacy Policy</a>.</small>
+                <button class="button button-primary submit-button" type="submit">Request my dealer demo</button>
+            </div>
         }
     </div>
-</div></section>
+</div>
+</section>
