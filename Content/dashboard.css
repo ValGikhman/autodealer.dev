@@ -10,14 +10,12 @@
     --pg-color-bg-row-odd: #535a62;
     --pg-color-bg-row-hover: #60676f;
     --pg-color-bg-row-selected: #676e76;
-    --pg-color-bg-pager-hover: #60676f;
     --pg-color-text: #edf0f2;
     --pg-color-text-header: #d7dbe0;
     --pg-color-text-muted: #c1c7cd;
     --pg-color-text-subtle: #aeb5bd;
     --pg-color-text-dark: #fff;
     --pg-color-accent: #edf0f2;
-    --pg-color-accent-text: #34393f;
     --pg-color-chip-bg: #464c53;
     --pg-color-chip-border: #858c93;
     --pg-color-chip-label: #f2f4f5;
@@ -306,25 +304,6 @@
     text-transform: uppercase;
 }
 
-.admin-dashboard-page .pg-grid-table td .dashboard-grid-action {
-    min-height: 32px;
-    padding: 0 12px;
-    border: 1px solid #8e959c;
-    border-radius: 7px;
-    color: #f5f6f7;
-    background: linear-gradient(180deg, #60676f, #50575f);
-    cursor: pointer;
-    font: 600 12px/1 var(--sans);
-    white-space: nowrap;
-}
-
-.admin-dashboard-page .pg-grid-table td .dashboard-grid-action:hover,
-.admin-dashboard-page .pg-grid-table td .dashboard-grid-action:focus-visible {
-    border-color: #bec3c8;
-    background: linear-gradient(180deg, #697078, #596068);
-    outline: 0;
-}
-
 .admin-dashboard-page .pg-grid-table tbody tr {
     cursor: pointer;
 }
@@ -476,12 +455,6 @@
     flex-direction: column;
     gap: 8px;
     min-width: 0;
-}
-
-.admin-dashboard-page .customer-detail-heading-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .admin-dashboard-page .customer-api-issue,
@@ -1103,8 +1076,7 @@
     background: linear-gradient(90deg, transparent, #d8dce0, transparent);
 }
 
-.admin-dashboard-page .dashboard-record-kicker,
-.admin-dashboard-page .dashboard-record-label {
+.admin-dashboard-page .dashboard-record-kicker{
     display: block;
     color: #bac1c7;
     font: 10px/1.4 var(--mono);

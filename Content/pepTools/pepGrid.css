@@ -23,7 +23,6 @@
     --pg-color-bg-row-odd:            #f8f9fb;
     --pg-color-bg-row-hover:          #f1f3f5;
     --pg-color-bg-row-selected:       #e8ecf0;
-    --pg-color-bg-pager-hover:        #edf4fc;
 
     --pg-color-text:                  #1e293b;
     --pg-color-text-header:           #475569;
@@ -32,7 +31,6 @@
     --pg-color-text-dark:             #343a40;
 
     --pg-color-accent:                #6c757d;
-    --pg-color-accent-text:           #fff;
 
     --pg-color-chip-bg:               #eef3ff;
     --pg-color-chip-border:           #a5b4fc;
@@ -51,7 +49,6 @@
     --pg-border-radius-md:            0.5rem;
 
     --pg-search-max-width:            320px;
-    --pg-pager-btn-size:              1.75rem;
     --pg-col-cb-width:                2.5rem;
     --pg-th-icon-size:                1.25rem;
     --pg-resize-handle-width:         0.625rem;
