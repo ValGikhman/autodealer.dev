@@ -2,17 +2,24 @@
 @{
     var delivered = Model != null && Model.VerificationEmailSent;
     var email = Model == null ? string.Empty : Model.Email;
+    var showLinks = ViewBag.ShowWorkspaceConfirmationLinks is bool && (bool)ViewBag.ShowWorkspaceConfirmationLinks;
 }
-<div class="workspace-confirmation-panel" data-workspace-confirmation data-verification-sent="@delivered.ToString().ToLowerInvariant()">
-    <span class="workspace-confirmation-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5M4 5h16a1 1 0 0 1 1 1v12H3V6a1 1 0 0 1 1-1Z" /></svg></span>
-    <div class="workspace-confirmation-copy">
-        <span class="workspace-confirmation-eyebrow" data-confirmation-eyebrow>@(delivered ? "CONFIRMATION SENT" : "DELIVERY NEEDS ATTENTION")</span>
-        <h2 data-confirmation-heading>@(delivered ? "Check your email to activate the workspace" : "Your workspace was saved")</h2>
-        <p class="workspace-confirmation-primary"><span data-confirmation-prefix>@(delivered ? "We sent a secure confirmation message to" : "We could not deliver the confirmation message to")</span> <strong data-confirmation-email>@email</strong><span data-confirmation-suffix>@(delivered ? ". Open it and click the confirmation button within 24 hours." : ". The workspace remains safely inactive and no API key has been issued.")</span></p>
-        <div class="workspace-confirmation-next" data-confirmation-next>
-            <strong>What happens next?</strong>
-            <span>After confirmation, AutoDealer.dev will activate the workspace and send a separate private email containing the API key, client number, plan details, sign-in guidance, and useful documentation links.</span>
+<div class="success-card verification-pending-card" data-workspace-confirmation data-verification-sent="@delivered.ToString().ToLowerInvariant()">
+    <button type="button" class="btn-close workspace-confirmation-close" data-bs-dismiss="modal" aria-label="Close confirmation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg></button>
+    <div class="workspace-confirmation-panel">
+        <span class="workspace-confirmation-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5M4 5h16a1 1 0 0 1 1 1v12H3V6a1 1 0 0 1 1-1Z" /></svg></span>
+        <div class="workspace-confirmation-copy">
+            <span class="workspace-confirmation-eyebrow" data-confirmation-eyebrow>@(delivered ? "CONFIRMATION SENT" : "DELIVERY NEEDS ATTENTION")</span>
+            <h2 id="workspace-confirmation-heading" data-confirmation-heading>@(delivered ? "Check your email to activate the workspace" : "Your workspace was saved")</h2>
+            <p class="workspace-confirmation-primary"><span data-confirmation-prefix>@(delivered ? "We sent a secure confirmation message to" : "We could not deliver the confirmation message to")</span> <strong data-confirmation-email>@email</strong><span data-confirmation-suffix>@(delivered ? ". Open it and click the confirmation button within 24 hours." : ". The workspace remains safely inactive and no API key has been issued.")</span></p>
+            <div class="workspace-confirmation-next" data-confirmation-next>
+                <strong>What happens next?</strong>
+                <span>After confirmation, AutoDealer.dev will activate the workspace and send a separate private email containing the API key, client number, plan details, sign-in guidance, and useful documentation links.</span>
+            </div>
+            <p class="workspace-confirmation-note" data-confirmation-note>@(delivered ? "The API key has not been created yet and will never be displayed in this window. If the message is not visible, check the spam or promotions folder." : "Please verify the email address before arranging a new confirmation message.")</p>
         </div>
-        <p class="workspace-confirmation-note" data-confirmation-note>@(delivered ? "The API key has not been created yet and will never be displayed in this window. If the message is not visible, check the spam or promotions folder." : "Please verify the email address before arranging a new confirmation message.")</p>
     </div>
+    @if (showLinks) {
+        <div class="button-row centered-row workspace-confirmation-actions"><a class="button button-primary" href="@Url.Action("Index", "Documentation")">Preview documentation</a><a class="button button-outline" href="@Url.Action("Index", "Home")">Return home</a></div>
+    }
 </div>

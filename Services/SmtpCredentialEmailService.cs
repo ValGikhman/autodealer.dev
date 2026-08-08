@@ -6,11 +6,12 @@ using System.Web;
 
 namespace autodealer.dev.Services {
     public sealed class SmtpCredentialEmailService : ICredentialEmailService {
-        public bool SendVerification(long clientId, string firstName, string email, string verificationUrl) {
+        public bool SendVerification(long clientId, string firstName, string lastName, string email, string verificationUrl) {
             try {
                 var body = EmailTemplateRenderer.Render(EmailTemplateName.EmailVerification,
                     new EmailTemplateValues()
                         .Add("FIRST_NAME", firstName)
+                        .Add("FULL_NAME", ((firstName ?? string.Empty) + " " + (lastName ?? string.Empty)).Trim())
                         .AddAttribute("VERIFICATION_URL", verificationUrl));
                 SmtpMailSender.SendForClient(clientId, email, firstName, "Confirm your AutoDealer.dev email", body, null, null);
                 return true;
@@ -24,9 +25,19 @@ namespace autodealer.dev.Services {
         public bool SendCredentials(long clientId, string businessName, string firstName, string lastName, string email, string phone, string clientNumber, string apiKey, string planCode, bool createdByAdmin) {
             try {
                 var rows = new StringBuilder();
+                AddRow(rows, "Dealership / company", businessName);
+                AddRow(rows, "First name", firstName);
+                AddRow(rows, "Last name", lastName);
+                AddRow(rows, "Verified email", email);
+                AddRow(rows, "Username", email);
+                AddRow(rows, "Password", createdByAdmin
+                    ? "Use the temporary password selected when the workspace was created"
+                    : "Use the password selected during registration");
+                AddRow(rows, "Phone", phone);
                 AddRow(rows, "Client number", clientNumber);
-                AddRow(rows, "Sign-in email", email);
                 AddRow(rows, "Plan", planCode);
+                AddRow(rows, "Workspace status", "Active — email verified");
+                AddRow(rows, "API scope", "vin:read");
                 var body = EmailTemplateRenderer.Render(EmailTemplateName.ApiCredentials,
                     new EmailTemplateValues()
                         .Add("FIRST_NAME", firstName)

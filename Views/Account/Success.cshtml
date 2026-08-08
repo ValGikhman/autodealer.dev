@@ -1,7 +1,19 @@
 @model autodealer.dev.Models.AccountCreatedViewModel
-@{ ViewBag.Title = "Check your email"; ViewBag.BodyClass = "account-page"; }
+@{
+    ViewBag.Title = "Check your email";
+    ViewBag.BodyClass = "account-page";
+    ViewBag.ShowWorkspaceConfirmationLinks = true;
+}
 <section class="site-hero page-hero"><div class="shell site-hero-shell"><div class="hero-copy"><span class="eyebrow">ONE STEP REMAINS</span><h1>Check your inbox.</h1><p>Confirm your email to activate the workspace and securely receive your credentials.</p></div></div></section>
-<section class="section light-section account-content-section success-page"><div class="shell"><div class="success-card verification-pending-card">
-    @Html.Partial("_WorkspaceConfirmation", Model)
-    <div class="button-row centered-row"><a class="button button-primary" href="@Url.Action("Index", "Documentation")">Preview the documentation &rarr;</a><a class="button button-outline" href="@Url.Action("Index", "Home")">Return home</a></div>
-</div></div></section>
+<div class="modal fade workspace-confirmation-modal" id="workspace-confirmation-modal" tabindex="-1" aria-labelledby="workspace-confirmation-heading" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">@Html.Partial("_WorkspaceConfirmation", Model)</div>
+    </div>
+</div>
+@section scripts {
+    <script>
+        $(function () {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('workspace-confirmation-modal'), { backdrop: 'static' }).show();
+        });
+    </script>
+}

@@ -718,6 +718,36 @@
     max-width: 860px;
 }
 
+.admin-dashboard-page .dashboard-confirmation-modal .modal-dialog {
+    max-width: 760px;
+}
+
+.admin-dashboard-page .dashboard-confirmation-modal .modal-content {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.admin-dashboard-page .dashboard-confirmation-modal .modal-header,
+.admin-dashboard-page .dashboard-confirmation-modal .modal-content > .modal-footer,
+.admin-dashboard-page .dashboard-confirmation-modal .dashboard-subgrid-edit-fields,
+.admin-dashboard-page .dashboard-confirmation-modal .dashboard-subgrid-edit-error,
+.admin-dashboard-page .dashboard-confirmation-modal .dashboard-subgrid-edit-actions {
+    display: none !important;
+}
+
+.admin-dashboard-page .dashboard-confirmation-modal .modal-body {
+    padding: 0;
+    overflow: visible;
+}
+
+.admin-dashboard-page .dashboard-confirmation-modal .dashboard-subgrid-editor,
+.admin-dashboard-page .dashboard-confirmation-modal #dashboard-subgrid-edit-form {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+}
+
 .admin-dashboard-page .dashboard-subgrid-edit-modal .modal-content > .modal-footer {
     display: none;
 }
