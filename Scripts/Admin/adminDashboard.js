@@ -17,6 +17,7 @@
         var subgridEditSave = document.getElementById('dashboard-subgrid-edit-save');
         var subgridEditNote = document.getElementById('dashboard-subgrid-edit-note');
         var subgridEditCancel = document.getElementById('dashboard-subgrid-edit-cancel');
+        var deleteClientOpen = document.getElementById('dashboard-client-delete-open');
         var clientEditFields = document.getElementById('client-edit-fields');
         var clientCreateFields = document.getElementById('client-create-fields');
         var clientCreateResult = document.getElementById('dashboard-client-create-result');
@@ -28,10 +29,34 @@
         var keyIssueName = document.getElementById('issue-api-key-name');
         var keyIssueSubmit = document.getElementById('issue-api-key-submit');
         var keyIssueError = document.getElementById('issue-api-key-error');
+        var deleteClientModalElement = document.getElementById('delete-client-modal');
+        var deleteClientModal = window.bootstrap.Modal.getOrCreateInstance(deleteClientModalElement);
+        var deleteClientForm = document.getElementById('delete-client-form');
+        var deleteClientConfirm = document.getElementById('delete-client-confirm');
+        var deleteClientSubmit = document.getElementById('delete-client-submit');
+        var deleteClientError = document.getElementById('delete-client-error');
+        var deleteOpportunityModalElement = document.getElementById('delete-opportunity-modal');
+        var deleteOpportunityModal = window.bootstrap.Modal.getOrCreateInstance(deleteOpportunityModalElement);
+        var deleteOpportunityForm = document.getElementById('delete-opportunity-form');
+        var deleteOpportunityConfirm = document.getElementById('delete-opportunity-confirm');
+        var deleteOpportunitySubmit = document.getElementById('delete-opportunity-submit');
+        var deleteOpportunityError = document.getElementById('delete-opportunity-error');
+        var opportunityEditModalElement = document.getElementById('opportunity-edit-modal');
+        var opportunityEditModal = window.bootstrap.Modal.getOrCreateInstance(opportunityEditModalElement);
+        var opportunityEditForm = document.getElementById('opportunity-edit-form');
+        var opportunityEditSave = document.getElementById('opportunity-edit-save');
+        var opportunityEditError = document.getElementById('opportunity-edit-error');
+        var opportunityRequestId = document.getElementById('opportunity-request-id');
+        var opportunityDeleteOpen = document.getElementById('opportunity-delete-open');
         var pendingKeyIssue = null;
         var pendingSubgridEdit = null;
+        var pendingClientDelete = null;
+        var pendingOpportunityDelete = null;
+        var opportunityEditIsNew = false;
         var subgridEditSequence = 0;
         var expandedCustomerDetail = null;
+        var clientDeleteParentModal = null;
+        var opportunityDeleteParentModal = null;
 
         function responseData(response) { return response && response.Data ? response.Data : []; }
         function clearEmailPreview() {
@@ -51,6 +76,30 @@
                 element.selected = String(option.Value) === String(selectedValue);
                 select.appendChild(element);
             });
+        }
+        function setButtonLabel(button, value) {
+            var label = button.querySelector('span');
+            if (label) label.textContent = value;
+            else button.textContent = value;
+        }
+        function setIconButtonLabel(button, value) {
+            var label = button.querySelector('span');
+            if (label) label.textContent = value;
+            button.setAttribute('aria-label', value);
+            button.title = value;
+        }
+        function showDeleteConfirmation(modal, parentModal) {
+            document.body.classList.add('admin-delete-confirmation-open');
+            if (parentModal) parentModal.setAttribute('inert', '');
+            modal.show();
+        }
+        function restoreParentModal(parentModal, focusTarget) {
+            document.body.classList.remove('admin-delete-confirmation-open');
+            if (!parentModal) return;
+            parentModal.removeAttribute('inert');
+            if (!parentModal.classList.contains('show')) return;
+            document.body.classList.add('modal-open');
+            window.setTimeout(function () { if (focusTarget) focusTarget.focus(); }, 0);
         }
         function notifyInput(element) {
             if (element) element.dispatchEvent(new window.Event('input', { bubbles: true }));
@@ -74,6 +123,7 @@
             profileElement.hidden = true;
             emailPreviewElement.hidden = true;
             subgridEditorElement.hidden = true;
+            deleteClientOpen.hidden = true;
             clearEmailPreview();
         }
         function showSubgridEditError(message) {
@@ -82,29 +132,31 @@
         }
         function openSubgridEditor(kind, item, gridElement, clientId, detailUrl, separator) {
             var isNewClient = kind === 'client-new';
+            var isNewSubscription = kind === 'subscription-new';
             var isClient = kind === 'client' || isNewClient;
             var isApiKey = kind === 'api';
-            var editUrl = $('#customer-grid').data(isNewClient ? 'new-client-url' : isClient ? 'edit-client-url' : isApiKey ? 'edit-api-key-url' : 'edit-subscription-url');
-            var recordId = isNewClient ? null : isClient ? item.ClientId : isApiKey ? item.ApiKeyId : item.SubscriptionId;
+            var editUrl = $('#customer-grid').data(isNewClient ? 'new-client-url' : isClient ? 'edit-client-url' : isApiKey ? 'edit-api-key-url' : isNewSubscription ? 'new-subscription-url' : 'edit-subscription-url');
+            var recordId = isNewClient || isNewSubscription ? null : isClient ? item.ClientId : isApiKey ? item.ApiKeyId : item.SubscriptionId;
             var requestSequence = ++subgridEditSequence;
 
             pendingSubgridEdit = null;
             resetRecordModalPanels();
             modalElement.classList.add('dashboard-subgrid-edit-modal');
             if (isNewClient) modalElement.classList.add('dashboard-new-client-modal');
-            text('dashboard-record-kicker', isNewClient ? 'NEW DEALER ACCOUNT' : isClient ? 'DEALER ACCOUNT' : isApiKey ? 'API KEY RECORD' : 'SUBSCRIPTION RECORD');
-            text('dashboard-record-title', isNewClient ? 'Create a new customer' : isClient ? 'Edit dealer account' : isApiKey ? 'Edit API key' : 'Edit subscription');
-            text('dashboard-record-subtitle', isNewClient ? 'Generating a fresh client number...' : 'Loading record #' + recordId + '...');
+            text('dashboard-record-kicker', isNewClient ? 'NEW DEALER ACCOUNT' : isClient ? 'DEALER ACCOUNT' : isApiKey ? 'API KEY RECORD' : isNewSubscription ? 'NEW SUBSCRIPTION' : 'SUBSCRIPTION RECORD');
+            text('dashboard-record-title', isNewClient ? 'Create a new customer' : isClient ? 'Edit dealer account' : isApiKey ? 'Edit API key' : isNewSubscription ? 'Create a new subscription' : 'Edit subscription');
+            text('dashboard-record-subtitle', isNewClient ? 'Generating a fresh client number...' : isNewSubscription ? 'Preparing subscription defaults...' : 'Loading record #' + recordId + '...');
             subgridEditNote.textContent = isClient
                 ? isNewClient ? 'A 14-day trial and primary API key will be created automatically.' : 'Changing account status affects customer access.'
                 : isApiKey ? 'Changing key status affects API access immediately.'
-                    : 'Double-check status and billing dates before saving.';
+                    : isNewSubscription ? 'Review the plan, status, and billing period before creating the subscription.' : 'Double-check status and billing dates before saving.';
             subgridEditError.hidden = true;
             clientCreateResult.hidden = true;
             subgridEditSave.disabled = true;
             subgridEditSave.hidden = false;
-            subgridEditSave.textContent = 'Save changes';
-            subgridEditCancel.textContent = 'Cancel';
+            setButtonLabel(subgridEditSave, isNewSubscription ? 'Create subscription' : 'Save changes');
+            deleteClientOpen.hidden = true;
+            setIconButtonLabel(subgridEditCancel, 'Cancel');
             subgridEditorElement.hidden = false;
             setEditFieldsActive(clientEditFields, false);
             setEditFieldsActive(clientCreateFields, false);
@@ -112,11 +164,11 @@
             setEditFieldsActive(subscriptionEditFields, false);
             recordModal.show();
 
-            $.getJSON(editUrl, isNewClient ? {} : { id: recordId }).done(function (response) {
+            $.getJSON(editUrl, isNewClient ? {} : isNewSubscription ? { clientId: clientId } : { id: recordId }).done(function (response) {
                 if (requestSequence !== subgridEditSequence) return;
                 pendingSubgridEdit = {
                     kind: kind,
-                    id: recordId,
+                    id: isNewSubscription ? response.SubscriptionId : recordId,
                     editUrl: editUrl,
                     gridElement: gridElement,
                     clientId: clientId,
@@ -127,12 +179,13 @@
                 text('dashboard-record-subtitle', isClient
                     ? isNewClient ? 'Create the account, trial subscription, login, and primary credential.' : 'Update the customer identity, contact information, and account access.'
                     : isApiKey ? 'Update the credential lifecycle and access settings.'
-                        : 'Update billing state, plan, and service period. All dates are UTC.');
+                        : isNewSubscription ? 'Create a billing record for this dealer. All dates are UTC.' : 'Update billing state, plan, and service period. All dates are UTC.');
                 setEditFieldsActive(clientEditFields, isClient);
                 setClientEditOnlyActive(isClient && !isNewClient);
                 setEditFieldsActive(clientCreateFields, isNewClient);
                 setEditFieldsActive(apiKeyEditFields, isApiKey);
                 setEditFieldsActive(subscriptionEditFields, !isClient && !isApiKey);
+                deleteClientOpen.hidden = !(isClient && !isNewClient);
 
                 if (isClient) {
                     document.getElementById('edit-client-number').value = response.ClientNumber || '';
@@ -189,16 +242,18 @@
 
             var context = pendingSubgridEdit;
             var data = $(subgridEditForm).serializeArray();
-            if (context.kind !== 'client-new')
+            if (context.kind !== 'client-new' && context.kind !== 'subscription-new')
                 data.push({ name: context.kind === 'client' ? 'ClientId' : context.kind === 'api' ? 'ApiKeyId' : 'SubscriptionId', value: context.id });
             if (context.kind === 'client-new')
                 data.push({ name: 'ClientNumber', value: document.getElementById('edit-client-number').value });
+            if (context.kind === 'subscription-new')
+                data.push({ name: 'ClientId', value: context.clientId });
             data.push({
                 name: '__RequestVerificationToken',
                 value: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value
             });
             subgridEditSave.disabled = true;
-            subgridEditSave.textContent = 'Saving...';
+            setButtonLabel(subgridEditSave, context.kind === 'subscription-new' ? 'Creating...' : 'Saving...');
             subgridEditError.hidden = true;
 
             $.ajax({ url: context.editUrl, method: 'POST', dataType: 'json', data: data }).done(function (response) {
@@ -213,13 +268,13 @@
                     document.getElementById('created-client-api-key').textContent = response.ApiKey || '';
                     clientCreateResult.hidden = false;
                     subgridEditSave.hidden = true;
-                    subgridEditCancel.textContent = 'Done';
+                    setIconButtonLabel(subgridEditCancel, 'Done');
                     subgridEditNote.textContent = 'These credentials are shown once. Store them securely.';
                     $('#customer-grid').pepGrid('refresh');
                     return;
                 }
                 recordModal.hide();
-                if (context.kind === 'client' || context.kind === 'subscription') {
+                if (context.kind === 'client' || context.kind === 'subscription' || context.kind === 'subscription-new') {
                     $('#customer-grid').pepGrid('refresh');
                     return;
                 }
@@ -231,7 +286,7 @@
                 showSubgridEditError(response.Message || 'The record could not be saved.');
             }).always(function () {
                 subgridEditSave.disabled = false;
-                subgridEditSave.textContent = 'Save changes';
+                setButtonLabel(subgridEditSave, context.kind === 'subscription-new' ? 'Create subscription' : 'Save changes');
             });
         });
 
@@ -253,6 +308,250 @@
                 button.textContent = 'Copied';
             }
         });
+
+        function prepareClientDelete(client) {
+            pendingClientDelete = {
+                clientId: client.ClientId,
+                businessName: client.BusinessName,
+                clientNumber: client.ClientNumber
+            };
+            deleteClientForm.reset();
+            deleteClientSubmit.disabled = true;
+            deleteClientError.hidden = true;
+            deleteClientError.textContent = '';
+            text('delete-client-name', pendingClientDelete.businessName || 'Selected customer');
+            text('delete-client-detail', pendingClientDelete.clientNumber || '');
+        }
+
+        deleteClientOpen.addEventListener('click', function () {
+            if (!pendingSubgridEdit || pendingSubgridEdit.kind !== 'client') return;
+            prepareClientDelete({
+                ClientId: pendingSubgridEdit.id,
+                BusinessName: document.getElementById('edit-client-business').value,
+                ClientNumber: document.getElementById('edit-client-number').value
+            });
+            clientDeleteParentModal = modalElement;
+            showDeleteConfirmation(deleteClientModal, clientDeleteParentModal);
+        });
+
+        deleteClientConfirm.addEventListener('change', function () {
+            deleteClientSubmit.disabled = !deleteClientConfirm.checked;
+        });
+
+        deleteClientForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            if (!pendingClientDelete || !deleteClientConfirm.checked || !deleteClientForm.checkValidity()) {
+                deleteClientForm.reportValidity();
+                return;
+            }
+
+            var clientId = pendingClientDelete.clientId;
+            deleteClientConfirm.disabled = true;
+            deleteClientSubmit.disabled = true;
+            deleteClientSubmit.textContent = 'Deleting...';
+            deleteClientError.hidden = true;
+            $.ajax({
+                url: $('#customer-grid').data('delete-client-url'),
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    __RequestVerificationToken: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value,
+                    clientId: clientId,
+                    confirmDelete: true
+                }
+            }).done(function () {
+                deleteClientModal.hide();
+                if (clientDeleteParentModal) recordModal.hide();
+                closeCustomerDetail();
+                $('#customer-grid').pepGrid('refresh');
+            }).fail(function (xhr) {
+                var response = xhr.responseJSON || {};
+                deleteClientError.textContent = response.Message || 'The customer could not be deleted. No records were removed.';
+                deleteClientError.hidden = false;
+            }).always(function () {
+                deleteClientConfirm.disabled = false;
+                deleteClientSubmit.textContent = 'Yes, delete everything';
+                deleteClientSubmit.disabled = !deleteClientConfirm.checked;
+            });
+        });
+
+        $(deleteClientModalElement).on('hidden.bs.modal', function () {
+            restoreParentModal(clientDeleteParentModal, deleteClientOpen);
+            clientDeleteParentModal = null;
+            pendingClientDelete = null;
+            deleteClientForm.reset();
+            deleteClientConfirm.disabled = false;
+            deleteClientSubmit.disabled = true;
+            deleteClientSubmit.textContent = 'Yes, delete everything';
+            deleteClientError.hidden = true;
+            deleteClientError.textContent = '';
+        });
+
+        function prepareOpportunityDelete(opportunity) {
+            pendingOpportunityDelete = {
+                requestId: opportunity.RequestId,
+                businessName: opportunity.BusinessName,
+                contactName: opportunity.ContactName,
+                email: opportunity.Email
+            };
+            deleteOpportunityForm.reset();
+            deleteOpportunitySubmit.disabled = true;
+            deleteOpportunityError.hidden = true;
+            deleteOpportunityError.textContent = '';
+            text('delete-opportunity-name', pendingOpportunityDelete.businessName || 'Selected opportunity');
+            text('delete-opportunity-detail', [pendingOpportunityDelete.contactName, pendingOpportunityDelete.email].filter(Boolean).join(' — '));
+        }
+
+        deleteOpportunityConfirm.addEventListener('change', function () {
+            deleteOpportunitySubmit.disabled = !deleteOpportunityConfirm.checked;
+        });
+
+        deleteOpportunityForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            if (!pendingOpportunityDelete || !deleteOpportunityConfirm.checked || !deleteOpportunityForm.checkValidity()) {
+                deleteOpportunityForm.reportValidity();
+                return;
+            }
+
+            deleteOpportunityConfirm.disabled = true;
+            deleteOpportunitySubmit.disabled = true;
+            deleteOpportunitySubmit.textContent = 'Deleting...';
+            deleteOpportunityError.hidden = true;
+            $.ajax({
+                url: $('#demo-request-grid').data('delete-url'),
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    __RequestVerificationToken: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value,
+                    requestId: pendingOpportunityDelete.requestId,
+                    confirmDelete: true
+                }
+            }).done(function () {
+                deleteOpportunityModal.hide();
+                if (opportunityDeleteParentModal) opportunityEditModal.hide();
+                $('#demo-request-grid').pepGrid('refresh');
+            }).fail(function (xhr) {
+                var response = xhr.responseJSON || {};
+                deleteOpportunityError.textContent = response.Message || 'The opportunity could not be deleted. No records were removed.';
+                deleteOpportunityError.hidden = false;
+            }).always(function () {
+                deleteOpportunityConfirm.disabled = false;
+                deleteOpportunitySubmit.textContent = 'Yes, delete opportunity';
+                deleteOpportunitySubmit.disabled = !deleteOpportunityConfirm.checked;
+            });
+        });
+
+        $(deleteOpportunityModalElement).on('hidden.bs.modal', function () {
+            restoreParentModal(opportunityDeleteParentModal, opportunityDeleteOpen);
+            opportunityDeleteParentModal = null;
+            pendingOpportunityDelete = null;
+            deleteOpportunityForm.reset();
+            deleteOpportunityConfirm.disabled = false;
+            deleteOpportunitySubmit.disabled = true;
+            deleteOpportunitySubmit.textContent = 'Yes, delete opportunity';
+            deleteOpportunityError.hidden = true;
+            deleteOpportunityError.textContent = '';
+        });
+
+        function opportunityValue(id, value) {
+            document.getElementById(id).value = value == null ? '' : value;
+        }
+
+        function openOpportunityEditor(item) {
+            opportunityEditIsNew = !item || !item.RequestId;
+            opportunityEditForm.reset();
+            opportunityRequestId.disabled = opportunityEditIsNew;
+            opportunityRequestId.value = opportunityEditIsNew ? '' : item.RequestId;
+            opportunityDeleteOpen.hidden = opportunityEditIsNew;
+            opportunityEditError.hidden = true;
+            opportunityEditError.textContent = '';
+            opportunityEditSave.disabled = true;
+            setButtonLabel(opportunityEditSave, opportunityEditIsNew ? 'Create opportunity' : 'Save opportunity');
+            text('opportunity-edit-kicker', opportunityEditIsNew ? 'NEW OPPORTUNITY' : 'OPPORTUNITY');
+            text('opportunity-edit-title', opportunityEditIsNew ? 'Add a new opportunity' : 'Edit opportunity');
+            text('opportunity-edit-subtitle', opportunityEditIsNew ? 'Create a prospective dealer record for follow-up.' : 'Update the prospective dealer and follow-up status.');
+            text('opportunity-edit-created', opportunityEditIsNew ? 'Created when saved' : 'Loading...');
+            opportunityEditModal.show();
+
+            $.getJSON($demoGrid.data(opportunityEditIsNew ? 'new-url' : 'edit-url'), opportunityEditIsNew ? {} : { id: item.RequestId })
+                .done(function (response) {
+                    opportunityRequestId.value = response.RequestId || '';
+                    opportunityValue('opportunity-business', response.BusinessName);
+                    opportunityValue('opportunity-contact', response.ContactName);
+                    opportunityValue('opportunity-email', response.Email);
+                    opportunityValue('opportunity-phone', response.Phone);
+                    opportunityValue('opportunity-website', response.CurrentWebsite);
+                    opportunityValue('opportunity-locations', response.LocationCount);
+                    opportunityValue('opportunity-inventory', response.InventorySize);
+                    opportunityValue('opportunity-goal', response.PrimaryGoal);
+                    opportunityValue('opportunity-message', response.Message);
+                    setSelectOptions(document.getElementById('opportunity-contact-method'), response.ContactOptions, response.PreferredContact);
+                    setSelectOptions(document.getElementById('opportunity-status'), response.StatusOptions, response.Status);
+                    text('opportunity-edit-created', opportunityEditIsNew ? 'Created when saved' : 'Received ' + (response.CreatedUtc || ''));
+                    opportunityEditSave.disabled = false;
+                    opportunityDeleteOpen.hidden = opportunityEditIsNew;
+                    document.getElementById('opportunity-business').focus();
+                })
+                .fail(function (xhr) {
+                    var response = xhr.responseJSON || {};
+                    opportunityEditError.textContent = response.Message || 'The opportunity could not be loaded.';
+                    opportunityEditError.hidden = false;
+                });
+        }
+
+        opportunityEditForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            if (!opportunityEditForm.checkValidity()) {
+                opportunityEditForm.reportValidity();
+                return;
+            }
+
+            opportunityEditSave.disabled = true;
+            setButtonLabel(opportunityEditSave, opportunityEditIsNew ? 'Creating...' : 'Saving...');
+            opportunityEditError.hidden = true;
+            var data = $(opportunityEditForm).serializeArray();
+            data.push({
+                name: '__RequestVerificationToken',
+                value: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value
+            });
+            $.ajax({
+                url: $demoGrid.data(opportunityEditIsNew ? 'new-url' : 'edit-url'),
+                method: 'POST',
+                dataType: 'json',
+                data: data
+            }).done(function () {
+                opportunityEditModal.hide();
+                $demoGrid.pepGrid('refresh');
+            }).fail(function (xhr) {
+                var response = xhr.responseJSON || {};
+                opportunityEditError.textContent = response.Message || 'The opportunity could not be saved.';
+                opportunityEditError.hidden = false;
+            }).always(function () {
+                opportunityEditSave.disabled = false;
+                setButtonLabel(opportunityEditSave, opportunityEditIsNew ? 'Create opportunity' : 'Save opportunity');
+            });
+        });
+
+        opportunityDeleteOpen.addEventListener('click', function () {
+            if (opportunityEditIsNew || !opportunityRequestId.value) return;
+            prepareOpportunityDelete({
+                RequestId: opportunityRequestId.value,
+                BusinessName: document.getElementById('opportunity-business').value,
+                ContactName: document.getElementById('opportunity-contact').value,
+                Email: document.getElementById('opportunity-email').value
+            });
+            opportunityDeleteParentModal = opportunityEditModalElement;
+            showDeleteConfirmation(deleteOpportunityModal, opportunityDeleteParentModal);
+        });
+
+        $(opportunityEditModalElement).on('hidden.bs.modal', function () {
+            opportunityEditForm.reset();
+            opportunityRequestId.disabled = false;
+            opportunityDeleteOpen.hidden = true;
+            opportunityEditError.hidden = true;
+            opportunityEditError.textContent = '';
+        });
+
         function openKeyIssueModal(context) {
             pendingKeyIssue = context;
             keyIssueForm.reset();
@@ -478,7 +777,7 @@
             subgridEditError.hidden = true;
             clientCreateResult.hidden = true;
             subgridEditSave.hidden = false;
-            subgridEditCancel.textContent = 'Cancel';
+            setIconButtonLabel(subgridEditCancel, 'Cancel');
             profileElement.hidden = false;
         });
 
@@ -512,7 +811,7 @@
             $(detailRow).find('.customer-email-grid').pepGrid({
                 url: emailUrl + separator + $.param({ clientId: detail.dataItem.ClientId }),
                 schema: { data: responseData }, height: null, pageable: false, pageSize: 20,
-                resizable: false, autozoomable: true, showSearch: false, exportToExcel: false, exportToPdf: false,
+                resizable: true, autozoomable: true, showSearch: false, exportToExcel: false, exportToPdf: false,
                 defaultSort: [{ field: 'SentSort', dir: 'desc' }],
                 onCellClick: function (emailDetail) {
                     var action = emailDetail.event.target.closest('[data-email-action]');
@@ -590,6 +889,17 @@
                         copyButton.textContent = 'Copied';
                     }
                 });
+            } else {
+                detailRow.querySelector('.customer-subscription-new').addEventListener('click', function () {
+                    openSubgridEditor(
+                        'subscription-new',
+                        {},
+                        detailRow.querySelector('.customer-subscription-grid'),
+                        detail.dataItem.ClientId,
+                        detailUrl,
+                        separator
+                    );
+                });
             }
             $.getJSON(detailUrl + separator + $.param({ clientId: detail.dataItem.ClientId }))
                 .done(function (response) {
@@ -598,7 +908,7 @@
                         var apiGridElement = detailRow.querySelector('.customer-api-grid');
                         $(apiGridElement).pepGrid({
                             data: response.ApiKeys || [], height: null, pageable: false, pageSize: 100,
-                            resizable: false, autozoomable: true, showSearch: false, exportToExcel: false, exportToPdf: false,
+                            resizable: true, autozoomable: true, showSearch: false, exportToExcel: false, exportToPdf: false,
                             defaultSort: [{ field: 'CreatedSort', dir: 'desc' }],
                             onCellDblClick: function (apiDetail) {
                                 openSubgridEditor('api', apiDetail.dataItem, apiGridElement, detail.dataItem.ClientId, detailUrl, separator);
@@ -620,7 +930,7 @@
                         var subscriptionGridElement = detailRow.querySelector('.customer-subscription-grid');
                         $(subscriptionGridElement).pepGrid({
                             data: response.Subscriptions || [], height: null, pageable: false, pageSize: 100,
-                            resizable: false, autozoomable: true, showSearch: false, exportToExcel: false, exportToPdf: false,
+                            resizable: true, autozoomable: true, showSearch: false, exportToExcel: false, exportToPdf: false,
                             defaultSort: [{ field: 'PeriodEndSort', dir: 'desc' }],
                             onCellDblClick: function (subscriptionDetail) {
                                 openSubgridEditor('subscription', subscriptionDetail.dataItem, subscriptionGridElement, detail.dataItem.ClientId, detailUrl, separator);
@@ -669,13 +979,22 @@
 
             $customerGrid.pepGrid({
                 url: $customerGrid.data('url'), schema: { data: responseData }, height: null, pageable: false, pageSize: 100,
-                resizable: false, autozoomable: true, exportToExcel: false, exportToPdf: false,
+                resizable: true, autozoomable: true, exportToExcel: false, exportToPdf: false,
                 defaultSort: [{ field: 'CreatedSort', dir: 'desc' }],
                 onDataBound: function () {
                     expandedCustomerDetail = null;
                     ensureNewCustomerToolbarButton();
                 },
                 onCellClick: function (detail) {
+                    if (detail.field === 'Delete') {
+                        var deleteButton = detail.event.target.closest('.customer-delete-action');
+                        if (!deleteButton) return;
+                        detail.event.preventDefault();
+                        detail.event.stopPropagation();
+                        prepareClientDelete(detail.dataItem);
+                        deleteClientModal.show();
+                        return;
+                    }
                     if (detail.field === 'EmailCount') expandCustomerEmails(detail);
                     if (detail.field === 'ApiKeyCount') expandCustomerAccount(detail, 'api');
                     if (detail.field === 'SubscriptionCount') expandCustomerAccount(detail, 'subscription');
@@ -688,32 +1007,60 @@
                     openSubgridEditor('client', detail.dataItem, document.getElementById('customer-grid'), detail.dataItem.ClientId, null, null);
                 },
                 columns: [
-                    { field: 'BusinessName', title: 'Customer', width: '16%' },
-                    { field: 'ClientNumber', title: 'Client number', width: '14%' },
-                    { field: 'ContactName', title: 'Contact', width: '15%' },
-                    { field: 'Email', title: 'Email', width: '19%' },
-                    { field: 'ApiKeyCount', title: 'API keys', width: '12%', sortable: false, filterable: false, template: '#customer-api-toggle-template' },
-                    { field: 'SubscriptionCount', title: 'Subscription', width: '14%', sortable: false, filterable: false, template: '#customer-subscription-toggle-template' },
-                    { field: 'EmailCount', title: 'Mail', width: '10%', sortable: false, filterable: false, template: '#customer-email-toggle-template' }
+                    { field: 'BusinessName', title: 'Customer', width: '15%' },
+                    { field: 'ClientNumber', title: 'Client number', width: '13%' },
+                    { field: 'ContactName', title: 'Contact', width: '14%' },
+                    { field: 'Email', title: 'Email', width: '18%' },
+                    { field: 'ApiKeyCount', title: 'API keys', width: '10%', sortable: false, filterable: false, template: '#customer-api-toggle-template' },
+                    { field: 'SubscriptionCount', title: 'Subscription', width: '13%', sortable: false, filterable: false, template: '#customer-subscription-toggle-template' },
+                    { field: 'EmailCount', title: 'Mail', width: '8%', sortable: false, filterable: false, template: '#customer-email-toggle-template' },
+                    { field: 'Delete', title: '', width: '9%', sortable: false, filterable: false, template: '#customer-delete-action-template' }
                 ]
             });
         }
 
         var $demoGrid = $('#demo-request-grid');
         if ($demoGrid.length) {
+            function ensureNewOpportunityToolbarButton() {
+                var searchBar = $demoGrid[0].querySelector('.pg-search-bar');
+                if (!searchBar || searchBar.querySelector('.admin-new-opportunity')) return;
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'admin-new-opportunity';
+                button.textContent = 'New opportunity';
+                button.addEventListener('click', function () { openOpportunityEditor(null); });
+                var searchInputGroup = searchBar.querySelector('.pg-search-input-group');
+                searchBar.insertBefore(button, searchInputGroup || searchBar.firstChild);
+            }
+
             $demoGrid.pepGrid({
                 url: $demoGrid.data('url'), schema: { data: responseData }, height: null, pageable: false, pageSize: 100,
-                resizable: false, autozoomable: true, exportToExcel: false, exportToPdf: false,
+                resizable: true, autozoomable: true, exportToExcel: false, exportToPdf: false,
                 defaultSort: [{ field: 'CreatedSort', dir: 'desc' }],
-                onCellDblClick: function (detail) { prepareModal(detail.dataItem, 'demo'); },
-                onRowDblClick: function (detail) { prepareModal(detail.dataItem, 'demo'); },
+                onDataBound: ensureNewOpportunityToolbarButton,
+                onCellClick: function (detail) {
+                    if (detail.field !== 'Delete') return;
+                    var deleteButton = detail.event.target.closest('.opportunity-delete-action');
+                    if (!deleteButton) return;
+                    detail.event.preventDefault();
+                    detail.event.stopPropagation();
+                    prepareOpportunityDelete(detail.dataItem);
+                    deleteOpportunityModal.show();
+                },
+                onCellDblClick: function (detail) {
+                    if (detail.field !== 'Delete') openOpportunityEditor(detail.dataItem);
+                },
+                onRowDblClick: function (detail) {
+                    if (!detail.event.target.closest('.opportunity-delete-action')) openOpportunityEditor(detail.dataItem);
+                },
                 columns: [
                     { field: 'BusinessName', title: 'Dealership', width: '15%' },
                     { field: 'ContactName', title: 'Contact', width: '15%' },
                     { field: 'Email', title: 'Email', width: '15%' },
                     { field: 'Phone', title: 'Phone', width: '15%' },
                     { field: 'Inventory', title: 'Inventory', width: '15%' },
-                    { field: 'Status', title: 'Status', width: '15%', template: '#demo-status-template' }
+                    { field: 'Status', title: 'Status', width: '15%', template: '#demo-status-template' },
+                    { field: 'Delete', title: '', width: '10%', sortable: false, filterable: false, template: '#opportunity-delete-action-template' }
                 ]
             });
         }

@@ -3,6 +3,7 @@ using autodealer.dev.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Linq;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Security.Principal;
@@ -63,6 +64,12 @@ namespace autodealer.dev.Controllers {
         [AdminAuthorize]
         [HttpGet]
         public ActionResult Customers() {
+            return View(adminService.GetDashboard());
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
+        public ActionResult Opportunities() {
             return View(adminService.GetDashboard());
         }
 
@@ -277,6 +284,44 @@ namespace autodealer.dev.Controllers {
         }
 
         [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteClient(long clientId, bool confirmDelete = false) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            if (!confirmDelete) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = "Check the confirmation box before deleting this customer." });
+            }
+            try {
+                var businessName = adminService.DeleteClient(clientId);
+                return Json(new {
+                    Ok = true,
+                    Message = businessName + " and all related records were permanently deleted."
+                });
+            }
+            catch (KeyNotFoundException ex) {
+                Response.StatusCode = 404;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (ArgumentException ex) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (SqlException ex) {
+                Response.StatusCode = 503;
+                var message = ex.Number == 229
+                    ? "The application database user cannot delete client records. Run Database/005_AdminClientDeletionPermissions.sql against the production database."
+                        : ex.Number == 547
+                            ? "A related database table currently prevents this client from being deleted. No records were removed."
+                            : ex.Number == -2
+                                ? "Client deletion timed out. No records were removed; try again after database activity has settled."
+                                : "The customer could not be deleted because the database operation failed (SQL " + ex.Number + "). No records were removed.";
+                return Json(new { Ok = false, Message = message });
+            }
+        }
+
+        [AdminAuthorize]
         [HttpGet]
         public ActionResult EditApiKey(long id) {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
@@ -311,6 +356,48 @@ namespace autodealer.dev.Controllers {
             catch (SqlException) {
                 Response.StatusCode = 503;
                 return Json(new { Ok = false, Message = "The API key could not be updated because the database is temporarily unavailable." });
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
+        public ActionResult NewSubscription(long clientId) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            try {
+                return Json(SubscriptionEditResponse(adminService.GetNewSubscriptionDefaults(clientId)), JsonRequestBehavior.AllowGet);
+            }
+            catch (KeyNotFoundException ex) {
+                Response.StatusCode = 404;
+                return Json(new { Ok = false, Message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+            catch (InvalidOperationException ex) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult NewSubscription(AdminSubscriptionEditViewModel model) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            if (!ModelState.IsValid) return EditValidationFailure();
+            try {
+                return Json(SubscriptionEditResponse(adminService.CreateSubscription(model)));
+            }
+            catch (KeyNotFoundException ex) {
+                Response.StatusCode = 404;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (SqlException) {
+                Response.StatusCode = 503;
+                return Json(new { Ok = false, Message = "The subscription could not be created because the database is temporarily unavailable." });
             }
         }
 
@@ -422,6 +509,36 @@ namespace autodealer.dev.Controllers {
             };
         }
 
+        private object DemoRequestEditResponse(AdminDemoRequestEditViewModel model, bool isNew) {
+            return new {
+                Ok = true,
+                IsNew = isNew,
+                model.RequestId,
+                model.BusinessName,
+                model.ContactName,
+                model.Email,
+                model.Phone,
+                model.CurrentWebsite,
+                model.LocationCount,
+                model.InventorySize,
+                model.PrimaryGoal,
+                model.PreferredContact,
+                model.Message,
+                model.Status,
+                CreatedUtc = model.CreatedUtc.ToString("MMM d, yyyy HH:mm 'UTC'"),
+                StatusOptions = new[] {
+                    new AdminEditOptionViewModel { Value = "new", Text = "New" },
+                    new AdminEditOptionViewModel { Value = "active", Text = "Active" },
+                    new AdminEditOptionViewModel { Value = "postponed", Text = "Postponed" },
+                    new AdminEditOptionViewModel { Value = "closed", Text = "Closed" }
+                },
+                ContactOptions = new[] {
+                    new AdminEditOptionViewModel { Value = "Email", Text = "Email" },
+                    new AdminEditOptionViewModel { Value = "Phone", Text = "Phone" }
+                }
+            };
+        }
+
         private ActionResult EditValidationFailure() {
             Response.StatusCode = 400;
             var message = ModelState.Values.SelectMany(x => x.Errors)
@@ -445,6 +562,13 @@ namespace autodealer.dev.Controllers {
                 string.Equals(status, "inactive", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(status, "past_due", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(status, "canceled", StringComparison.OrdinalIgnoreCase)) return "danger";
+            return "secondary";
+        }
+
+        private static string OpportunityStatusBadgeClass(string status) {
+            if (string.Equals(status, "new", StringComparison.OrdinalIgnoreCase)) return "info";
+            if (string.Equals(status, "active", StringComparison.OrdinalIgnoreCase)) return "success";
+            if (string.Equals(status, "postponed", StringComparison.OrdinalIgnoreCase)) return "warning";
             return "secondary";
         }
 
@@ -486,12 +610,115 @@ namespace autodealer.dev.Controllers {
                 request.Message,
                 request.PreferredContact,
                 request.Status,
+                StatusBadgeClass = OpportunityStatusBadgeClass(request.Status),
                 Received = request.CreatedUtc.ToString("MMM d, yyyy HH:mm 'UTC'"),
                 CreatedSort = request.CreatedUtc.ToString("o"),
                 request.ContactHref,
                 request.ContactAction
             });
             return Json(new { Data = rows }, JsonRequestBehavior.AllowGet);
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
+        public ActionResult NewDemoRequest() {
+            return Json(DemoRequestEditResponse(adminService.GetNewDemoRequestDefaults(), true), JsonRequestBehavior.AllowGet);
+        }
+
+        [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult NewDemoRequest(AdminDemoRequestEditViewModel model) {
+            if (!ModelState.IsValid) return EditValidationFailure();
+            try {
+                return Json(DemoRequestEditResponse(adminService.SaveDemoRequest(model, true), false));
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (SqlException) {
+                Response.StatusCode = 503;
+                return Json(new { Ok = false, Message = "The opportunity could not be created because the database is temporarily unavailable." });
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
+        public ActionResult EditDemoRequest(Guid id) {
+            try {
+                return Json(DemoRequestEditResponse(adminService.GetDemoRequestForEdit(id), false), JsonRequestBehavior.AllowGet);
+            }
+            catch (KeyNotFoundException ex) {
+                Response.StatusCode = 404;
+                return Json(new { Ok = false, Message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditDemoRequest(AdminDemoRequestEditViewModel model) {
+            if (!ModelState.IsValid) return EditValidationFailure();
+            try {
+                return Json(DemoRequestEditResponse(adminService.SaveDemoRequest(model, false), false));
+            }
+            catch (KeyNotFoundException ex) {
+                Response.StatusCode = 404;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (ChangeConflictException) {
+                Response.StatusCode = 409;
+                return Json(new { Ok = false, Message = "This opportunity changed while it was being edited. Refresh the grid and try again." });
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (SqlException ex) {
+                Response.StatusCode = 503;
+                var message = ex.Number == 547
+                    ? "The production opportunity-status constraint is out of date. Run the latest Database/005_AdminClientDeletionPermissions.sql, then try again."
+                    : ex.Number == 229
+                        ? "The AUTODEALER database user cannot update opportunity records. Grant UPDATE on dbo.DealerDemoRequests to the production user."
+                        : ex.Number == 8152 || ex.Number == 2628
+                            ? "One of the opportunity values is longer than the database column allows."
+                            : "The opportunity could not be updated because the database operation failed (SQL " + ex.Number + ").";
+                return Json(new { Ok = false, Message = message });
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteDemoRequest(Guid requestId, bool confirmDelete = false) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            if (!confirmDelete) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = "Check the confirmation box before deleting this opportunity." });
+            }
+            try {
+                var businessName = adminService.DeleteDemoRequest(requestId);
+                return Json(new { Ok = true, Message = businessName + " was permanently removed from new opportunities." });
+            }
+            catch (KeyNotFoundException ex) {
+                Response.StatusCode = 404;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (ArgumentException ex) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (SqlException ex) {
+                Response.StatusCode = 503;
+                var message = ex.Number == 229
+                    ? "The application database user cannot delete opportunity records. Run Database/005_AdminClientDeletionPermissions.sql against the production database."
+                    : ex.Number == 547
+                        ? "A related database record currently prevents this opportunity from being deleted. No records were removed."
+                        : "The opportunity could not be deleted because the database operation failed (SQL " + ex.Number + "). No records were removed.";
+                return Json(new { Ok = false, Message = message });
+            }
         }
 
         [AdminAuthorize]

@@ -7,6 +7,13 @@ The migration creates clients, password credentials, plans, subscriptions,
 tokenized payment profiles, API keys, detailed request logs, daily aggregates,
 indexes, and constraints.
 
+Run `Database/005_AdminClientDeletionPermissions.sql` before deploying the
+administrator deletion features. It grants the web database principal the
+table-level delete permissions required by the LINQ-to-SQL workflows. The
+application deletes email history, API usage, keys, payment profiles,
+credentials, subscriptions, and the client inside one serializable transaction.
+The same migration also grants permission to delete dealer demo opportunities.
+
 For local development, the `AutoDealer.dev` connection targets the
 `AUTODEALER.DEV` catalog on `VALS-PC`. Set deployment-specific connection strings through a release
 transform or a protected configuration provider. Do not commit production

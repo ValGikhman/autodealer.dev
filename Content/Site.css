@@ -12,6 +12,10 @@
     --blue-strong: #4f82e5;
     --blue-soft: #e8efff;
     --violet: #9d9cff;
+    --control-silver-top: #92999f;
+    --control-silver-bottom: #626970;
+    --control-silver-border: #85858e;
+    --control-silver-text: #252a2f;
     --mono: "Cascadia Code","SFMono-Regular",Consolas,monospace;
     --sans: Inter,"Segoe UI",Arial,sans-serif
 }
@@ -5485,7 +5489,7 @@ h2, h3 {
 /* Landing-page feature cards share the silver dashboard treatment. */
 .home-page .feature-card {
     border-color: #aeb4ba;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 18px 44px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.32)
 }
 
@@ -5505,7 +5509,7 @@ h2, h3 {
 .account-content-section .form-card.demo-request-card {
     color: #111518;
     border-color: #aeb4ba;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 18px 44px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.32)
 }
 
@@ -6196,7 +6200,7 @@ h2, h3 {
     border: 1px solid #b7bdc3;
     border-radius: 999px;
     color: #20262b;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: inset 0 1px rgba(255,255,255,.34);
     font-size: 10px;
     font-weight: 800;
@@ -6216,7 +6220,7 @@ h2, h3 {
 .button.site-cta, .button.site-cta:hover, .site-header .site-nav .site-cta:hover {
     color: #171c20;
     border-color: #b7bdc3;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 10px 24px rgba(16,19,23,.2),inset 0 1px rgba(255,255,255,.34)
 }
 
@@ -6248,7 +6252,7 @@ h2, h3 {
 .account-content-section .form-card.login-card {
     color: #111518;
     border-color: #aeb4ba;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 18px 44px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.32)
 }
 
@@ -6269,7 +6273,7 @@ h2, h3 {
 .account-content-section .form-card {
     color: #111518;
     border-color: #aeb4ba;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 18px 44px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.32)
 }
 
@@ -6336,7 +6340,7 @@ h2, h3 {
     border: 1px solid #606870;
     border-radius: 9px;
     color: #151a1e;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 12px 26px rgba(25,30,34,.24),inset 0 1px rgba(255,255,255,.4);
     font-size: 14px;
     font-weight: 800;
@@ -6369,7 +6373,7 @@ h2, h3 {
 .content-section .editorial-copy.about-editorial-copy {
     color: #111518;
     border-color: #aeb4ba;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 18px 44px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.32)
 }
 
@@ -6380,7 +6384,7 @@ h2, h3 {
 .content-section .about-card {
     color: #111518;
     border-color: #aeb4ba;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 18px 44px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.32)
 }
 
@@ -6395,7 +6399,7 @@ h2, h3 {
 .content-section .about-contact {
     color: #111518;
     border-color: #aeb4ba;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 18px 44px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.32)
 }
 
@@ -6406,7 +6410,7 @@ h2, h3 {
 .content-section .contact-card {
     color: #111518;
     border-color: #aeb4ba;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 18px 44px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.32)
 }
 
@@ -6561,28 +6565,33 @@ h2, h3 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    align-self: center;
-    flex: 0 0 36px;
-    width: 36px;
-    height: 36px;
+    align-self: flex-start;
+    flex: 0 0 39px;
+    width: 39px;
+    height: 39px;
     padding: 0;
-    border: 1px solid #858c93;
-    border-radius: 50%;
-    color: #f4f5f6;
-    background: #50575f;
+    border: 1px solid #5c636a;
+    border-radius: 7px;
+    color: #fff;
+    background: #6c757d !important;
+    background-image: none !important;
     cursor: pointer;
     line-height: 1
 }
 
     .contact-page .contact-modal-close:hover, .contact-page .contact-modal-close:focus-visible {
-        border-color: #c1c6cb;
-        background: #626971;
-        outline: 0
+        border-color: #5c636a;
+        color: #e5e8ea;
+        background: #6c757d !important;
+        box-shadow: none;
+        filter: none;
+        outline: 0;
+        transform: none
     }
 
 .contact-page .modal-body {
     padding: 18px 24px 20px;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%)
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%)
 }
 
 .contact-page .contact-modal-form {
@@ -6757,7 +6766,7 @@ h2, h3 {
 .account-content-section .success-card {
     color: #111518;
     border-color: #aeb4ba;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 18px 44px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.32)
 }
 
@@ -6783,7 +6792,7 @@ h2, h3 {
     padding: 22px 24px;
     border: 1px solid #aeb4ba;
     border-radius: 12px;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: 0 16px 38px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.32)
 }
 
@@ -6965,28 +6974,44 @@ h2, h3 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    align-self: center;
-    flex: 0 0 36px;
-    width: 36px;
-    height: 36px;
+    align-self: flex-start;
+    flex: 0 0 39px;
+    width: 39px;
+    height: 39px;
     padding: 0;
-    border: 1px solid #858c93;
-    border-radius: 50%;
-    color: #f4f5f6;
-    background: #50575f;
+    border: 1px solid #5c636a;
+    border-radius: 7px;
+    color: #fff;
+    background: #6c757d !important;
+    background-image: none !important;
     line-height: 1
 }
 
     .legal-modal-close:hover, .legal-modal-close:focus-visible {
-        border-color: #c1c6cb;
-        background: #626971;
-        outline: 0
+        border-color: #5c636a;
+        color: #e5e8ea;
+        background: #6c757d !important;
+        box-shadow: none;
+        filter: none;
+        outline: 0;
+        transform: none
     }
+
+.contact-page .contact-modal-close svg, .legal-modal-close svg {
+    display: block;
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round
+}
 
 .legal-modal-body {
     padding: 18px 22px;
     overflow-y: auto;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     scroll-behavior: smooth
 }
 
@@ -7167,7 +7192,7 @@ body .form-card .button.button-primary.submit-button {
     border: 1px solid #b7bdc3;
     border-radius: 999px;
     color: #20262b;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%);
     box-shadow: inset 0 1px rgba(255,255,255,.34);
     font-size: 10px;
     font-weight: 800;
@@ -7444,7 +7469,7 @@ input.availability-invalid {
 .dashboard-style-form-body {
     margin: 0;
     padding: 16px 24px 0;
-    background: radial-gradient(circle at 88% 2%,rgba(255,255,255,.3),transparent 28%),linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%)
+    background: linear-gradient(145deg,#a0a6ac 0%,#858c93 48%,#6f767e 100%)
 }
 
 .dashboard-style-form .form-row {
@@ -7662,4 +7687,106 @@ input.availability-invalid {
     .dashboard-style-form .dashboard-style-form-footer .submit-button {
         width: 100%
     }
+}
+
+/* Unified text weight and pg-th-inspired button treatment. */
+body {
+    font-weight: 500
+}
+
+input,
+select,
+textarea {
+    font-weight: 500
+}
+
+body .button,
+body .nav-logout button,
+body .legal-modal-footer button,
+body .legal-modal-footer a,
+body .payment-information-button,
+body .key-output button,
+body #copy-vin-response,
+body .code-tabs button,
+body .vin-format-tabs button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 39px;
+    padding: 0 15px;
+    border: 1px solid var(--control-silver-border);
+    border-radius: 7px;
+    color: var(--control-silver-text);
+    background: linear-gradient(180deg,var(--control-silver-top),var(--control-silver-bottom)) !important;
+    box-shadow: inset 0 1px rgba(255,255,255,.22);
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .035em;
+    text-transform: none;
+    white-space: nowrap;
+    transition: color .16s ease
+}
+
+body .button:hover,
+body .button:focus-visible,
+body .nav-logout button:hover,
+body .nav-logout button:focus-visible,
+body .legal-modal-footer button:hover,
+body .legal-modal-footer button:focus-visible,
+body .legal-modal-footer a:hover,
+body .legal-modal-footer a:focus-visible,
+body .payment-information-button:hover,
+body .payment-information-button:focus-visible,
+body .key-output button:hover,
+body .key-output button:focus-visible,
+body #copy-vin-response:hover,
+body #copy-vin-response:focus-visible,
+body .code-tabs button:hover,
+body .code-tabs button:focus-visible,
+body .vin-format-tabs button:hover,
+body .vin-format-tabs button:focus-visible {
+    border-color: var(--control-silver-border) !important;
+    color: #fff !important;
+    background: linear-gradient(180deg,var(--control-silver-top),var(--control-silver-bottom)) !important;
+    box-shadow: inset 0 1px rgba(255,255,255,.22) !important;
+    filter: none !important;
+    outline: 0;
+    transform: none !important
+}
+
+body .button:disabled,
+body .payment-information-button:disabled,
+body .key-output button:disabled,
+body #copy-vin-response:disabled,
+body .code-tabs button:disabled,
+body .vin-format-tabs button:disabled {
+    cursor: not-allowed;
+    filter: grayscale(.25);
+    opacity: .55
+}
+
+body .code-tabs button {
+    color: var(--control-silver-text);
+    font-weight: 700
+}
+
+body .code-tabs button.active {
+    color: var(--control-silver-text);
+    background: linear-gradient(180deg,var(--control-silver-top),var(--control-silver-bottom));
+    font-weight: 700
+}
+
+body .vin-format-tabs button,
+body .vin-format-tabs button.active {
+    color: var(--control-silver-text);
+    background: linear-gradient(180deg,var(--control-silver-top),var(--control-silver-bottom));
+    font-weight: 700
+}
+
+body .dashboard-style-form .dashboard-style-form-footer .submit-button {
+    color: var(--control-silver-text);
+    background: linear-gradient(180deg,var(--control-silver-top),var(--control-silver-bottom));
+    font-weight: 700;
+    letter-spacing: .035em
 }

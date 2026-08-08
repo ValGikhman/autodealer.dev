@@ -126,8 +126,9 @@
             <div><span>Primary API key</span><code id="created-client-api-key"></code><button type="button" data-copy-target="created-client-api-key">Copy</button></div>
         </div>
         <div class="dashboard-subgrid-edit-actions">
+            <button type="button" class="customer-delete-action dashboard-client-delete-open" id="dashboard-client-delete-open" aria-label="Delete customer" title="Delete customer" hidden><svg aria-hidden="true"><use href="#icon-trash"></use></svg></button>
             <span id="dashboard-subgrid-edit-note">Double-check the values before saving.</span>
-            <div><button type="button" class="dashboard-modal-done" id="dashboard-subgrid-edit-cancel" data-bs-dismiss="modal">Cancel</button><button type="submit" class="customer-api-issue" id="dashboard-subgrid-edit-save">Save changes</button></div>
+            <div><button type="button" class="btn btn-secondary admin-modal-cancel" id="dashboard-subgrid-edit-cancel" data-bs-dismiss="modal" aria-label="Cancel" title="Cancel"><svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg><span>Cancel</span></button><button type="submit" class="customer-api-issue admin-save-button" id="dashboard-subgrid-edit-save"><svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5V4Z"/><path d="M8 4v6h8V4M8 16h8"/></svg><span>Save changes</span></button></div>
         </div>
     </form>
 </section>

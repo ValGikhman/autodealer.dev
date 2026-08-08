@@ -45,21 +45,70 @@
                 <p class="dashboard-key-issue-help">The complete key will be emailed to the customer and displayed once after creation.</p>
                 <div class="dashboard-key-issue-error" id="issue-api-key-error" hidden></div>
             </div>
-            <div class="modal-footer"><button type="button" class="dashboard-modal-done" data-bs-dismiss="modal">Cancel</button><button type="submit" class="customer-api-issue" id="issue-api-key-submit">Issue API key</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary admin-modal-cancel" data-bs-dismiss="modal" aria-label="Cancel" title="Cancel"><svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg><span>Cancel</span></button><button type="submit" class="customer-api-issue" id="issue-api-key-submit">Issue API key</button></div>
         </form>
     </div>
 </div>
 
+@Html.Partial("_AdminDeleteConfirmationModal", new autodealer.dev.Models.AdminDeleteConfirmationViewModel {
+    IdPrefix = "delete-client",
+    Title = "Delete this customer?",
+    Warning = "This permanently deletes the client account, credentials, API keys, subscriptions, payment profiles, API usage records, and email history.",
+    Confirmation = "I understand that all records for this customer will be permanently deleted.",
+    KeepButtonText = "No, keep customer",
+    DeleteButtonText = "Yes, delete everything"
+})
+
+<div class="modal fade dashboard-record-modal dashboard-opportunity-edit-modal" id="opportunity-edit-modal" tabindex="-1" aria-labelledby="opportunity-edit-title" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <form class="modal-content" id="opportunity-edit-form">
+            <div class="modal-header dashboard-record-header">
+                <div><span class="dashboard-record-kicker" id="opportunity-edit-kicker">OPPORTUNITY</span><h2 class="modal-title" id="opportunity-edit-title">Edit opportunity</h2><p id="opportunity-edit-subtitle">Update the prospective dealer and follow-up status.</p></div>
+                <button type="button" class="btn-close dashboard-modal-close" data-bs-dismiss="modal" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 7l10 10M17 7L7 17" /></svg></button>
+            </div>
+            <div class="modal-body">
+                <input id="opportunity-request-id" name="RequestId" type="hidden" />
+                <div class="dashboard-subgrid-edit-fields opportunity-edit-fields">
+                    <div class="dashboard-edit-field dashboard-edit-field-wide"><label for="opportunity-business">Business name</label><input id="opportunity-business" name="BusinessName" type="text" maxlength="160" required autocomplete="organization" /></div>
+                    <div class="dashboard-edit-field"><label for="opportunity-contact">Contact name</label><input id="opportunity-contact" name="ContactName" type="text" maxlength="160" required autocomplete="name" /></div>
+                    <div class="dashboard-edit-field"><label for="opportunity-email">Email</label><input id="opportunity-email" name="Email" type="email" maxlength="254" required autocomplete="email" /></div>
+                    <div class="dashboard-edit-field"><label for="opportunity-phone">Phone</label><input id="opportunity-phone" name="Phone" type="tel" maxlength="32" autocomplete="tel" /></div>
+                    <div class="dashboard-edit-field"><label for="opportunity-contact-method">Preferred contact</label><select id="opportunity-contact-method" name="PreferredContact" required></select></div>
+                    <div class="dashboard-edit-field"><label for="opportunity-status">Status</label><select id="opportunity-status" name="Status" required></select></div>
+                    <div class="dashboard-edit-field"><label for="opportunity-locations">Locations</label><input id="opportunity-locations" name="LocationCount" type="number" min="1" max="1000" required /></div>
+                    <div class="dashboard-edit-field"><label for="opportunity-inventory">Inventory size</label><select id="opportunity-inventory" name="InventorySize" required>@Html.Partial("_InventorySizeOptions", string.Empty)</select></div>
+                    <div class="dashboard-edit-field"><label for="opportunity-goal">Primary goal</label><input id="opportunity-goal" name="PrimaryGoal" type="text" maxlength="120" required /></div>
+                    <div class="dashboard-edit-field"><label for="opportunity-website">Current website</label><input id="opportunity-website" name="CurrentWebsite" type="text" maxlength="300" autocomplete="url" /></div>
+                    <div class="dashboard-edit-field dashboard-edit-field-wide"><label for="opportunity-message">Opportunity notes</label><textarea id="opportunity-message" name="Message" maxlength="3000" rows="5" required></textarea></div>
+                </div>
+                <div class="dashboard-subgrid-edit-error" id="opportunity-edit-error" role="alert" hidden></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="customer-delete-action opportunity-delete-open" id="opportunity-delete-open" aria-label="Delete opportunity" title="Delete opportunity" hidden><svg aria-hidden="true"><use href="#icon-trash"></use></svg></button><span id="opportunity-edit-created"></span><div class="opportunity-edit-actions"><button type="button" class="btn btn-secondary admin-modal-cancel" data-bs-dismiss="modal" aria-label="Cancel" title="Cancel"><svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg><span>Cancel</span></button><button type="submit" class="customer-api-issue admin-save-button" id="opportunity-edit-save"><svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5V4Z"/><path d="M8 4v6h8V4M8 16h8"/></svg><span>Save opportunity</span></button></div></div>
+        </form>
+    </div>
+</div>
+
+@Html.Partial("_AdminDeleteConfirmationModal", new autodealer.dev.Models.AdminDeleteConfirmationViewModel {
+    IdPrefix = "delete-opportunity",
+    Title = "Delete this opportunity?",
+    Warning = "This permanently deletes the dealer demo request and all information submitted with it.",
+    Confirmation = "I understand that this opportunity will be permanently deleted.",
+    KeepButtonText = "No, keep opportunity",
+    DeleteButtonText = "Yes, delete opportunity"
+})
+
 <div class="dashboard-antiforgery" hidden>@Html.AntiForgeryToken()</div>
 
 <script type="text/x-pepgrid-template" id="customer-status-template"><span class="dashboard-grid-status">{{SubscriptionStatus}}</span></script>
-<script type="text/x-pepgrid-template" id="demo-status-template"><span class="dashboard-grid-status">{{Status}}</span></script>
-<script type="text/x-pepgrid-template" id="customer-email-toggle-template">{{#if EmailCount}}<button type="button" class="customer-email-toggle" aria-label="Show {{EmailCount}} associated emails" aria-expanded="false"><svg aria-hidden="true"><use href="#icon-mail"></use></svg><span>{{EmailCount}}</span></button>{{/if}}</script>
-<script type="text/x-pepgrid-template" id="customer-email-detail-template"><div class="customer-email-detail"><div class="customer-email-detail-heading"><div><span>EMAIL HISTORY</span><h3>Associated messages</h3></div><button type="button" class="customer-email-collapse" aria-label="Close email history">&times;</button></div><div class="customer-email-grid admin-pep-grid"></div></div></script>
+<script type="text/x-pepgrid-template" id="demo-status-template"><span class="opportunity-grid-status"><span class="dashboard-grid-status badge bg-{{StatusBadgeClass}}">{{Status}}</span></span></script>
+<script type="text/x-pepgrid-template" id="customer-email-toggle-template">{{#if EmailCount}}<span class="customer-grid-icon-action"><button type="button" class="customer-email-toggle" aria-label="Show {{EmailCount}} associated emails" aria-expanded="false"><svg aria-hidden="true"><use href="#icon-mail"></use></svg><span>{{EmailCount}}</span></button></span>{{/if}}</script>
+<script type="text/x-pepgrid-template" id="customer-email-detail-template"><div class="customer-email-detail"><div class="customer-email-detail-heading"><div><span>EMAIL HISTORY</span><h3>Associated messages</h3></div><button type="button" class="customer-email-collapse" aria-label="Close email history" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg></button></div><div class="customer-email-grid admin-pep-grid"></div></div></script>
 <script type="text/x-pepgrid-template" id="customer-email-actions-template"><div class="customer-email-actions"><button type="button" data-email-action="view" aria-label="View rendered email">View</button></div></script>
-<script type="text/x-pepgrid-template" id="customer-api-toggle-template"><button type="button" class="customer-api-toggle" aria-label="Show {{ApiKeyCount}} API keys" aria-expanded="false"><svg aria-hidden="true"><use href="#icon-key"></use></svg><span>{{ApiKeyCount}}</span></button></script>
-<script type="text/x-pepgrid-template" id="customer-subscription-toggle-template"><button type="button" class="customer-subscription-toggle" aria-label="{{SubscriptionStatus}} subscription; show {{SubscriptionCount}} subscription records" aria-expanded="false"><svg aria-hidden="true"><use href="#icon-plan"></use></svg><span class="badge bg-{{SubscriptionBadgeClass}}">{{SubscriptionCount}}</span></button></script>
-<script type="text/x-pepgrid-template" id="customer-api-detail-template"><div class="customer-account-detail"><div class="customer-email-detail-heading"><div><span>ACCOUNT ACCESS</span><h3>API keys</h3></div><div class="customer-detail-heading-actions"><button type="button" class="customer-api-issue">Issue API key</button><button type="button" class="customer-email-collapse" aria-label="Close API keys">&times;</button></div></div><div class="customer-api-issue-result" hidden><span></span><code></code><button type="button" class="customer-api-copy">Copy key</button></div><section class="customer-account-grid-section"><div class="customer-api-grid admin-pep-grid"></div></section></div></script>
-<script type="text/x-pepgrid-template" id="customer-subscription-detail-template"><div class="customer-account-detail"><div class="customer-email-detail-heading"><div><span>BILLING ACCESS</span><h3>Subscription history</h3></div><button type="button" class="customer-email-collapse" aria-label="Close subscriptions">&times;</button></div><section class="customer-account-grid-section"><div class="customer-subscription-grid admin-pep-grid"></div></section></div></script>
+<script type="text/x-pepgrid-template" id="customer-api-toggle-template"><span class="customer-grid-icon-action"><button type="button" class="customer-api-toggle" aria-label="Show {{ApiKeyCount}} API keys" aria-expanded="false"><svg aria-hidden="true"><use href="#icon-key"></use></svg><span>{{ApiKeyCount}}</span></button></span></script>
+<script type="text/x-pepgrid-template" id="customer-subscription-toggle-template"><span class="customer-grid-icon-action"><button type="button" class="customer-subscription-toggle" aria-label="{{SubscriptionStatus}} subscription; show {{SubscriptionCount}} subscription records" aria-expanded="false"><svg aria-hidden="true"><use href="#icon-plan"></use></svg><span class="badge bg-{{SubscriptionBadgeClass}}">{{SubscriptionCount}}</span></button></span></script>
+<script type="text/x-pepgrid-template" id="customer-api-detail-template"><div class="customer-account-detail"><div class="customer-email-detail-heading"><div class="customer-detail-heading-primary"><h3>API keys</h3><button type="button" class="customer-api-issue">Issue API key</button></div><button type="button" class="customer-email-collapse" aria-label="Close API keys" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg></button></div><div class="customer-api-issue-result" hidden><span></span><code></code><button type="button" class="customer-api-copy">Copy key</button></div><section class="customer-account-grid-section"><div class="customer-api-grid admin-pep-grid"></div></section></div></script>
+<script type="text/x-pepgrid-template" id="customer-subscription-detail-template"><div class="customer-account-detail"><div class="customer-email-detail-heading"><div class="customer-detail-heading-primary"><h3>Subscription history</h3><button type="button" class="customer-api-issue customer-subscription-new">New subscription</button></div><button type="button" class="customer-email-collapse" aria-label="Close subscriptions" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg></button></div><section class="customer-account-grid-section"><div class="customer-subscription-grid admin-pep-grid"></div></section></div></script>
 <script type="text/x-pepgrid-template" id="customer-key-status-template"><span class="dashboard-grid-status">{{Status}}</span></script>
 <script type="text/x-pepgrid-template" id="customer-subscription-status-template"><span class="dashboard-grid-status badge bg-{{StatusBadgeClass}}">{{Status}}</span></script>
+<script type="text/x-pepgrid-template" id="customer-delete-action-template"><span class="customer-grid-icon-action"><button type="button" class="customer-delete-action" aria-label="Delete {{BusinessName}}"><svg aria-hidden="true"><use href="#icon-trash"></use></svg></button></span></script>
+<script type="text/x-pepgrid-template" id="opportunity-delete-action-template"><span class="customer-grid-icon-action"><button type="button" class="customer-delete-action opportunity-delete-action" aria-label="Delete opportunity for {{BusinessName}}"><svg aria-hidden="true"><use href="#icon-trash"></use></svg></button></span></script>

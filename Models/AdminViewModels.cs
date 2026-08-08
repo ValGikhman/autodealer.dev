@@ -206,4 +206,52 @@ namespace autodealer.dev.Models {
         public string ContactHref { get; set; }
         public string ContactAction { get; set; }
     }
+
+    public sealed class AdminDemoRequestEditViewModel {
+        public Guid RequestId { get; set; }
+
+        [Required, StringLength(160)]
+        public string BusinessName { get; set; }
+
+        [Required, StringLength(160)]
+        public string ContactName { get; set; }
+
+        [Required, EmailAddress, StringLength(254)]
+        public string Email { get; set; }
+
+        [Phone, StringLength(32), RegularExpression(@"^[0-9+().\- xX#]*$", ErrorMessage = "Please enter a valid phone number.")]
+        public string Phone { get; set; }
+
+        [StringLength(300)]
+        public string CurrentWebsite { get; set; }
+
+        [Range(1, 1000)]
+        public int? LocationCount { get; set; }
+
+        [Required, StringLength(80), AllowedValues("Under 50 vehicles", "50-149 vehicles", "150-499 vehicles", "500+ vehicles", ErrorMessage = "Please choose an inventory size.")]
+        public string InventorySize { get; set; }
+
+        [Required, StringLength(120)]
+        public string PrimaryGoal { get; set; }
+
+        [Required, StringLength(20)]
+        public string PreferredContact { get; set; }
+
+        [Required, StringLength(3000)]
+        public string Message { get; set; }
+
+        [Required, StringLength(20), AllowedValues("new", "active", "postponed", "closed", ErrorMessage = "Please choose a valid opportunity status.")]
+        public string Status { get; set; }
+
+        public DateTime CreatedUtc { get; set; }
+    }
+
+    public sealed class AdminDeleteConfirmationViewModel {
+        public string IdPrefix { get; set; }
+        public string Title { get; set; }
+        public string Warning { get; set; }
+        public string Confirmation { get; set; }
+        public string KeepButtonText { get; set; }
+        public string DeleteButtonText { get; set; }
+    }
 }

@@ -15,7 +15,7 @@
                     <h2 class="modal-title" id="contact-modal-title">Tell us what you are building.</h2>
                     <p id="contact-modal-subtitle">A few useful details will help us begin in the right place.</p>
                 </div>
-                <button type="button" class="btn-close contact-modal-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                <button type="button" class="btn-close contact-modal-close" data-bs-dismiss="modal" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg></button>
             </div>
             <div class="modal-body">
                 @using (Html.BeginForm("Contact", "Home", FormMethod.Post, new { id = "contact-inquiry-form", @class = "form-card contact-modal-form", autocomplete = "on" })) {
