@@ -3,15 +3,17 @@
     ViewBag.Description = "Render the AutoDealer.dev VIN Decode API as a responsive HTML vehicle report with secure customer integration examples.";
     var demoApiKey = System.Configuration.ConfigurationManager.AppSettings["DemoApi:Key"] ?? "ad_live_demo.keysecret";
 }
-<section class="docs-header">
-    <div class="shell">
+<section class="site-hero page-hero">
+    <div class="shell site-hero-shell">
+      <div class="hero-copy">
         <span class="eyebrow">VIN DECODE DOCUMENTATION</span>
         <h1>Render a complete vehicle report.</h1>
-        <p>Place a VIN and API URL on one div, load the widget, and render the self-styled HTML response. Production integrations keep the API key behind a server-side proxy.</p>
+        <p>Render a complete responsive VIN report from one lightweight integration.</p>
         <div class="button-row docs-header-actions">
             <a class="button site-cta" href="#live-example"><span>Run the live example</span><i aria-hidden="true">&darr;</i></a>
             <a class="button button-secondary" href="@Url.Action("VinDecoder", "Solutions")">Open full API playground</a>
         </div>
+      </div>
     </div>
 </section>
 

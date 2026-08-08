@@ -1,5 +1,5 @@
 @{ ViewBag.Title = "API errors and limits"; }
-<section class="docs-header"><div class="shell"><span class="eyebrow">DOCUMENTATION</span><h1>Errors and limits</h1><p>Consistent JSON authentication errors, endpoint-specific validation, and observable usage headers.</p></div></section>
+<section class="site-hero page-hero"><div class="shell site-hero-shell"><div class="hero-copy"><span class="eyebrow">DOCUMENTATION</span><h1>Errors and limits</h1><p>Understand API errors, validation, rate limits, and response headers.</p></div></div></section>
 <section class="docs-page light-section"><div class="shell docs-layout">@Html.Partial("_DocsNav")<article class="docs-article">
     <h2>HTTP status codes</h2><div class="status-table full"><div><b>400</b><span>Invalid VIN or malformed request</span></div><div><b>401</b><span>Missing or invalid API key</span></div><div><b>403</b><span>Scope denied</span></div><div><b>422</b><span>The provider could not decode the VIN</span></div><div><b>429</b><span>Registered-key monthly quota or demo five-VIN daily limit reached</span></div><div><b>500</b><span>Service configuration failure</span></div><div><b>502</b><span>Vehicle-data provider unavailable</span></div><div><b>503</b><span>Authentication database unavailable</span></div></div>
     <h3>Error envelope</h3><div class="code-block simple"><pre><code>{

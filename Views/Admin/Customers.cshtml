@@ -5,13 +5,13 @@
     @Styles.Render("~/bundles/admin-css")
 }
 
-<section class="page-hero dashboard-hero admin-hero"><div class="shell">
+<section class="site-hero page-hero dashboard-hero admin-hero"><div class="shell site-hero-shell"><div class="hero-copy">
     <span class="eyebrow">ADMIN CONTROL ROOM</span><h1>Active customers.</h1><p>@Model.ActiveCustomers active of @Model.TotalCustomers registered accounts</p>
-</div></section>
+</div></div></section>
 <section class="section light-section dashboard-section"><div class="shell">
-    <div class="dashboard-heading"><div><span class="eyebrow dark">CUSTOMER DIRECTORY</span><h2>Dealer accounts.</h2></div><span class="status-badge">@Model.ActiveCustomers active</span></div>
+    <div class="section-heading"><span class="eyebrow">CUSTOMER DIRECTORY</span><h2>Dealer accounts.</h2><span class="status-badge">@Model.ActiveCustomers active</span></div>
     <section class="admin-customer-panel dashboard-grid-panel" aria-labelledby="customer-grid-title">
-        <div class="admin-table-heading"><div><span class="eyebrow dark">ACTIVE CUSTOMERS</span><h2 id="customer-grid-title">Dealer accounts</h2></div><span>@Model.Customers.Count active</span></div>
+        <div class="admin-table-heading"><div><span class="eyebrow">ACTIVE CUSTOMERS</span><h2 id="customer-grid-title">Dealer accounts</h2></div><span>@Model.Customers.Count active</span></div>
         <div id="customer-grid" class="admin-pep-grid" data-url="@Url.Action("CustomerGridData", "Admin")" data-email-url="@Url.Action("CustomerEmailGridData", "Admin")" data-account-detail-url="@Url.Action("CustomerAccountDetailData", "Admin")" data-issue-key-url="@Url.Action("IssueApiKey", "Admin")" data-new-client-url="@Url.Action("NewClient", "Admin")" data-edit-client-url="@Url.Action("EditClient", "Admin")" data-delete-client-url="@Url.Action("DeleteClient", "Admin")" data-edit-api-key-url="@Url.Action("EditApiKey", "Admin")" data-new-subscription-url="@Url.Action("NewSubscription", "Admin")" data-edit-subscription-url="@Url.Action("EditSubscription", "Admin")"></div>
     </section>
 </div></section>

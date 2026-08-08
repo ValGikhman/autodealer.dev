@@ -942,18 +942,18 @@
     width: 39px;
     height: 39px;
     padding: 0;
-    border: 1px solid #5c636a;
+    border: 1px solid #85858e;
     border-radius: 7px;
-    color: #fff;
-    background: #6c757d;
+    color: #252a2f;
+    background: linear-gradient(180deg, #92999f, #626970);
     cursor: pointer;
 }
 
 .admin-dashboard-page .customer-email-collapse:hover,
 .admin-dashboard-page .customer-email-collapse:focus-visible {
-    border-color: #5c636a;
-    color: #e5e8ea;
-    background: #6c757d;
+    border-color: #85858e;
+    color: #fff;
+    background: linear-gradient(180deg, #92999f, #626970);
     box-shadow: none;
     filter: none;
     outline: 0;
@@ -1202,11 +1202,10 @@
     width: 39px;
     height: 39px;
     padding: 0;
-    border: 1px solid #5c636a;
+    border: 1px solid #85858e;
     border-radius: 7px;
-    color: #fff;
-    background: #6c757d !important;
-    background-image: none !important;
+    color: #252a2f;
+    background: linear-gradient(180deg, #92999f, #626970) !important;
     cursor: pointer;
     opacity: 1;
 }
@@ -1223,9 +1222,9 @@
 
 .admin-dashboard-page .dashboard-modal-close:hover,
 .admin-dashboard-page .dashboard-modal-close:focus-visible {
-    border-color: #5c636a;
-    color: #e5e8ea;
-    background: #6c757d !important;
+    border-color: #85858e;
+    color: #fff;
+    background: linear-gradient(180deg, #92999f, #626970) !important;
     box-shadow: none;
     filter: none;
     outline: 0;

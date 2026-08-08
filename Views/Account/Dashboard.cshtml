@@ -1,8 +1,8 @@
 @model autodealer.dev.Models.AccountDashboardViewModel
 @{ ViewBag.Title = "My account"; ViewBag.BodyClass = "dashboard-page"; }
-<section class="page-hero dashboard-hero"><div class="shell"><span class="eyebrow">CLIENT WORKSPACE</span><h1>Welcome back, @Model.ContactName.</h1><p>@Model.BusinessName &middot; @Model.ClientNumber</p></div></section>
+<section class="site-hero page-hero dashboard-hero"><div class="shell site-hero-shell"><div class="hero-copy"><span class="eyebrow">CLIENT WORKSPACE</span><h1>Welcome, @Model.ContactName.</h1><p>@Model.BusinessName &middot; @Model.ClientNumber</p></div></div></section>
 <section class="section light-section dashboard-section"><div class="shell">
-    <div class="dashboard-heading"><div><span class="eyebrow dark">ACCOUNT OVERVIEW</span><h2>Your platform at a glance.</h2></div><span class="status-badge@(Model.PaymentRequired ? " payment-required-status" : "")">@Model.SubscriptionStatus</span></div>
+    <div class="section-heading"><span class="eyebrow">ACCOUNT OVERVIEW</span><h2>Your platform at a glance.</h2><span class="status-badge@(Model.PaymentRequired ? " payment-required-status" : "")">@Model.SubscriptionStatus</span></div>
     <div class="dashboard-grid">
         <article><span class="color-icon metric-icon" aria-hidden="true"><svg><use href="#icon-plan"></use></svg></span><span>PLAN</span><strong>@Model.PlanName</strong><small>Current subscription</small></article>
         <article><span class="color-icon metric-icon" aria-hidden="true"><svg><use href="#icon-gauge"></use></svg></span><span>MONTHLY QUOTA</span><strong>@Model.MonthlyRequestQuota</strong><small>API requests per period</small></article>

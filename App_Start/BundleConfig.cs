@@ -15,6 +15,9 @@ namespace autodealer.dev {
             bundles.Add(new Bundle("~/bundles/bootstrap").Include(
                       "~/Scripts/bootstrap.bundle.min.js"));
 
+            bundles.Add(new ScriptBundle("~/bundles/password-visibility").Include(
+                      "~/Scripts/passwordVisibility.js"));
+
             bundles.Add(new ScriptBundle("~/bundles/account-validation").Include(
                       "~/Scripts/accountCredentialValidation.js"));
 

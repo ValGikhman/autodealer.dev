@@ -239,6 +239,7 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\Admin\adminDashboard.js" />
     <Content Include="Scripts\accountCredentialValidation.js" />
+    <Content Include="Scripts\passwordVisibility.js" />
     <Content Include="Scripts\Invoke-TrialExpiration.ps1" />
     <Content Include="Scripts\autodealer-vin-report.js" />
     <Content Include="Scripts\pepTools\pepGrid.js" />
