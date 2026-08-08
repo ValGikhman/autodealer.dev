@@ -1,10 +1,11 @@
 @using System.Collections.Generic
 @using System.Linq
+@using autodealer.dev.Services
 @model autodealer.dev.Models.PricingPageViewModel
 @{
     ViewBag.Title = "API Pricing Plans";
     ViewBag.Description = "Compare AutoDealer.dev API pricing plans for VIN decoding, secure API keys, JSON, XML and HTML responses, usage tracking, and a 14-day trial.";
-    ViewBag.CanonicalUrl = Url.Action("Index", "Pricing", null, Request.Url.Scheme);
+    ViewBag.CanonicalUrl = SeoUrl.Absolute("/pricing");
 
     var offerItems = new List<Dictionary<string, object>>();
     foreach (var seoPlan in Model.Plans.Where(x => x.MonthlyPrice.HasValue)) {
@@ -14,7 +15,7 @@
             { "price", seoPlan.MonthlyPrice.Value },
             { "priceCurrency", "USD" },
             { "availability", "https://schema.org/InStock" },
-            { "url", Url.Action("Register", "Account", new { plan = seoPlan.PlanCode }, Request.Url.Scheme) },
+            { "url", SeoUrl.Absolute("/account/register?plan=" + System.Web.HttpUtility.UrlEncode(seoPlan.PlanCode)) },
             { "description", seoPlan.MonthlyRequestQuota.ToString("N0") + " API requests per month and up to " + seoPlan.MaxApiKeys + " secure API keys." }
         });
     }
@@ -24,7 +25,7 @@
         { "@type", "Service" },
         { "name", "AutoDealer.dev API access" },
         { "description", ViewBag.Description },
-        { "provider", new Dictionary<string, object> { { "@type", "Organization" }, { "name", "AutoDealer.dev" }, { "url", Url.Action("Index", "Home", null, Request.Url.Scheme) } } },
+        { "provider", new Dictionary<string, object> { { "@type", "Organization" }, { "name", "AutoDealer.dev" }, { "url", SeoUrl.Absolute("/") } } },
         { "serviceType", "Automotive data API" },
         { "url", ViewBag.CanonicalUrl },
         { "hasOfferCatalog", new Dictionary<string, object> { { "@type", "OfferCatalog" }, { "name", "API pricing plans" }, { "itemListElement", offerItems } } }

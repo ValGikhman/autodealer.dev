@@ -64,6 +64,54 @@ them to activate, renew, pause, or cancel subscriptions.
   audit logging, monitoring, backups, and an incident-response process.
 - Put rate limiting at the edge as well as enforcing plan quota in the API access service.
 
+## Search, sitemap, and Google measurement setup
+
+Production publishing applies `Web.Release.config`, which enables indexing and
+disables compilation debugging. Confirm these deployment values rather than
+putting environment-specific IDs directly in a Razor view:
+
+```xml
+<add key="Seo:SiteUrl" value="https://autodealer.dev" />
+<add key="Seo:AllowIndexing" value="true" />
+<add key="GoogleAnalytics:MeasurementId" value="G-XXXXXXXXXX" />
+<add key="GoogleSearchConsole:VerificationToken" value="verification-token" />
+```
+
+Keep `Seo:AllowIndexing=false` in local, staging, and preview deployments. The
+application then emits `noindex,nofollow` and a blocking `robots.txt`. A Release
+deployment serves the public sitemap at `https://autodealer.dev/sitemap.xml` and
+references it from `https://autodealer.dev/robots.txt`.
+
+For Google Analytics 4:
+
+1. Sign in to Google Analytics and create or select the property owned by the
+   business responsible for AutoDealer.dev.
+2. In **Admin > Data streams**, create a Web stream for
+   `https://autodealer.dev`, or select the existing stream if this site already
+   has one.
+3. Copy its Measurement ID (`G-...`) into the protected deployment value for
+   `GoogleAnalytics:MeasurementId`.
+4. Deploy, visit the production site, and use **Admin > Data streams > Test your
+   website**, Tag Assistant, and the Realtime report to verify collection.
+
+Do not reuse another site's Measurement ID merely because you control that
+site. Reuse it only when both domains intentionally belong in the same GA4 web
+journey and property; otherwise create a separate web stream so reporting is not
+mixed. The layout does not load Google Analytics when the setting is blank or
+does not match the `G-...` format.
+
+For Google Search Console:
+
+1. Add `autodealer.dev` as a Domain property and complete the recommended DNS
+   TXT verification. If URL-prefix verification is used instead, place the
+   provided HTML meta token in `GoogleSearchConsole:VerificationToken`.
+2. Submit `https://autodealer.dev/sitemap.xml` under **Sitemaps**.
+3. Inspect the home page and key solution pages with **URL Inspection**, then
+   request indexing after the production deployment is confirmed.
+4. Validate the home-page Organization markup and pricing Service markup with
+   Google's Rich Results Test, and monitor Core Web Vitals after real-user data
+   becomes available.
+
 ## Registration lifecycle
 
 1. The dedicated MVC account controller applies model validation and anti-forgery protection.

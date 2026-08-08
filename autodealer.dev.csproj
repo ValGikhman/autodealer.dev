@@ -144,6 +144,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\AdminAuthorizeAttribute.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\SeoMetadataFilter.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\UnityConfig.cs" />
     <Compile Include="App_Start\UnityMvcActivator.cs" />
@@ -153,6 +154,7 @@
     <Compile Include="Controllers\DocumentationController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PricingController.cs" />
+    <Compile Include="Controllers\SeoController.cs" />
     <Compile Include="Controllers\SolutionsController.cs" />
     <Compile Include="Controllers\DecoderController.cs" />
     <Compile Include="Models\AccountRegistrationViewModel.cs" />
@@ -185,6 +187,7 @@
     <Compile Include="Services\IContactInquiryService.cs" />
     <Compile Include="Services\IPlanService.cs" />
     <Compile Include="Services\PlanService.cs" />
+    <Compile Include="Services\SeoUrl.cs" />
     <Compile Include="Services\IDealerDemoRequestService.cs" />
     <Compile Include="Services\DealerDemoRequestService.cs" />
     <Compile Include="Services\EmailTemplateName.cs" />
@@ -226,10 +229,6 @@
     <Content Include="Content\email.css" />
     <Content Include="Content\pepTools\pepGrid.css" />
     <Content Include="Content\Site.css" />
-    <Content Include="images\1.png" />
-    <Content Include="images\2.png" />
-    <Content Include="images\3.png" />
-    <Content Include="images\logo.png" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />

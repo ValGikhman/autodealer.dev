@@ -1,31 +1,78 @@
+@using System
+@using System.Collections.Generic
+@using System.Configuration
+@using System.Text.RegularExpressions
+@using autodealer.dev.Services
 @{
     var pageTitle = (ViewBag.Title ?? "Dealer APIs and digital solutions").ToString();
     var pageDescription = (ViewBag.Description ?? "Dealer-ready APIs for VIN decoding, inventory, websites, and automotive retail workflows.").ToString();
-    var canonicalUrl = ViewBag.CanonicalUrl as string;
+    var canonicalUrl = ViewBag.CanonicalUrl as string ?? SeoUrl.Absolute(Request.Url == null ? "/" : Request.Url.AbsolutePath);
+    var socialImageUrl = ViewBag.SocialImageUrl as string ?? SeoUrl.Absolute("/Content/images/vtec-dealer-showroom-ad-v2.png");
+    var indexingEnabled = string.Equals(ConfigurationManager.AppSettings["Seo:AllowIndexing"], "true", StringComparison.OrdinalIgnoreCase);
+    var robots = indexingEnabled ? (ViewBag.Robots ?? "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1").ToString() : "noindex,nofollow";
+    var googleAnalyticsId = (ConfigurationManager.AppSettings["GoogleAnalytics:MeasurementId"] ?? string.Empty).Trim().ToUpperInvariant();
+    if (!Regex.IsMatch(googleAnalyticsId, @"^G-[A-Z0-9]+$")) { googleAnalyticsId = string.Empty; }
+    var googleSiteVerification = (ConfigurationManager.AppSettings["GoogleSearchConsole:VerificationToken"] ?? string.Empty).Trim();
+    var controllerName = (ViewContext.RouteData.Values["controller"] ?? string.Empty).ToString();
+    var actionName = (ViewContext.RouteData.Values["action"] ?? string.Empty).ToString();
+    string organizationJson = null;
+    if (controllerName.Equals("Home", StringComparison.OrdinalIgnoreCase) && actionName.Equals("Index", StringComparison.OrdinalIgnoreCase)) {
+        var organizationData = new Dictionary<string, object> {
+            { "@context", "https://schema.org" },
+            { "@graph", new object[] {
+                new Dictionary<string, object> {
+                    { "@type", "Organization" }, { "@id", SeoUrl.Absolute("/#organization") },
+                    { "name", "AutoDealer.dev" }, { "url", SeoUrl.Absolute("/") },
+                    { "logo", SeoUrl.Absolute("/Content/images/autodealer-logo.png") },
+                    { "email", "sales@autodealer.dev" },
+                    { "description", pageDescription }
+                },
+                new Dictionary<string, object> {
+                    { "@type", "WebSite" }, { "@id", SeoUrl.Absolute("/#website") },
+                    { "name", "AutoDealer.dev" }, { "url", SeoUrl.Absolute("/") },
+                    { "publisher", new Dictionary<string, object> { { "@id", SeoUrl.Absolute("/#organization") } } }
+                }
+            } }
+        };
+        organizationJson = Newtonsoft.Json.JsonConvert.SerializeObject(organizationData, new Newtonsoft.Json.JsonSerializerSettings { StringEscapeHandling = Newtonsoft.Json.StringEscapeHandling.EscapeHtml });
+    }
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @if (!string.IsNullOrWhiteSpace(googleAnalyticsId)) {
+        <script async src="https://www.googletagmanager.com/gtag/js?id=@googleAnalyticsId"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+            gtag('config', '@googleAnalyticsId');
+        </script>
+    }
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#111923" />
     <meta name="description" content="@pageDescription" />
-    <meta name="robots" content="@(ViewBag.Robots ?? "index,follow")" />
+    <meta name="robots" content="@robots" />
+    @if (!string.IsNullOrWhiteSpace(googleSiteVerification)) { <meta name="google-site-verification" content="@googleSiteVerification" /> }
     <title>@pageTitle | AutoDealer.dev</title>
-    @if (!string.IsNullOrWhiteSpace(canonicalUrl)) {
-        <link rel="canonical" href="@canonicalUrl" />
-        <meta property="og:url" content="@canonicalUrl" />
-    }
+    <link rel="canonical" href="@canonicalUrl" />
+    <link rel="sitemap" type="application/xml" href="@SeoUrl.Absolute("/sitemap.xml")" />
+    <meta property="og:url" content="@canonicalUrl" />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content="AutoDealer.dev" />
     <meta property="og:title" content="@pageTitle | AutoDealer.dev" />
     <meta property="og:description" content="@pageDescription" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="@socialImageUrl" />
+    <meta property="og:image:alt" content="AutoDealer.dev automotive API and dealer platform" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="@pageTitle | AutoDealer.dev" />
     <meta name="twitter:description" content="@pageDescription" />
+    <meta name="twitter:image" content="@socialImageUrl" />
     <link rel="icon" href="@Url.Content("~/favicon.ico")" />
     @Styles.Render("~/Content/css")
-    @Scripts.Render("~/bundles/modernizr")
+    @if (!string.IsNullOrWhiteSpace(organizationJson)) { <script type="application/ld+json">@Html.Raw(organizationJson)</script> }
     @RenderSection("head", required: false)
 </head>
 <body class="@ViewBag.BodyClass">
@@ -45,7 +92,7 @@
     </svg>
     <header class="site-header">
         <div class="shell nav-shell">
-            <a class="brand header-brand-logo" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><img class="brand-logo" src="@Url.Content("~/Content/images/autodealer-logo-light.png")" alt="AutoDealer.dev" /></a>
+            <a class="brand header-brand-logo" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><img class="brand-logo" src="@Url.Content("~/Content/images/autodealer-logo-light.png")" width="1299" height="208" alt="AutoDealer.dev" decoding="async" /></a>
             <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
             <nav class="site-nav" id="site-nav">
                 @if (User.IsInRole("Admin")) {
@@ -90,7 +137,7 @@
 
     <footer class="site-footer">
         <div class="shell footer-grid">
-            <div><a class="brand footer-brand-logo" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><img class="brand-logo" src="@Url.Content("~/Content/images/autodealer-logo.png")" alt="AutoDealer.dev" /></a></div>
+            <div><a class="brand footer-brand-logo" href="@Url.Action("Index", "Home")" aria-label="AutoDealer.dev home"><img class="brand-logo" src="@Url.Content("~/Content/images/autodealer-logo.png")" width="1134" height="193" alt="AutoDealer.dev" loading="lazy" decoding="async" /></a></div>
             <div><strong>PRODUCT</strong><a href="@Url.Action("VinDecoder", "Solutions")">VIN Decode</a><a href="@Url.Action("DigitalShowroom", "Solutions")">Dealer Website</a></div>
             <div><strong>DEVELOPERS</strong><a href="@Url.Action("Index", "Documentation")">Quickstart</a><a href="@Url.Action("VinHtml", "Documentation")">HTML VIN report</a><a href="@Url.Action("Authentication", "Documentation")">Authentication</a><a href="@Url.Action("Errors", "Documentation")">Errors &amp; limits</a></div>
             <div><strong>COMPANY</strong><a href="@Url.Action("About", "Home")">About</a><a href="@Url.Action("Contact", "Home")">Contact</a><a href="@Url.Action("Index", "Pricing")">Pricing</a><a href="@Url.Action("Legal", "Home")">Terms &amp; Privacy</a></div>
@@ -99,8 +146,8 @@
     </footer>
 
     @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/jqueryval")
-    <script src="@Url.Content("~/Scripts/bootstrap.bundle.min.js")"></script>
+    @if (ViewBag.IncludeValidation is bool && (bool)ViewBag.IncludeValidation) { @Scripts.Render("~/bundles/jqueryval") }
+    @Scripts.Render("~/bundles/bootstrap")
     <script>
         if ($.validator && $.validator.unobtrusive) {
             $.validator.addMethod('mustbetrue', function (value, element) { return element.checked; });

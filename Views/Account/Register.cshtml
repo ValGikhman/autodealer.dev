@@ -1,5 +1,5 @@
 @model autodealer.dev.Models.AccountRegistrationViewModel
-@{ ViewBag.Title = "Create your account"; ViewBag.BodyClass = "account-page"; }
+@{ ViewBag.Title = "Create your account"; ViewBag.BodyClass = "account-page"; ViewBag.IncludeValidation = true; }
 <section class="page-hero account-page-hero"><div class="shell"><div class="account-intro"><span class="eyebrow">CREATE YOUR WORKSPACE</span><h1>Get your API key and start building.</h1><p>Your 14-day trial includes real API credentials and usage tracking. No payment method is required today.</p></div></div></section>
 <section class="section light-section account-content-section"><div class="shell account-form-shell wide-form-shell">
     <div class="form-card dashboard-style-form">
@@ -23,5 +23,5 @@
 </div></section>
 
 @section scripts {
-    <script src="@Url.Content("~/Scripts/accountCredentialValidation.js")"></script>
+    @Scripts.Render("~/bundles/account-validation")
 }

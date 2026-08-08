@@ -2,8 +2,7 @@
 @{ ViewBag.Title = "Customers"; ViewBag.BodyClass = "dashboard-page admin-dashboard-page"; }
 
 @section head {
-    <link rel="stylesheet" href="@Url.Content("~/Content/pepTools/pepGrid.css")" />
-    <link rel="stylesheet" href="@Url.Content("~/Content/dashboard.css")" />
+    @Styles.Render("~/bundles/admin-css")
 }
 
 <section class="page-hero dashboard-hero admin-hero"><div class="shell">
@@ -20,7 +19,5 @@
 @Html.Partial("_AdminRecordModal")
 
 @section scripts {
-    <script src="@Url.Content("~/Scripts/pepTools/pepGrid.js")"></script>
-    <script src="@Url.Content("~/Scripts/accountCredentialValidation.js")"></script>
-    <script src="@Url.Content("~/Scripts/Admin/adminDashboard.js")"></script>
+    @Scripts.Render("~/bundles/admin-dashboard")
 }
