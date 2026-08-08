@@ -274,6 +274,142 @@ namespace autodealer.dev.Services {
             }
         }
 
+        public string DeleteClient(long clientId) {
+            if (clientId <= 0) throw new ArgumentException("Select a valid dealer account.");
+            EnsureDatabaseConfigured();
+
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                context.CommandTimeout = 120;
+                if (context.Connection.State == ConnectionState.Closed) context.Connection.Open();
+                using (var transaction = context.Connection.BeginTransaction(IsolationLevel.Serializable)) {
+                    context.Transaction = transaction;
+                    try {
+                        var client = context.Clients.SingleOrDefault(x => x.ClientId == clientId);
+                        if (client == null) throw new KeyNotFoundException("The dealer account could not be found.");
+                        var businessName = client.BusinessName;
+
+                        context.ApiUsageLogs.DeleteAllOnSubmit(context.ApiUsageLogs.Where(x => x.ClientId == clientId));
+                        context.ApiUsageDailies.DeleteAllOnSubmit(context.ApiUsageDailies.Where(x => x.ClientId == clientId));
+                        context.SubmitChanges();
+
+                        context.ApiKeys.DeleteAllOnSubmit(context.ApiKeys.Where(x => x.ClientId == clientId));
+                        context.SubmitChanges();
+
+                        context.PaymentProfiles.DeleteAllOnSubmit(context.PaymentProfiles.Where(x => x.ClientId == clientId));
+                        context.ClientCredentials.DeleteAllOnSubmit(context.ClientCredentials.Where(x => x.ClientId == clientId));
+                        context.SubmitChanges();
+
+                        context.Subscriptions.DeleteAllOnSubmit(context.Subscriptions.Where(x => x.ClientId == clientId));
+                        context.SubmitChanges();
+
+                        context.Clients.DeleteOnSubmit(client);
+                        context.SubmitChanges();
+                        transaction.Commit();
+                        return businessName;
+                    }
+                    catch {
+                        try { transaction.Rollback(); }
+                        catch { }
+                        throw;
+                    }
+                }
+            }
+        }
+
+        public string DeleteDemoRequest(Guid requestId) {
+            if (requestId == Guid.Empty) throw new ArgumentException("Select a valid opportunity.");
+            EnsureDatabaseConfigured();
+
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                var requests = context.GetTable<DealerDemoRequestRecord>();
+                var request = requests.SingleOrDefault(x => x.RequestId == requestId);
+                if (request == null) throw new KeyNotFoundException("The opportunity could not be found.");
+                var businessName = request.BusinessName;
+                requests.DeleteOnSubmit(request);
+                context.SubmitChanges();
+                return businessName;
+            }
+        }
+
+        public AdminDemoRequestEditViewModel GetNewDemoRequestDefaults() {
+            return new AdminDemoRequestEditViewModel {
+                RequestId = Guid.Empty,
+                PreferredContact = "Email",
+                Status = "new",
+                CreatedUtc = DateTime.UtcNow
+            };
+        }
+
+        public AdminDemoRequestEditViewModel GetDemoRequestForEdit(Guid requestId) {
+            if (requestId == Guid.Empty) throw new ArgumentException("Select a valid opportunity.");
+            EnsureDatabaseConfigured();
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                var request = context.GetTable<DealerDemoRequestRecord>().SingleOrDefault(x => x.RequestId == requestId);
+                if (request == null) throw new KeyNotFoundException("The opportunity could not be found.");
+                return MapDemoRequestEdit(request);
+            }
+        }
+
+        public AdminDemoRequestEditViewModel SaveDemoRequest(AdminDemoRequestEditViewModel model, bool create) {
+            if (model == null) throw new ArgumentNullException("model");
+            EnsureDatabaseConfigured();
+
+            var businessName = (model.BusinessName ?? string.Empty).Trim();
+            var contactName = (model.ContactName ?? string.Empty).Trim();
+            var email = (model.Email ?? string.Empty).Trim().ToLowerInvariant();
+            var phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim();
+            var website = string.IsNullOrWhiteSpace(model.CurrentWebsite) ? null : model.CurrentWebsite.Trim();
+            var inventorySize = (model.InventorySize ?? string.Empty).Trim();
+            var primaryGoal = (model.PrimaryGoal ?? string.Empty).Trim();
+            var preferredContact = string.Equals(model.PreferredContact, "Phone", StringComparison.OrdinalIgnoreCase) ? "Phone" : "Email";
+            var message = (model.Message ?? string.Empty).Trim();
+            var status = (model.Status ?? string.Empty).Trim().ToLowerInvariant();
+
+            if (businessName.Length == 0 || businessName.Length > 160) throw new ArgumentException("Enter a business name of 160 characters or fewer.");
+            if (contactName.Length == 0 || contactName.Length > 160) throw new ArgumentException("Enter a contact name of 160 characters or fewer.");
+            if (email.Length == 0 || email.Length > 254) throw new ArgumentException("Enter a valid contact email address.");
+            if (phone != null && phone.Length > 32) throw new ArgumentException("Enter a phone number of 32 characters or fewer.");
+            if (preferredContact == "Phone" && phone == null) throw new ArgumentException("Enter a phone number when phone is the preferred contact method.");
+            if (website != null && website.Length > 300) throw new ArgumentException("Enter a website of 300 characters or fewer.");
+            if (!model.LocationCount.HasValue || model.LocationCount.Value < 1 || model.LocationCount.Value > 1000)
+                throw new ArgumentException("Enter a location count between 1 and 1000.");
+            if (inventorySize.Length == 0 || inventorySize.Length > 80) throw new ArgumentException("Enter an inventory size of 80 characters or fewer.");
+            if (primaryGoal.Length == 0 || primaryGoal.Length > 120) throw new ArgumentException("Enter a primary goal of 120 characters or fewer.");
+            if (message.Length == 0 || message.Length > 3000) throw new ArgumentException("Enter an opportunity message of 3000 characters or fewer.");
+            if (status != "new" && status != "active" && status != "postponed" && status != "closed")
+                throw new ArgumentException("Select a valid opportunity status.");
+
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                var requests = context.GetTable<DealerDemoRequestRecord>();
+                DealerDemoRequestRecord request;
+                if (create) {
+                    request = new DealerDemoRequestRecord {
+                        RequestId = Guid.NewGuid(),
+                        CreatedUtc = DateTime.UtcNow
+                    };
+                    requests.InsertOnSubmit(request);
+                } else {
+                    if (model.RequestId == Guid.Empty) throw new ArgumentException("Select a valid opportunity.");
+                    request = requests.SingleOrDefault(x => x.RequestId == model.RequestId);
+                    if (request == null) throw new KeyNotFoundException("The opportunity could not be found.");
+                }
+
+                request.BusinessName = businessName;
+                request.ContactName = contactName;
+                request.Email = email;
+                request.Phone = phone;
+                request.CurrentWebsite = website;
+                request.LocationCount = model.LocationCount;
+                request.InventorySize = inventorySize;
+                request.PrimaryGoal = primaryGoal;
+                request.PreferredContact = preferredContact;
+                request.Message = message;
+                request.Status = status;
+                context.SubmitChanges();
+                return MapDemoRequestEdit(request);
+            }
+        }
+
         public AdminApiKeyEditViewModel GetApiKeyForEdit(long apiKeyId) {
             EnsureDatabaseConfigured();
             using (var context = new AutoDealerDataContext(connectionString)) {
@@ -318,6 +454,55 @@ namespace autodealer.dev.Services {
             }
         }
 
+        public AdminSubscriptionEditViewModel GetNewSubscriptionDefaults(long clientId) {
+            EnsureDatabaseConfigured();
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                if (!context.Clients.Any(x => x.ClientId == clientId))
+                    throw new KeyNotFoundException("The dealer account could not be found.");
+                var plan = context.Plans.Where(x => x.IsActive).OrderBy(x => x.PlanId).FirstOrDefault();
+                if (plan == null) throw new InvalidOperationException("Create or activate a subscription plan before adding a subscription.");
+                var now = DateTime.UtcNow;
+                return new AdminSubscriptionEditViewModel {
+                    ClientId = clientId,
+                    PlanId = plan.PlanId,
+                    Status = "active",
+                    CurrentPeriodStartUtc = now,
+                    CurrentPeriodEndUtc = now.AddMonths(1),
+                    CancelAtPeriodEnd = false,
+                    PlanOptions = GetSubscriptionPlanOptions(context)
+                };
+            }
+        }
+
+        public AdminSubscriptionEditViewModel CreateSubscription(AdminSubscriptionEditViewModel model) {
+            if (model == null) throw new ArgumentNullException("model");
+            EnsureDatabaseConfigured();
+            var status = ValidateSubscription(model);
+
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                if (!context.Clients.Any(x => x.ClientId == model.ClientId))
+                    throw new KeyNotFoundException("The dealer account could not be found.");
+                if (!context.Plans.Any(x => x.PlanId == model.PlanId))
+                    throw new ArgumentException("Select a valid subscription plan.");
+
+                var now = DateTime.UtcNow;
+                var subscription = new Subscription {
+                    ClientId = model.ClientId,
+                    PlanId = model.PlanId,
+                    Status = status,
+                    CurrentPeriodStartUtc = DateTime.SpecifyKind(model.CurrentPeriodStartUtc, DateTimeKind.Utc),
+                    CurrentPeriodEndUtc = DateTime.SpecifyKind(model.CurrentPeriodEndUtc, DateTimeKind.Utc),
+                    CancelAtPeriodEnd = model.CancelAtPeriodEnd,
+                    ProviderSubscriptionId = string.IsNullOrWhiteSpace(model.ProviderSubscriptionId) ? null : model.ProviderSubscriptionId.Trim(),
+                    CreatedUtc = now,
+                    UpdatedUtc = now
+                };
+                context.Subscriptions.InsertOnSubmit(subscription);
+                context.SubmitChanges();
+                return MapSubscriptionEdit(context, subscription);
+            }
+        }
+
         public AdminSubscriptionEditViewModel GetSubscriptionForEdit(long subscriptionId) {
             EnsureDatabaseConfigured();
             using (var context = new AutoDealerDataContext(connectionString)) {
@@ -331,11 +516,7 @@ namespace autodealer.dev.Services {
             if (model == null) throw new ArgumentNullException("model");
             EnsureDatabaseConfigured();
 
-            var status = (model.Status ?? string.Empty).Trim().ToLowerInvariant();
-            if (status != "trialing" && status != "active" && status != "past_due" && status != "paused" && status != "canceled")
-                throw new ArgumentException("Select a valid subscription status.");
-            if (model.CurrentPeriodEndUtc <= model.CurrentPeriodStartUtc)
-                throw new ArgumentException("The period end must be later than the period start.");
+            var status = ValidateSubscription(model);
 
             using (var context = new AutoDealerDataContext(connectionString)) {
                 var subscription = context.Subscriptions.SingleOrDefault(x => x.SubscriptionId == model.SubscriptionId);
@@ -394,8 +575,35 @@ namespace autodealer.dev.Services {
             };
         }
 
-        private static AdminSubscriptionEditViewModel MapSubscriptionEdit(AutoDealerDataContext context, Subscription subscription) {
-            var plans = context.Plans
+        private static AdminDemoRequestEditViewModel MapDemoRequestEdit(DealerDemoRequestRecord request) {
+            return new AdminDemoRequestEditViewModel {
+                RequestId = request.RequestId,
+                BusinessName = request.BusinessName,
+                ContactName = request.ContactName,
+                Email = request.Email,
+                Phone = request.Phone,
+                CurrentWebsite = request.CurrentWebsite,
+                LocationCount = request.LocationCount,
+                InventorySize = request.InventorySize,
+                PrimaryGoal = request.PrimaryGoal,
+                PreferredContact = request.PreferredContact,
+                Message = request.Message,
+                Status = request.Status,
+                CreatedUtc = request.CreatedUtc
+            };
+        }
+
+        private static string ValidateSubscription(AdminSubscriptionEditViewModel model) {
+            var status = (model.Status ?? string.Empty).Trim().ToLowerInvariant();
+            if (status != "trialing" && status != "active" && status != "past_due" && status != "paused" && status != "canceled")
+                throw new ArgumentException("Select a valid subscription status.");
+            if (model.CurrentPeriodEndUtc <= model.CurrentPeriodStartUtc)
+                throw new ArgumentException("The period end must be later than the period start.");
+            return status;
+        }
+
+        private static IReadOnlyList<AdminEditOptionViewModel> GetSubscriptionPlanOptions(AutoDealerDataContext context) {
+            return context.Plans
                 .OrderByDescending(x => x.IsActive)
                 .ThenBy(x => x.DisplayName)
                 .Select(x => new { x.PlanId, x.DisplayName, x.PlanCode, x.IsActive })
@@ -404,6 +612,9 @@ namespace autodealer.dev.Services {
                     Value = x.PlanId.ToString(),
                     Text = x.DisplayName + " (" + x.PlanCode + ")" + (x.IsActive ? string.Empty : " — inactive")
                 }).ToList();
+        }
+
+        private static AdminSubscriptionEditViewModel MapSubscriptionEdit(AutoDealerDataContext context, Subscription subscription) {
             return new AdminSubscriptionEditViewModel {
                 SubscriptionId = subscription.SubscriptionId,
                 ClientId = subscription.ClientId,
@@ -413,7 +624,7 @@ namespace autodealer.dev.Services {
                 CurrentPeriodEndUtc = subscription.CurrentPeriodEndUtc,
                 CancelAtPeriodEnd = subscription.CancelAtPeriodEnd,
                 ProviderSubscriptionId = subscription.ProviderSubscriptionId,
-                PlanOptions = plans
+                PlanOptions = GetSubscriptionPlanOptions(context)
             };
         }
 

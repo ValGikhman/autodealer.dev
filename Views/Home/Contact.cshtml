@@ -1,6 +1,6 @@
 @model autodealer.dev.Models.ContactInquiryViewModel
 @{ ViewBag.Title = "Contact"; ViewBag.BodyClass = "content-page contact-page"; ViewBag.IncludeValidation = true; }
-<section class="page-hero content-hero"><div class="shell"><span class="eyebrow">CONTACT AUTODEALER.DEV</span><h1>Let&rsquo;s build the right automotive experience.</h1><p>Whether you are launching a modern dealer website or connecting vehicle data to your product, tell us what you are working on. We will help turn the idea into a practical next step.</p></div></section>
+<section class="site-hero page-hero content-hero"><div class="shell site-hero-shell"><div class="hero-copy"><span class="eyebrow">CONTACT AUTODEALER.DEV</span><h1>Build your automotive experience.</h1><p>Tell us what you are building and we&rsquo;ll help define the next step.</p></div></div></section>
 <section class="section light-section content-section"><div class="shell contact-grid">
     <article class="contact-card"><span class="contact-index">DEALER WEBSITES</span><span class="color-icon icon-teal contact-icon" aria-hidden="true"><svg><use href="#icon-browser"></use></svg></span><h2>A digital showroom built around your dealership.</h2><p>Let&rsquo;s talk about your inventory, brand, locations, and customer journey. We can shape a fast, polished website that makes every vehicle easier to discover and every next action easier to take.</p><a class="button site-cta contact-email-button" href="#contact-inquiry-modal" data-bs-toggle="modal" data-bs-target="#contact-inquiry-modal" data-inquiry-type="website"><span>sales@autodealer.dev</span></a></article>
     <article class="contact-card"><span class="contact-index">API &amp; VEHICLE DATA</span><span class="color-icon icon-blue contact-icon" aria-hidden="true"><svg><use href="#icon-code"></use></svg></span><h2>Reliable vehicle data, ready for your stack.</h2><p>Tell us what you are building and how you plan to use the data. We can help with VIN decoding, response formats, authentication, expected volume, and the right path to production.</p><a class="button site-cta contact-email-button" href="#contact-inquiry-modal" data-bs-toggle="modal" data-bs-target="#contact-inquiry-modal" data-inquiry-type="api"><span>sales@autodealer.dev</span></a></article>
@@ -15,7 +15,7 @@
                     <h2 class="modal-title" id="contact-modal-title">Tell us what you are building.</h2>
                     <p id="contact-modal-subtitle">A few useful details will help us begin in the right place.</p>
                 </div>
-                <button type="button" class="btn-close contact-modal-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                <button type="button" class="btn-close contact-modal-close" data-bs-dismiss="modal" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg></button>
             </div>
             <div class="modal-body">
                 @using (Html.BeginForm("Contact", "Home", FormMethod.Post, new { id = "contact-inquiry-form", @class = "form-card contact-modal-form", autocomplete = "on" })) {

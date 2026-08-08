@@ -89,6 +89,7 @@
         <symbol id="icon-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></symbol>
         <symbol id="icon-trial" viewBox="0 0 24 24"><path d="M9 3h6m-5 0v5l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/><path d="M7.5 15h9"/></symbol>
         <symbol id="icon-code" viewBox="0 0 24 24"><path d="m8 7-5 5 5 5m8-10 5 5-5 5m-2-12-4 14"/></symbol>
+        <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"/></symbol>
     </svg>
     <header class="site-header">
         <div class="shell nav-shell">
@@ -98,6 +99,7 @@
                 @if (User.IsInRole("Admin")) {
                     <a href="@Url.Action("Dashboard", "Admin")">Dashboard</a>
                     <a href="@Url.Action("Customers", "Admin")">Customers</a>
+                    <a href="@Url.Action("Opportunities", "Admin")">Opportunities</a>
                     using (Html.BeginForm("Logout", "Admin", FormMethod.Post, new { @class = "nav-logout" })) { @Html.AntiForgeryToken()<button type="submit">Sign out</button> }
                 } else {
                     <a href="@Url.Action("Index", "Solutions")">Solutions</a>
@@ -126,7 +128,7 @@
                 <div class="modal-content">
                     <div class="modal-header legal-modal-header">
                         <div><span>TERMS &amp; PRIVACY</span><h2 class="modal-title" id="legal-modal-title">The details behind the agreement.</h2><p>Read the Service Terms and Privacy Policy without leaving your form.</p></div>
-                        <button type="button" class="btn-close legal-modal-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                        <button type="button" class="btn-close legal-modal-close" data-bs-dismiss="modal" aria-label="Close" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg></button>
                     </div>
                     <div class="modal-body legal-modal-body">@Html.Partial("_LegalTermsPrivacy")</div>
                     <div class="modal-footer legal-modal-footer"><a href="@Url.Action("Legal", "Home")">Open the full page</a><button type="button" data-bs-dismiss="modal">Done reading</button></div>
@@ -148,6 +150,7 @@
     @Scripts.Render("~/bundles/jquery")
     @if (ViewBag.IncludeValidation is bool && (bool)ViewBag.IncludeValidation) { @Scripts.Render("~/bundles/jqueryval") }
     @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/password-visibility")
     <script>
         if ($.validator && $.validator.unobtrusive) {
             $.validator.addMethod('mustbetrue', function (value, element) { return element.checked; });

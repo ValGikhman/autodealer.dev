@@ -5,11 +5,11 @@
     @Styles.Render("~/bundles/admin-css")
 }
 
-<section class="page-hero dashboard-hero admin-hero"><div class="shell">
+<section class="site-hero page-hero dashboard-hero admin-hero"><div class="shell site-hero-shell"><div class="hero-copy">
     <span class="eyebrow">ADMIN CONTROL ROOM</span><h1>Customer operations, at a glance.</h1><p>Live account information from AutoDealer.dev</p>
-</div></section>
+</div></div></section>
 <section class="section light-section dashboard-section"><div class="shell">
-    <div class="dashboard-heading"><div><span class="eyebrow dark">PLATFORM OVERVIEW</span><h2>Current customer activity.</h2></div><span class="status-badge">Administrator</span></div>
+    <div class="section-heading"><span class="eyebrow">PLATFORM OVERVIEW</span><h2>Current customer activity.</h2><span class="status-badge">Administrator</span></div>
     <div class="dashboard-grid admin-metrics">
         <article><span class="color-icon metric-icon" aria-hidden="true"><svg><use href="#icon-users"></use></svg></span><span>TOTAL CUSTOMERS</span><strong>@Model.TotalCustomers</strong><small>All registered accounts</small></article>
         <article><span class="color-icon metric-icon" aria-hidden="true"><svg><use href="#icon-check"></use></svg></span><span>ACTIVE CUSTOMERS</span><strong>@Model.ActiveCustomers</strong><small>Accounts currently enabled</small></article>
@@ -17,12 +17,12 @@
         <article><span class="color-icon metric-icon" aria-hidden="true"><svg><use href="#icon-key"></use></svg></span><span>ACTIVE API KEYS</span><strong>@Model.ActiveApiKeys</strong><small>Credentials currently enabled</small></article>
     </div>
     <section class="admin-customer-panel dashboard-grid-panel" aria-labelledby="customer-grid-title">
-        <div class="admin-table-heading"><div><span class="eyebrow dark">ACTIVE CUSTOMERS</span><h2 id="customer-grid-title">Dealer accounts</h2></div><span>@Model.Customers.Count active</span></div>
-        <div id="customer-grid" class="admin-pep-grid" data-url="@Url.Action("CustomerGridData", "Admin")" data-email-url="@Url.Action("CustomerEmailGridData", "Admin")" data-account-detail-url="@Url.Action("CustomerAccountDetailData", "Admin")" data-issue-key-url="@Url.Action("IssueApiKey", "Admin")" data-new-client-url="@Url.Action("NewClient", "Admin")" data-edit-client-url="@Url.Action("EditClient", "Admin")" data-edit-api-key-url="@Url.Action("EditApiKey", "Admin")" data-edit-subscription-url="@Url.Action("EditSubscription", "Admin")"></div>
+        <div class="admin-table-heading"><div><span class="eyebrow">ACTIVE CUSTOMERS</span><h2 id="customer-grid-title">Dealer accounts</h2></div><span>@Model.Customers.Count active</span></div>
+        <div id="customer-grid" class="admin-pep-grid" data-url="@Url.Action("CustomerGridData", "Admin")" data-email-url="@Url.Action("CustomerEmailGridData", "Admin")" data-account-detail-url="@Url.Action("CustomerAccountDetailData", "Admin")" data-issue-key-url="@Url.Action("IssueApiKey", "Admin")" data-new-client-url="@Url.Action("NewClient", "Admin")" data-edit-client-url="@Url.Action("EditClient", "Admin")" data-delete-client-url="@Url.Action("DeleteClient", "Admin")" data-edit-api-key-url="@Url.Action("EditApiKey", "Admin")" data-new-subscription-url="@Url.Action("NewSubscription", "Admin")" data-edit-subscription-url="@Url.Action("EditSubscription", "Admin")"></div>
     </section>
     <section class="admin-customer-panel dashboard-grid-panel" aria-labelledby="demo-grid-title">
-        <div class="admin-table-heading"><div><span class="eyebrow dark">DEALER DEMO REQUESTS</span><h2 id="demo-grid-title">New opportunities</h2></div><span>@Model.DemoRequests.Count recent</span></div>
-        <div id="demo-request-grid" class="admin-pep-grid" data-url="@Url.Action("DemoRequestGridData", "Admin")"></div>
+        <div class="admin-table-heading"><div><span class="eyebrow">DEALER DEMO REQUESTS</span><h2 id="demo-grid-title">New opportunities</h2></div><span>@Model.DemoRequests.Count recent</span></div>
+        <div id="demo-request-grid" class="admin-pep-grid" data-url="@Url.Action("DemoRequestGridData", "Admin")" data-new-url="@Url.Action("NewDemoRequest", "Admin")" data-edit-url="@Url.Action("EditDemoRequest", "Admin")" data-delete-url="@Url.Action("DeleteDemoRequest", "Admin")"></div>
     </section>
 </div></section>
 

@@ -172,6 +172,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>autodealer_dev.dbml</DependentUpon>
     </Compile>
+    <Compile Include="Data\DealerDemoRequestRecord.cs" />
     <Compile Include="Services\ClientAccountService.cs" />
     <Compile Include="Services\ClientEmailHistoryRecorder.cs" />
     <Compile Include="Services\ContactInquiryService.cs" />
@@ -225,6 +226,7 @@
     <Content Include="Database\002_DealerDemoRequests.sql" />
     <Content Include="Database\003_ClientEmailHistory.sql" />
     <Content Include="Database\004_TrialExpirationAutomation.sql" />
+    <Content Include="Database\005_AdminClientDeletionPermissions.sql" />
     <Content Include="Content\dashboard.css" />
     <Content Include="Content\email.css" />
     <Content Include="Content\pepTools\pepGrid.css" />
@@ -237,6 +239,7 @@
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\Admin\adminDashboard.js" />
     <Content Include="Scripts\accountCredentialValidation.js" />
+    <Content Include="Scripts\passwordVisibility.js" />
     <Content Include="Scripts\Invoke-TrialExpiration.ps1" />
     <Content Include="Scripts\autodealer-vin-report.js" />
     <Content Include="Scripts\pepTools\pepGrid.js" />
@@ -259,6 +262,7 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\Shared\_InventorySizeOptions.cshtml" />
     <Content Include="Views\Shared\_LegalTermsPrivacy.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\Home\Contact.cshtml" />
@@ -271,7 +275,9 @@
     <Content Include="Views\Admin\Login.cshtml" />
     <Content Include="Views\Admin\Dashboard.cshtml" />
     <Content Include="Views\Admin\Customers.cshtml" />
+    <Content Include="Views\Admin\Opportunities.cshtml" />
     <Content Include="Views\Admin\_AdminRecordModal.cshtml" />
+    <Content Include="Views\Admin\_AdminDeleteConfirmationModal.cshtml" />
     <Content Include="Views\Admin\_AdminSubgridEdit.cshtml" />
     <Content Include="Views\Documentation\Authentication.cshtml" />
     <Content Include="Views\Documentation\Errors.cshtml" />

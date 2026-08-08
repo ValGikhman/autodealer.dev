@@ -21,7 +21,7 @@ BEGIN
         CreatedUtc datetime2(3) NOT NULL CONSTRAINT DF_DealerDemoRequests_CreatedUtc DEFAULT (SYSUTCDATETIME()),
         OwnerNotificationSentUtc datetime2(3) NULL,
         CustomerConfirmationSentUtc datetime2(3) NULL,
-        CONSTRAINT CK_DealerDemoRequests_Status CHECK (Status IN ('new','contacted','qualified','closed')),
+        CONSTRAINT CK_DealerDemoRequests_Status CHECK (Status IN ('new','active','postponed','closed')),
         CONSTRAINT CK_DealerDemoRequests_PreferredContact CHECK (PreferredContact IN ('Email','Phone')),
         CONSTRAINT CK_DealerDemoRequests_LocationCount CHECK (LocationCount IS NULL OR LocationCount BETWEEN 1 AND 1000),
         CONSTRAINT CK_DealerDemoRequests_PhonePreference CHECK (PreferredContact <> 'Phone' OR Phone IS NOT NULL)
@@ -34,6 +34,6 @@ BEGIN
 END;
 GO
 
-/* Optional least-privilege grants; replace AutoDealerWeb with your database user.
-GRANT SELECT, INSERT, UPDATE ON dbo.DealerDemoRequests TO AutoDealerWeb;
+/* Optional least-privilege grants; replace AUTODEALER if the configured SQL login changes.
+GRANT SELECT, INSERT, UPDATE, DELETE ON dbo.DealerDemoRequests TO AUTODEALER;
 */

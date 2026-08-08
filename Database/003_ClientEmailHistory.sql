@@ -12,7 +12,7 @@ BEGIN
         ToEmail nvarchar(254) NOT NULL,
         Subject nvarchar(998) NOT NULL,
         HtmlBody nvarchar(max) NOT NULL,
-        CONSTRAINT FK_ClientEmailHistory_Client FOREIGN KEY (ClientId) REFERENCES dbo.Clients(ClientId)
+        CONSTRAINT FK_ClientEmailHistory_Client FOREIGN KEY (ClientId) REFERENCES dbo.Clients(ClientId) ON DELETE CASCADE
     );
 
     CREATE INDEX IX_ClientEmailHistory_Client_SentUtc
@@ -32,7 +32,7 @@ IF EXISTS (
 BEGIN
     ALTER TABLE dbo.ClientEmailHistory DROP CONSTRAINT FK_ClientEmailHistory_Client;
     ALTER TABLE dbo.ClientEmailHistory WITH CHECK ADD CONSTRAINT FK_ClientEmailHistory_Client
-        FOREIGN KEY (ClientId) REFERENCES dbo.Clients(ClientId);
+        FOREIGN KEY (ClientId) REFERENCES dbo.Clients(ClientId) ON DELETE CASCADE;
 END;
 GO
 

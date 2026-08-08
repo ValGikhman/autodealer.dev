@@ -97,7 +97,7 @@
          * Resizing changes only the active column and keeps adjacent columns fixed.
          * Default false.
          */
-        resizable: false,
+        resizable: true,
 
         // ── Event callbacks ──────────────────────────────────────────────────
         // Each callback also fires as a jQuery event on the container element.
