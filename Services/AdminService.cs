@@ -70,9 +70,19 @@ namespace autodealer.dev.Services {
                     .ToList()
                     .GroupBy(x => x.ClientId)
                     .ToDictionary(x => x.Key, x => x.OrderByDescending(y => y.CurrentPeriodEndUtc).First());
+                var subscriptionCounts = context.Subscriptions
+                    .Where(x => clientIds.Contains(x.ClientId))
+                    .GroupBy(x => x.ClientId)
+                    .Select(x => new { ClientId = x.Key, Count = x.Count() })
+                    .ToDictionary(x => x.ClientId, x => x.Count);
 
                 var keyCounts = context.ApiKeys
                     .Where(x => clientIds.Contains(x.ClientId) && x.Status == "active")
+                    .GroupBy(x => x.ClientId)
+                    .Select(x => new { ClientId = x.Key, Count = x.Count() })
+                    .ToDictionary(x => x.ClientId, x => x.Count);
+                var allKeyCounts = context.ApiKeys
+                    .Where(x => clientIds.Contains(x.ClientId))
                     .GroupBy(x => x.ClientId)
                     .Select(x => new { ClientId = x.Key, Count = x.Count() })
                     .ToDictionary(x => x.ClientId, x => x.Count);
@@ -91,6 +101,8 @@ namespace autodealer.dev.Services {
                         SubscriptionStatus = subscription == null ? "unavailable" : subscription.Status,
                         PeriodEndUtc = subscription == null ? (DateTime?)null : subscription.CurrentPeriodEndUtc,
                         ActiveApiKeyCount = keyCounts.ContainsKey(client.ClientId) ? keyCounts[client.ClientId] : 0,
+                        ApiKeyCount = allKeyCounts.ContainsKey(client.ClientId) ? allKeyCounts[client.ClientId] : 0,
+                        SubscriptionCount = subscriptionCounts.ContainsKey(client.ClientId) ? subscriptionCounts[client.ClientId] : 0,
                         EmailCount = emailCounts.ContainsKey(client.ClientId) ? emailCounts[client.ClientId] : 0,
                         CreatedUtc = client.CreatedUtc
                     });
@@ -137,6 +149,277 @@ namespace autodealer.dev.Services {
                 }
             }
             return emails;
+        }
+
+        public AdminCustomerAccountDetailViewModel GetClientAccountDetails(long clientId) {
+            var empty = new AdminCustomerAccountDetailViewModel {
+                ApiKeys = new List<AdminApiKeyViewModel>(),
+                Subscriptions = new List<AdminSubscriptionViewModel>()
+            };
+            if (clientId <= 0 || string.IsNullOrWhiteSpace(connectionString)) return empty;
+
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                if (!context.Clients.Any(x => x.ClientId == clientId)) return empty;
+
+                var apiKeys = context.ApiKeys
+                    .Where(x => x.ClientId == clientId)
+                    .OrderByDescending(x => x.CreatedUtc)
+                    .Select(x => new AdminApiKeyViewModel {
+                        ApiKeyId = x.ApiKeyId,
+                        Name = x.Name,
+                        KeyPrefix = x.KeyPrefix,
+                        Scopes = x.Scopes,
+                        Status = x.Status,
+                        CreatedUtc = x.CreatedUtc,
+                        LastUsedUtc = x.LastUsedUtc,
+                        ExpiresUtc = x.ExpiresUtc,
+                        RevokedUtc = x.RevokedUtc
+                    }).ToList();
+
+                var subscriptions = context.Subscriptions
+                    .Where(x => x.ClientId == clientId)
+                    .OrderByDescending(x => x.CurrentPeriodEndUtc)
+                    .Select(x => new AdminSubscriptionViewModel {
+                        SubscriptionId = x.SubscriptionId,
+                        PlanName = x.Plan.DisplayName,
+                        PlanCode = x.Plan.PlanCode,
+                        Status = x.Status,
+                        MonthlyRequestQuota = x.Plan.MonthlyRequestQuota,
+                        MaxApiKeys = x.Plan.MaxApiKeys,
+                        CurrentPeriodStartUtc = x.CurrentPeriodStartUtc,
+                        CurrentPeriodEndUtc = x.CurrentPeriodEndUtc,
+                        CancelAtPeriodEnd = x.CancelAtPeriodEnd,
+                        ProviderSubscriptionId = x.ProviderSubscriptionId,
+                        CreatedUtc = x.CreatedUtc
+                    }).ToList();
+
+                return new AdminCustomerAccountDetailViewModel { ApiKeys = apiKeys, Subscriptions = subscriptions };
+            }
+        }
+
+        public AdminClientEditViewModel GetClientForEdit(long clientId) {
+            EnsureDatabaseConfigured();
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                var client = context.Clients.SingleOrDefault(x => x.ClientId == clientId);
+                if (client == null) throw new KeyNotFoundException("The dealer account could not be found.");
+                return MapClientEdit(client);
+            }
+        }
+
+        public AdminClientCreateViewModel GetNewClientDefaults() {
+            EnsureDatabaseConfigured();
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                string clientNumber = null;
+                for (var attempt = 0; attempt < 20; attempt++) {
+                    var candidate = ClientNumberGenerator.Generate();
+                    if (!context.Clients.Any(x => x.ClientNumber == candidate)) {
+                        clientNumber = candidate;
+                        break;
+                    }
+                }
+                if (clientNumber == null) throw new InvalidOperationException("A unique client number could not be generated. Try again.");
+
+                var plans = context.Plans.Where(x => x.IsActive)
+                    .OrderBy(x => x.MonthlyPrice)
+                    .ThenBy(x => x.DisplayName)
+                    .Select(x => new AdminEditOptionViewModel { Value = x.PlanCode, Text = x.DisplayName + " (" + x.PlanCode + ")" })
+                    .ToList();
+                if (plans.Count == 0) throw new InvalidOperationException("No active subscription plans are available.");
+                return new AdminClientCreateViewModel {
+                    ClientNumber = clientNumber,
+                    TemporaryPassword = ClientNumberGenerator.GenerateTemporaryPassword(),
+                    ConfirmTemporaryPassword = null,
+                    PlanCode = plans[0].Value,
+                    PlanOptions = plans
+                };
+            }
+        }
+
+        public AdminClientEditViewModel UpdateClient(AdminClientEditViewModel model) {
+            if (model == null) throw new ArgumentNullException("model");
+            EnsureDatabaseConfigured();
+
+            var businessName = (model.BusinessName ?? string.Empty).Trim();
+            var firstName = (model.FirstName ?? string.Empty).Trim();
+            var lastName = (model.LastName ?? string.Empty).Trim();
+            var email = (model.Email ?? string.Empty).Trim().ToLowerInvariant();
+            var phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim();
+            var status = (model.Status ?? string.Empty).Trim().ToLowerInvariant();
+            if (businessName.Length == 0 || businessName.Length > 160) throw new ArgumentException("Enter a business name of 160 characters or fewer.");
+            if (firstName.Length == 0 || firstName.Length > 80 || lastName.Length == 0 || lastName.Length > 80)
+                throw new ArgumentException("Enter both contact names using 80 characters or fewer.");
+            if (email.Length == 0 || email.Length > 254) throw new ArgumentException("Enter a valid account email address.");
+            if (phone != null && phone.Length > 32) throw new ArgumentException("Enter a phone number of 32 characters or fewer.");
+            if (status != "pending" && status != "active" && status != "suspended" && status != "closed")
+                throw new ArgumentException("Select a valid dealer account status.");
+
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                var client = context.Clients.SingleOrDefault(x => x.ClientId == model.ClientId);
+                if (client == null) throw new KeyNotFoundException("The dealer account could not be found.");
+                if (context.Clients.Any(x => x.ClientId != model.ClientId && x.Email == email))
+                    throw new ArgumentException("Another dealer account already uses this email address.");
+
+                client.BusinessName = businessName;
+                client.FirstName = firstName;
+                client.LastName = lastName;
+                client.Email = email;
+                client.Phone = phone;
+                client.Status = status;
+                client.EmailVerifiedUtc = model.EmailVerifiedUtc.HasValue
+                    ? DateTime.SpecifyKind(model.EmailVerifiedUtc.Value, DateTimeKind.Utc)
+                    : (DateTime?)null;
+                client.UpdatedUtc = DateTime.UtcNow;
+                context.SubmitChanges();
+                return MapClientEdit(client);
+            }
+        }
+
+        public AdminApiKeyEditViewModel GetApiKeyForEdit(long apiKeyId) {
+            EnsureDatabaseConfigured();
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                var apiKey = context.ApiKeys.SingleOrDefault(x => x.ApiKeyId == apiKeyId);
+                if (apiKey == null) throw new KeyNotFoundException("The API key could not be found.");
+                return MapApiKeyEdit(context, apiKey);
+            }
+        }
+
+        public AdminApiKeyEditViewModel UpdateApiKey(AdminApiKeyEditViewModel model) {
+            if (model == null) throw new ArgumentNullException("model");
+            EnsureDatabaseConfigured();
+
+            var name = (model.Name ?? string.Empty).Trim();
+            var scopes = (model.Scopes ?? string.Empty).Trim().ToLowerInvariant();
+            var status = (model.Status ?? string.Empty).Trim().ToLowerInvariant();
+            if (name.Length == 0 || name.Length > 80) throw new ArgumentException("Enter an API key name of 80 characters or fewer.");
+            if (scopes != "vin:read") throw new ArgumentException("Select a supported API scope.");
+            if (status != "active" && status != "revoked" && status != "expired") throw new ArgumentException("Select a valid API key status.");
+            if (status == "active" && model.ExpiresUtc.HasValue && model.ExpiresUtc.Value <= DateTime.UtcNow)
+                throw new ArgumentException("An active API key must have a future expiration date or no expiration date.");
+
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                var apiKey = context.ApiKeys.SingleOrDefault(x => x.ApiKeyId == model.ApiKeyId);
+                if (apiKey == null) throw new KeyNotFoundException("The API key could not be found.");
+                var subscriptionExists = context.Subscriptions.Any(x => x.SubscriptionId == model.SubscriptionId && x.ClientId == apiKey.ClientId);
+                if (!subscriptionExists) throw new ArgumentException("Select a subscription belonging to this customer.");
+
+                var now = DateTime.UtcNow;
+                apiKey.Name = name;
+                apiKey.Scopes = scopes;
+                apiKey.Status = status;
+                apiKey.SubscriptionId = model.SubscriptionId;
+                apiKey.ExpiresUtc = model.ExpiresUtc.HasValue
+                    ? DateTime.SpecifyKind(model.ExpiresUtc.Value, DateTimeKind.Utc)
+                    : (DateTime?)null;
+                if (status == "revoked") apiKey.RevokedUtc = apiKey.RevokedUtc ?? now;
+                else apiKey.RevokedUtc = null;
+                if (status == "expired" && (!apiKey.ExpiresUtc.HasValue || apiKey.ExpiresUtc.Value > now)) apiKey.ExpiresUtc = now;
+                context.SubmitChanges();
+                return MapApiKeyEdit(context, apiKey);
+            }
+        }
+
+        public AdminSubscriptionEditViewModel GetSubscriptionForEdit(long subscriptionId) {
+            EnsureDatabaseConfigured();
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                var subscription = context.Subscriptions.SingleOrDefault(x => x.SubscriptionId == subscriptionId);
+                if (subscription == null) throw new KeyNotFoundException("The subscription could not be found.");
+                return MapSubscriptionEdit(context, subscription);
+            }
+        }
+
+        public AdminSubscriptionEditViewModel UpdateSubscription(AdminSubscriptionEditViewModel model) {
+            if (model == null) throw new ArgumentNullException("model");
+            EnsureDatabaseConfigured();
+
+            var status = (model.Status ?? string.Empty).Trim().ToLowerInvariant();
+            if (status != "trialing" && status != "active" && status != "past_due" && status != "paused" && status != "canceled")
+                throw new ArgumentException("Select a valid subscription status.");
+            if (model.CurrentPeriodEndUtc <= model.CurrentPeriodStartUtc)
+                throw new ArgumentException("The period end must be later than the period start.");
+
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                var subscription = context.Subscriptions.SingleOrDefault(x => x.SubscriptionId == model.SubscriptionId);
+                if (subscription == null) throw new KeyNotFoundException("The subscription could not be found.");
+                if (!context.Plans.Any(x => x.PlanId == model.PlanId)) throw new ArgumentException("Select a valid subscription plan.");
+
+                subscription.PlanId = model.PlanId;
+                subscription.Status = status;
+                subscription.CurrentPeriodStartUtc = DateTime.SpecifyKind(model.CurrentPeriodStartUtc, DateTimeKind.Utc);
+                subscription.CurrentPeriodEndUtc = DateTime.SpecifyKind(model.CurrentPeriodEndUtc, DateTimeKind.Utc);
+                subscription.CancelAtPeriodEnd = model.CancelAtPeriodEnd;
+                subscription.ProviderSubscriptionId = string.IsNullOrWhiteSpace(model.ProviderSubscriptionId)
+                    ? null
+                    : model.ProviderSubscriptionId.Trim();
+                subscription.UpdatedUtc = DateTime.UtcNow;
+                context.SubmitChanges();
+                return MapSubscriptionEdit(context, subscription);
+            }
+        }
+
+        private static AdminApiKeyEditViewModel MapApiKeyEdit(AutoDealerDataContext context, ApiKey apiKey) {
+            var subscriptions = context.Subscriptions
+                .Where(x => x.ClientId == apiKey.ClientId)
+                .OrderByDescending(x => x.CurrentPeriodEndUtc)
+                .Select(x => new { x.SubscriptionId, x.Status, PlanName = x.Plan.DisplayName })
+                .ToList()
+                .Select(x => new AdminEditOptionViewModel {
+                    Value = x.SubscriptionId.ToString(),
+                    Text = "#" + x.SubscriptionId + " — " + x.PlanName + " (" + x.Status + ")"
+                }).ToList();
+            return new AdminApiKeyEditViewModel {
+                ApiKeyId = apiKey.ApiKeyId,
+                ClientId = apiKey.ClientId,
+                Name = apiKey.Name,
+                Scopes = apiKey.Scopes,
+                Status = apiKey.Status,
+                SubscriptionId = apiKey.SubscriptionId,
+                ExpiresUtc = apiKey.ExpiresUtc,
+                KeyPrefix = apiKey.KeyPrefix,
+                SubscriptionOptions = subscriptions
+            };
+        }
+
+        private static AdminClientEditViewModel MapClientEdit(Client client) {
+            return new AdminClientEditViewModel {
+                ClientId = client.ClientId,
+                ClientNumber = client.ClientNumber,
+                BusinessName = client.BusinessName,
+                FirstName = client.FirstName,
+                LastName = client.LastName,
+                Email = client.Email,
+                Phone = client.Phone,
+                Status = client.Status,
+                EmailVerifiedUtc = client.EmailVerifiedUtc,
+                CreatedUtc = client.CreatedUtc
+            };
+        }
+
+        private static AdminSubscriptionEditViewModel MapSubscriptionEdit(AutoDealerDataContext context, Subscription subscription) {
+            var plans = context.Plans
+                .OrderByDescending(x => x.IsActive)
+                .ThenBy(x => x.DisplayName)
+                .Select(x => new { x.PlanId, x.DisplayName, x.PlanCode, x.IsActive })
+                .ToList()
+                .Select(x => new AdminEditOptionViewModel {
+                    Value = x.PlanId.ToString(),
+                    Text = x.DisplayName + " (" + x.PlanCode + ")" + (x.IsActive ? string.Empty : " — inactive")
+                }).ToList();
+            return new AdminSubscriptionEditViewModel {
+                SubscriptionId = subscription.SubscriptionId,
+                ClientId = subscription.ClientId,
+                PlanId = subscription.PlanId,
+                Status = subscription.Status,
+                CurrentPeriodStartUtc = subscription.CurrentPeriodStartUtc,
+                CurrentPeriodEndUtc = subscription.CurrentPeriodEndUtc,
+                CancelAtPeriodEnd = subscription.CancelAtPeriodEnd,
+                ProviderSubscriptionId = subscription.ProviderSubscriptionId,
+                PlanOptions = plans
+            };
+        }
+
+        private void EnsureDatabaseConfigured() {
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new InvalidOperationException("The AutoDealer.dev database connection is not configured.");
         }
 
         private IDictionary<long, int> GetClientEmailCounts(IReadOnlyCollection<long> clientIds) {

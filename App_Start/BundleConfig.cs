@@ -8,18 +8,30 @@ namespace autodealer.dev {
                         "~/Scripts/jquery-{version}.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
-                        "~/Scripts/jquery.validate*"));
+                        "~/Scripts/jquery.validate.js",
+                        "~/Scripts/jquery.validate.unobtrusive.js"));
 
-            // Use the development version of Modernizr to develop with and learn from. Then, when you're
-            // ready for production, use the build tool at https://modernizr.com to pick only the tests you need.
-            bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
-                        "~/Scripts/modernizr-*"));
+            // Bootstrap is already minified and contains syntax unsupported by the legacy AjaxMin transform.
+            bundles.Add(new Bundle("~/bundles/bootstrap").Include(
+                      "~/Scripts/bootstrap.bundle.min.js"));
 
-            bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
-                      "~/Scripts/bootstrap.min.js"));
+            bundles.Add(new ScriptBundle("~/bundles/account-validation").Include(
+                      "~/Scripts/accountCredentialValidation.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/vin-report").Include(
+                      "~/Scripts/autodealer-vin-report.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/admin-dashboard").Include(
+                      "~/Scripts/pepTools/pepGrid.js",
+                      "~/Scripts/accountCredentialValidation.js",
+                      "~/Scripts/Admin/adminDashboard.js"));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/site.css"));
+
+            bundles.Add(new StyleBundle("~/bundles/admin-css").Include(
+                      "~/Content/pepTools/pepGrid.css",
+                      "~/Content/dashboard.css"));
         }
     }
 }

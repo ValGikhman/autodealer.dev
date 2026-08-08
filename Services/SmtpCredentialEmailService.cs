@@ -6,17 +6,18 @@ using System.Web;
 
 namespace autodealer.dev.Services {
     public sealed class SmtpCredentialEmailService : ICredentialEmailService {
-        public bool Send(long clientId, string businessName, string firstName, string lastName, string email, string phone, string clientNumber, string apiKey, string planCode) {
-            var credentialsEmailed = SendCredentials(clientId, firstName, email, clientNumber, apiKey, planCode);
+        public bool Send(long clientId, string businessName, string firstName, string lastName, string email, string phone, string clientNumber, string apiKey, string planCode, string temporaryPassword) {
+            var credentialsEmailed = SendCredentials(clientId, firstName, email, clientNumber, apiKey, planCode, temporaryPassword);
             SendOwnerNotification(clientId, businessName, firstName, lastName, email, phone, clientNumber, planCode);
             return credentialsEmailed;
         }
 
-        private static bool SendCredentials(long clientId, string firstName, string email, string clientNumber, string apiKey, string planCode) {
+        private static bool SendCredentials(long clientId, string firstName, string email, string clientNumber, string apiKey, string planCode, string temporaryPassword) {
             try {
                 var rows = new StringBuilder();
                 AddRow(rows, "Client", clientNumber);
                 AddRow(rows, "Plan", planCode);
+                AddRow(rows, "Temporary password", temporaryPassword);
                 var body = EmailTemplateRenderer.Render(EmailTemplateName.ApiCredentials,
                     new EmailTemplateValues()
                         .Add("FIRST_NAME", firstName)

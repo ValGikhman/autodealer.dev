@@ -3,7 +3,9 @@ using autodealer.dev.Services;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Web;
 using System.Web.Security;
 using System.Web.Mvc;
 
@@ -47,8 +49,30 @@ namespace autodealer.dev.Controllers {
                 ModelState.AddModelError("", ex.Message);
             }
             model.Password = null;
+            model.ConfirmPassword = null;
             PopulatePlanOptions(model);
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CheckEmailAvailability(string email) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            var normalizedEmail = (email ?? string.Empty).Trim();
+            if (!new EmailAddressAttribute().IsValid(normalizedEmail))
+                return Json(new { Available = false, Message = "Enter a valid email address first." });
+            try {
+                var available = accountService.IsEmailAvailable(normalizedEmail, null);
+                return Json(new {
+                    Available = available,
+                    Message = available ? "Email is available." : "An account already uses this email address."
+                });
+            }
+            catch (SqlException) {
+                Response.StatusCode = 503;
+                return Json(new { Available = false, Message = "Email availability cannot be checked right now." });
+            }
         }
 
         [HttpGet]

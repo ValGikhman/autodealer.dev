@@ -13,6 +13,7 @@ using System.Web.Security;
 namespace autodealer.dev {
     public class MvcApplication : System.Web.HttpApplication {
         protected void Application_Start() {
+            MvcHandler.DisableMvcResponseHeader = true;
             GlobalConfiguration.Configure(WebApiConfig.Register); // <— must be here, and BEFORE MVC routes
             UnityConfig.RegisterComponents();
             RegisterSanitizingModelBinders();

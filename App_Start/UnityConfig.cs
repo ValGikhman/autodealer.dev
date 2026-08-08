@@ -22,6 +22,7 @@ namespace autodealer.dev
             container.RegisterType<ICredentialEmailService, SmtpCredentialEmailService>();
             container.RegisterType<IClientAccountService, ClientAccountService>();
             container.RegisterType<IApiAccessService, ApiAccessService>();
+            container.RegisterType<IApiKeyIssuanceService, ApiKeyIssuanceService>();
             container.RegisterType<IAdminService, AdminService>();
             container.RegisterType<IPlanService, PlanService>();
             container.RegisterType<IDealerDemoRequestService, DealerDemoRequestService>();

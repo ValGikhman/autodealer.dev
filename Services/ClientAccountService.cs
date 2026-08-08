@@ -1,6 +1,7 @@
 using autodealer.dev.Data;
 using autodealer.dev.Models;
 using System;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Security.Cryptography;
@@ -18,13 +19,19 @@ namespace autodealer.dev.Services {
         }
 
         public AccountCreatedViewModel Create(AccountRegistrationViewModel model) {
+            return Create(model, null, false);
+        }
+
+        public AccountCreatedViewModel Create(AccountRegistrationViewModel model, string requestedClientNumber, bool emailTemporaryPassword) {
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new InvalidOperationException("The AutoDealer.dev database connection is not configured.");
 
             var planCode = NormalizePlan(model.PlanCode);
+            if (!PasswordPolicy.IsValid(model.Password))
+                throw new ArgumentException("The password does not meet the required security policy.");
             var normalizedEmail = model.Email.Trim().ToLowerInvariant();
             var now = DateTime.UtcNow;
-            var clientNumber = "DLR-" + DateTime.UtcNow.ToString("yyMMdd") + "-" + RandomToken(4).ToUpperInvariant();
+            var clientNumber = ResolveClientNumber(requestedClientNumber);
             var keyId = "ad_live_" + RandomToken(9);
             var secret = RandomToken(32);
             var fullKey = keyId + "." + secret;
@@ -41,6 +48,8 @@ namespace autodealer.dev.Services {
                     try {
                         if (context.Clients.Any(x => x.Email == normalizedEmail))
                             throw new InvalidOperationException("An account already exists for this email address.");
+                        if (context.Clients.Any(x => x.ClientNumber == clientNumber))
+                            throw new InvalidOperationException("That generated client number is no longer available. Reopen the form to generate another one.");
 
                         var plan = context.Plans.SingleOrDefault(x => x.PlanCode == planCode && x.IsActive);
                         if (plan == null) throw new InvalidOperationException("The selected plan is not available.");
@@ -116,8 +125,23 @@ namespace autodealer.dev.Services {
                 }
             }
 
-            var emailed = emailService != null && emailService.Send(clientId, model.BusinessName, model.FirstName, model.LastName, model.Email.Trim(), model.Phone, clientNumber, fullKey, planCode);
+            var emailed = emailService != null && emailService.Send(clientId, model.BusinessName, model.FirstName, model.LastName, model.Email.Trim(), model.Phone, clientNumber, fullKey, planCode, emailTemporaryPassword ? model.Password : null);
             return new AccountCreatedViewModel { ClientNumber = clientNumber, ApiKey = fullKey, Email = model.Email, CredentialsEmailed = emailed };
+        }
+
+        public bool IsEmailAvailable(string email, long? excludedClientId) {
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new InvalidOperationException("The AutoDealer.dev database connection is not configured.");
+            var normalizedEmail = (email ?? string.Empty).Trim().ToLowerInvariant();
+            if (normalizedEmail.Length == 0 || normalizedEmail.Length > 254) return false;
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                var clientsWithEmail = context.Clients.Where(x => x.Email == normalizedEmail);
+                if (excludedClientId.HasValue) {
+                    var clientId = excludedClientId.Value;
+                    clientsWithEmail = clientsWithEmail.Where(x => x.ClientId != clientId);
+                }
+                return !clientsWithEmail.Any();
+            }
         }
 
         public AccountDashboardViewModel Authenticate(string email, string password) {
@@ -169,16 +193,24 @@ namespace autodealer.dev.Services {
                 .OrderByDescending(x => x.CurrentPeriodEndUtc)
                 .Select(x => new { Item = x, Plan = x.Plan })
                 .FirstOrDefault();
+            var subscriptionStatus = subscription == null ? null : subscription.Item.Status;
+            var paymentRequired = subscription != null &&
+                (subscription.Item.CurrentPeriodEndUtc <= DateTime.UtcNow ||
+                 string.Equals(subscriptionStatus, "paused", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(subscriptionStatus, "past_due", StringComparison.OrdinalIgnoreCase) ||
+                 string.Equals(subscriptionStatus, "canceled", StringComparison.OrdinalIgnoreCase));
             return new AccountDashboardViewModel {
                 ClientNumber = client.ClientNumber,
                 BusinessName = client.BusinessName,
                 ContactName = client.FirstName + " " + client.LastName,
                 Email = client.Email,
                 PlanName = subscription == null ? "No active plan" : subscription.Plan.DisplayName,
-                SubscriptionStatus = subscription == null ? "unavailable" : subscription.Item.Status,
+                SubscriptionStatus = subscription == null ? "unavailable" : subscriptionStatus,
                 MonthlyRequestQuota = subscription == null ? 0 : subscription.Plan.MonthlyRequestQuota,
                 CurrentPeriodEndUtc = subscription == null ? (DateTime?)null : subscription.Item.CurrentPeriodEndUtc,
-                ActiveApiKeyCount = context.ApiKeys.Count(x => x.ClientId == client.ClientId && x.Status == "active")
+                ActiveApiKeyCount = context.ApiKeys.Count(x => x.ClientId == client.ClientId && x.Status == "active"),
+                PaymentRequired = paymentRequired,
+                PaymentUrl = paymentRequired ? (ConfigurationManager.AppSettings["Billing:PaymentUrl"] ?? string.Empty).Trim() : string.Empty
             };
         }
 
@@ -193,6 +225,14 @@ namespace autodealer.dev.Services {
             var plan = (value ?? string.Empty).Trim().ToUpperInvariant();
             if (plan.Length == 0 || plan.Length > 32) throw new ArgumentException("Please choose a valid plan.");
             return plan;
+        }
+
+        private static string ResolveClientNumber(string value) {
+            if (string.IsNullOrWhiteSpace(value)) return ClientNumberGenerator.Generate();
+            var clientNumber = value.Trim().ToUpperInvariant();
+            if (clientNumber.Length > 32 || !System.Text.RegularExpressions.Regex.IsMatch(clientNumber, @"^DLR-[0-9]{6}-[A-Z0-9_-]{6}$"))
+                throw new ArgumentException("The generated client number is invalid.");
+            return clientNumber;
         }
 
         private static byte[] Sha256(string value) {

@@ -1,18 +1,27 @@
 @model autodealer.dev.Models.AccountRegistrationViewModel
-@{ ViewBag.Title = "Create your account"; ViewBag.BodyClass = "account-page"; }
+@{ ViewBag.Title = "Create your account"; ViewBag.BodyClass = "account-page"; ViewBag.IncludeValidation = true; }
 <section class="page-hero account-page-hero"><div class="shell"><div class="account-intro"><span class="eyebrow">CREATE YOUR WORKSPACE</span><h1>Get your API key and start building.</h1><p>Your 14-day trial includes real API credentials and usage tracking. No payment method is required today.</p></div></div></section>
 <section class="section light-section account-content-section"><div class="shell account-form-shell wide-form-shell">
-    <div class="form-card">
-        <span class="form-step">ACCOUNT DETAILS</span><h2>Create your workspace</h2>
-        @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "account-form", autocomplete = "on" })) {
+    <div class="form-card dashboard-style-form">
+        <div class="dashboard-style-form-header"><span class="form-step">ACCOUNT DETAILS</span><h2>Create your workspace</h2><p>Set up the customer identity, secure login, and starting subscription.</p></div>
+        @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "account-form dashboard-style-form-body", autocomplete = "on", data_account_validation = "true", data_email_check_url = Url.Action("CheckEmailAvailability", "Account") })) {
             @Html.AntiForgeryToken()
             @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
             <div class="form-field">@Html.LabelFor(m => m.BusinessName)@Html.TextBoxFor(m => m.BusinessName, new { placeholder = "Northstar Motors", autocomplete = "organization" })@Html.ValidationMessageFor(m => m.BusinessName)</div>
             <div class="form-row"><div class="form-field">@Html.LabelFor(m => m.FirstName)@Html.TextBoxFor(m => m.FirstName, new { placeholder = "Alex", autocomplete = "given-name" })@Html.ValidationMessageFor(m => m.FirstName)</div><div class="form-field">@Html.LabelFor(m => m.LastName)@Html.TextBoxFor(m => m.LastName, new { placeholder = "Morgan", autocomplete = "family-name" })@Html.ValidationMessageFor(m => m.LastName)</div></div>
-            <div class="form-row"><div class="form-field">@Html.LabelFor(m => m.Email)@Html.TextBoxFor(m => m.Email, new { type = "email", placeholder = "alex@dealership.com", autocomplete = "email" })@Html.ValidationMessageFor(m => m.Email)</div><div class="form-field">@Html.LabelFor(m => m.Phone)@Html.TextBoxFor(m => m.Phone, new { type = "tel", placeholder = "(555) 012-3456", autocomplete = "tel" })@Html.ValidationMessageFor(m => m.Phone)</div></div>
-            <div class="form-row"><div class="form-field">@Html.LabelFor(m => m.Password)@Html.PasswordFor(m => m.Password, new { placeholder = "12 or more characters", autocomplete = "new-password" })@Html.ValidationMessageFor(m => m.Password)</div><div class="form-field">@Html.LabelFor(m => m.PlanCode)@Html.DropDownListFor(m => m.PlanCode, Model.PlanOptions)@Html.ValidationMessageFor(m => m.PlanCode)</div></div>
+            <div class="form-row"><div class="form-field">@Html.LabelFor(m => m.Email)@Html.TextBoxFor(m => m.Email, new { type = "email", placeholder = "alex@dealership.com", autocomplete = "email", data_email_availability = "true" })<small class="email-availability-status" data-email-availability-status aria-live="polite">Email availability will be checked here.</small>@Html.ValidationMessageFor(m => m.Email)</div><div class="form-field">@Html.LabelFor(m => m.Phone)@Html.TextBoxFor(m => m.Phone, new { type = "tel", placeholder = "(555) 012-3456", autocomplete = "tel" })@Html.ValidationMessageFor(m => m.Phone)</div></div>
+            <div class="form-row password-form-row"><div class="form-field">@Html.LabelFor(m => m.Password)@Html.PasswordFor(m => m.Password, new { placeholder = "Create a strong password", autocomplete = "new-password", data_password_primary = "true" })@Html.ValidationMessageFor(m => m.Password)</div><div class="form-field">@Html.LabelFor(m => m.ConfirmPassword)@Html.PasswordFor(m => m.ConfirmPassword, new { placeholder = "Enter it again", autocomplete = "new-password", data_password_confirmation = "true" })<small class="password-confirmation-status" data-password-confirmation-status aria-live="polite">Re-enter the password to confirm it.</small>@Html.ValidationMessageFor(m => m.ConfirmPassword)</div></div>
+            <div class="password-policy-panel" data-password-policy-panel>
+                <div class="password-policy-heading"><span>Secure password</span><small data-password-policy-count aria-live="polite">0 of 6 rules met</small></div>
+                <ul class="password-policy-checklist" data-password-policy aria-label="Password requirements"><li data-password-rule="length">12–100 characters</li><li data-password-rule="lower">Lowercase letter</li><li data-password-rule="upper">Uppercase letter</li><li data-password-rule="number">Number</li><li data-password-rule="symbol">Symbol</li><li data-password-rule="spaces">No spaces</li></ul>
+            </div>
+            <div class="form-field">@Html.LabelFor(m => m.PlanCode)@Html.DropDownListFor(m => m.PlanCode, Model.PlanOptions)@Html.ValidationMessageFor(m => m.PlanCode)</div>
             <label class="check-field legal-consent-field">@Html.CheckBoxFor(m => m.AcceptTerms)<span>I agree to the <a href="@Url.Action("Legal", "Home")#service-terms" data-legal-modal data-legal-section="service-terms">service terms</a> and <a href="@Url.Action("Legal", "Home")#privacy-policy" data-legal-modal data-legal-section="privacy-policy">privacy policy</a>.</span></label>@Html.ValidationMessageFor(m => m.AcceptTerms)
-            <button class="button button-primary submit-button" type="submit">Create account and issue key</button><small class="form-secure">Protected by TLS &middot; API secrets are displayed once</small>
+            <div class="dashboard-style-form-footer"><small class="form-secure">Protected by TLS &middot; API secrets are displayed once</small><button class="button button-primary submit-button" type="submit">Create account and issue key</button></div>
         }
     </div>
 </div></section>
+
+@section scripts {
+    @Scripts.Render("~/bundles/account-validation")
+}
