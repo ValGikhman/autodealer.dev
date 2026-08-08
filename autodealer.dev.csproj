@@ -173,6 +173,7 @@
       <DependentUpon>autodealer_dev.dbml</DependentUpon>
     </Compile>
     <Compile Include="Data\DealerDemoRequestRecord.cs" />
+    <Compile Include="Data\ClientEmailVerificationRecord.cs" />
     <Compile Include="Services\ClientAccountService.cs" />
     <Compile Include="Services\ClientEmailHistoryRecorder.cs" />
     <Compile Include="Services\ContactInquiryService.cs" />
@@ -227,6 +228,7 @@
     <Content Include="Database\003_ClientEmailHistory.sql" />
     <Content Include="Database\004_TrialExpirationAutomation.sql" />
     <Content Include="Database\005_AdminClientDeletionPermissions.sql" />
+    <Content Include="Database\006_ClientEmailVerification.sql" />
     <Content Include="Content\dashboard.css" />
     <Content Include="Content\email.css" />
     <Content Include="Content\pepTools\pepGrid.css" />
@@ -273,6 +275,7 @@
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Dashboard.cshtml" />
     <Content Include="Views\Account\Success.cshtml" />
+    <Content Include="Views\Account\VerifyEmail.cshtml" />
     <Content Include="Views\Admin\Login.cshtml" />
     <Content Include="Views\Admin\Dashboard.cshtml" />
     <Content Include="Views\Admin\Customers.cshtml" />
@@ -304,6 +307,7 @@
     <Content Include="Content\images\autodealer-logo.png" />
     <Content Include="Content\images\autodealer-logo-dark.png" />
     <Content Include="Templates\Emails\api-credentials.html" />
+    <Content Include="Templates\Emails\email-verification.html" />
     <Content Include="Templates\Emails\additional-api-key.html" />
     <Content Include="Templates\Emails\new-api-account.html" />
     <Content Include="Templates\Emails\dealer-demo-owner.html" />

@@ -5978,6 +5978,10 @@ h2, h3 {
     letter-spacing: 1.5px
 }
 
+.admin-table-heading .eyebrow {
+    background: #858c93
+}
+
 /* Hero labels use an instrument-panel treatment distinct from section eyebrows. */
 .site-hero .hero-copy > .eyebrow {
     display: inline-flex;
@@ -6860,6 +6864,38 @@ h2, h3 {
         color: #252b31
     }
 
+.verification-mail-mark {
+    font-family: Arial, sans-serif;
+    font-size: 34px
+}
+
+.verification-next-step {
+    max-width: 680px;
+    margin: 22px auto;
+    padding: 18px 20px;
+    border: 1px solid rgba(38,44,49,.35);
+    border-radius: 10px;
+    color: #252b31;
+    background: rgba(255,255,255,.2);
+    text-align: left
+}
+
+    .verification-next-step strong, .verification-next-step span {
+        display: block
+    }
+
+    .verification-next-step strong {
+        margin-bottom: 6px;
+        font-size: 13px;
+        letter-spacing: .04em;
+        text-transform: uppercase
+    }
+
+    .verification-next-step span {
+        font-size: 14px;
+        line-height: 1.65
+    }
+
 /* Shared Service Terms and Privacy Policy. */
 .legal-page-shell {
     max-width: 980px
@@ -7293,6 +7329,10 @@ body .form-card .button.button-primary.submit-button {
     display: grid;
     grid-template-columns: repeat(2,minmax(0,1fr));
     gap: 18px 22px
+}
+
+.workspace-fields[hidden] {
+    display: none
 }
 
     .workspace-fields > .form-field {
@@ -7827,6 +7867,90 @@ input.availability-invalid {
     color: #252b31;
     font-weight: 700
 }
+
+/* Compact spacing for the shared public/admin workspace form only. */
+.account-content-section .dashboard-style-form-body .workspace-fields {
+    gap: 10px 14px
+}
+
+    .account-content-section .dashboard-style-form-body .workspace-fields > .form-field {
+        margin-top: 0
+    }
+
+    .account-content-section .dashboard-style-form-body .workspace-fields .form-field label {
+        margin-bottom: 4px;
+        font-size: 11px
+    }
+
+    .account-content-section .dashboard-style-form-body .workspace-fields .form-field input,
+    .account-content-section .dashboard-style-form-body .workspace-fields .form-field select {
+        min-height: 39px;
+        padding: 7px 10px
+    }
+
+    .account-content-section .dashboard-style-form-body .workspace-fields .email-availability-status,
+    .account-content-section .dashboard-style-form-body .workspace-fields .password-confirmation-status {
+        min-height: 14px;
+        margin-top: 2px;
+        font-size: 10px
+    }
+
+    .account-content-section .dashboard-style-form-body .workspace-fields .password-policy-panel {
+        padding: 8px 9px 9px;
+        border-radius: 9px
+    }
+
+    .account-content-section .dashboard-style-form-body .workspace-fields .password-policy-heading {
+        margin-bottom: 6px
+    }
+
+    .account-content-section .dashboard-style-form-body .workspace-fields .password-policy-heading span {
+        font-size: 11px
+    }
+
+        .account-content-section .dashboard-style-form-body .workspace-fields .password-policy-heading span:before {
+            width: 18px;
+            height: 18px
+        }
+
+    .account-content-section .dashboard-style-form-body .workspace-fields .password-policy-checklist {
+        gap: 4px
+    }
+
+        .account-content-section .dashboard-style-form-body .workspace-fields .password-policy-checklist li {
+            min-height: 25px;
+            padding: 4px 6px 4px 25px;
+            font-size: 10px
+        }
+
+            .account-content-section .dashboard-style-form-body .workspace-fields .password-policy-checklist li:before {
+                left: 6px;
+                width: 13px;
+                height: 13px
+            }
+
+    .account-content-section .dashboard-style-form-body .workspace-fields .password-visibility-toggle {
+        right: 5px;
+        width: 30px;
+        height: 30px
+    }
+
+        .account-content-section .dashboard-style-form-body .workspace-fields .password-visibility-toggle svg {
+            width: 17px;
+            height: 17px
+        }
+
+    .account-content-section .dashboard-style-form-body .workspace-fields .accent-check-field {
+        min-height: 40px;
+        margin-top: 6px;
+        padding: 6px 10px
+    }
+
+        .account-content-section .dashboard-style-form-body .workspace-fields .accent-check-field > span:before {
+            flex-basis: 19px;
+            width: 19px;
+            height: 19px
+        }
 
 .dashboard-style-form-footer {
     display: flex;

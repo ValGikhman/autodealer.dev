@@ -6,25 +6,40 @@ using System.Web;
 
 namespace autodealer.dev.Services {
     public sealed class SmtpCredentialEmailService : ICredentialEmailService {
-        public bool Send(long clientId, string businessName, string firstName, string lastName, string email, string phone, string clientNumber, string apiKey, string planCode, string temporaryPassword) {
-            var credentialsEmailed = SendCredentials(clientId, firstName, email, clientNumber, apiKey, planCode, temporaryPassword);
-            SendOwnerNotification(clientId, businessName, firstName, lastName, email, phone, clientNumber, planCode);
-            return credentialsEmailed;
+        public bool SendVerification(long clientId, string firstName, string email, string verificationUrl) {
+            try {
+                var body = EmailTemplateRenderer.Render(EmailTemplateName.EmailVerification,
+                    new EmailTemplateValues()
+                        .Add("FIRST_NAME", firstName)
+                        .AddAttribute("VERIFICATION_URL", verificationUrl));
+                SmtpMailSender.SendForClient(clientId, email, firstName, "Confirm your AutoDealer.dev email", body, null, null);
+                return true;
+            }
+            catch (Exception ex) {
+                Trace.TraceError("Email verification SMTP delivery failed: {0}", ex);
+                return false;
+            }
         }
 
-        private static bool SendCredentials(long clientId, string firstName, string email, string clientNumber, string apiKey, string planCode, string temporaryPassword) {
+        public bool SendCredentials(long clientId, string businessName, string firstName, string lastName, string email, string phone, string clientNumber, string apiKey, string planCode, bool createdByAdmin) {
             try {
                 var rows = new StringBuilder();
-                AddRow(rows, "Client", clientNumber);
+                AddRow(rows, "Client number", clientNumber);
+                AddRow(rows, "Sign-in email", email);
                 AddRow(rows, "Plan", planCode);
-                AddRow(rows, "Temporary password", temporaryPassword);
                 var body = EmailTemplateRenderer.Render(EmailTemplateName.ApiCredentials,
                     new EmailTemplateValues()
                         .Add("FIRST_NAME", firstName)
                         .Add("API_KEY", apiKey)
+                        .Add("PASSWORD_GUIDANCE", createdByAdmin
+                            ? "Use the temporary password selected when this workspace was created. For security, passwords are never repeated by email; change it after your first sign-in."
+                            : "Use the password you chose during registration. For security, passwords are never repeated by email.")
+                        .AddAttribute("DOCUMENTATION_URL", SeoUrl.Absolute("documentation"))
+                        .AddAttribute("LOGIN_URL", SeoUrl.Absolute("account/login"))
                         .AddHtml("DETAIL_ROWS", rows.ToString()));
 
                 SmtpMailSender.SendForClient(clientId, email, firstName, "Your AutoDealer.dev API credentials", body, null, null);
+                SendOwnerNotification(clientId, businessName, firstName, lastName, email, phone, clientNumber, planCode);
                 return true;
             }
             catch (Exception ex) {

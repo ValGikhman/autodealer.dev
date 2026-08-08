@@ -1,9 +1,17 @@
 @model autodealer.dev.Models.AccountCreatedViewModel
-@{ ViewBag.Title = "Account ready"; ViewBag.BodyClass = "account-page"; }
-<section class="site-hero page-hero"><div class="shell site-hero-shell"><div class="hero-copy"><span class="eyebrow">WORKSPACE READY</span><h1>Welcome to the fast lane.</h1><p>Workspace and credentials are ready for client <strong>@Model.ClientNumber</strong>.</p></div></div></section>
-<section class="section light-section account-content-section success-page"><div class="shell"><div class="success-card">
-    <span class="success-mark">&#10003;</span><h2>Save your API credential</h2><p>Copy the API key now; the original secret cannot be recovered from the database.</p>
-    <label>YOUR API KEY &mdash; SHOWN ONCE</label><div class="key-output"><code id="new-api-key">@Model.ApiKey</code><button type="button" data-copy="#new-api-key">Copy key</button></div>
-    <p class="delivery-note">@(Model.CredentialsEmailed ? "A credential copy was also sent to " + Model.Email + "." : "SMTP is not configured, so save this credential before leaving this page.")</p>
-    <div class="button-row centered-row"><a class="button button-primary" href="@Url.Action("Index", "Documentation")">Make your first request &rarr;</a><a class="button button-outline" href="@Url.Action("Index", "Home")">Return home</a></div>
+@{ ViewBag.Title = "Check your email"; ViewBag.BodyClass = "account-page"; }
+<section class="site-hero page-hero"><div class="shell site-hero-shell"><div class="hero-copy"><span class="eyebrow">ONE STEP REMAINS</span><h1>Check your inbox.</h1><p>Confirm your email to activate the workspace and securely receive your credentials.</p></div></div></section>
+<section class="section light-section account-content-section success-page"><div class="shell"><div class="success-card verification-pending-card">
+    <span class="success-mark verification-mail-mark" aria-hidden="true">&#9993;</span>
+    @if (Model.VerificationEmailSent) {
+        <h2>Confirmation sent</h2>
+        <p>We sent a secure confirmation button to <strong>@Model.Email</strong>. Open that message and confirm your email within 24 hours.</p>
+        <div class="verification-next-step"><strong>What happens next?</strong><span>After confirmation, we will activate your workspace and send a separate email containing your API key, client number, plan details, sign-in guidance, and useful documentation links.</span></div>
+        <p class="delivery-note">Your API key has not been created yet and will never be displayed on this page. If the message is not visible, check your spam or promotions folder.</p>
+    } else {
+        <h2>Your workspace was saved</h2>
+        <p>We could not deliver the confirmation message to <strong>@Model.Email</strong>. Your workspace remains safely inactive and no API key has been issued.</p>
+        <p class="delivery-note">Please verify the address and contact us so we can resend the confirmation email.</p>
+    }
+    <div class="button-row centered-row"><a class="button button-primary" href="@Url.Action("Index", "Documentation")">Preview the documentation &rarr;</a><a class="button button-outline" href="@Url.Action("Index", "Home")">Return home</a></div>
 </div></div></section>

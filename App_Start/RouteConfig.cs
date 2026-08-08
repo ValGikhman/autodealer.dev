@@ -20,6 +20,7 @@ namespace autodealer.dev {
             routes.MapRoute("DocsAuthentication", "documentation/authentication", new { controller = "Documentation", action = "Authentication" });
             routes.MapRoute("DocsErrors", "documentation/errors-and-limits", new { controller = "Documentation", action = "Errors" });
             routes.MapRoute("GetApiKey", "account/register", new { controller = "Account", action = "Register" });
+            routes.MapRoute("VerifyAccountEmail", "account/verify-email", new { controller = "Account", action = "VerifyEmail" });
             routes.MapRoute("Admin", "majordome/{action}", new { controller = "Admin", action = "Login" });
             routes.MapRoute("Account", "account/{action}", new { controller = "Account", action = "Register" });
             routes.MapRoute("Documentation", "documentation/{action}", new { controller = "Documentation", action = "Index" });

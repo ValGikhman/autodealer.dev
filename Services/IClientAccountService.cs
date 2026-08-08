@@ -4,6 +4,7 @@ namespace autodealer.dev.Services {
     public interface IClientAccountService {
         AccountCreatedViewModel Create(AccountRegistrationViewModel model);
         AccountCreatedViewModel Create(AccountRegistrationViewModel model, string clientNumber, bool emailTemporaryPassword);
+        EmailVerificationViewModel VerifyEmail(string token);
         bool IsEmailAvailable(string email, long? excludedClientId);
         AccountDashboardViewModel Authenticate(string email, string password);
         AccountDashboardViewModel GetDashboard(string email);

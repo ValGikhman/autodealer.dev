@@ -195,12 +195,11 @@ namespace autodealer.dev.Controllers {
                 return Json(new {
                     Ok = true,
                     result.ClientNumber,
-                    ApiKey = result.ApiKey,
-                    TemporaryPassword = model.Password,
-                    result.CredentialsEmailed,
-                    Message = result.CredentialsEmailed
-                        ? "The customer was created and the credentials were emailed."
-                        : "The customer was created, but email delivery failed. Copy the credentials now."
+                    result.Email,
+                    result.VerificationEmailSent,
+                    Message = result.VerificationEmailSent
+                        ? "Customer saved. A confirmation email is waiting in their inbox."
+                        : "Customer saved, but the confirmation email could not be delivered."
                 });
             }
             catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException) {

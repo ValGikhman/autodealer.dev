@@ -83,6 +83,24 @@ namespace autodealer.dev.Controllers {
         }
 
         [HttpGet]
+        public ActionResult VerifyEmail(string token) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            try {
+                var result = accountService.VerifyEmail(token);
+                if (result.Status == EmailVerificationStatus.DeliveryFailed)
+                    result.RetryUrl = Url.Action("VerifyEmail", "Account", new { token = token });
+                return View(result);
+            }
+            catch (SqlException) {
+                return View(new EmailVerificationViewModel { Status = EmailVerificationStatus.DeliveryFailed });
+            }
+            catch (InvalidOperationException) {
+                return View(new EmailVerificationViewModel { Status = EmailVerificationStatus.DeliveryFailed });
+            }
+        }
+
+        [HttpGet]
         public ActionResult Login(string returnUrl) {
             if (User.IsInRole("Admin")) return RedirectToAction("Dashboard", "Admin");
             if (Request.IsAuthenticated) return RedirectToAction("Dashboard");

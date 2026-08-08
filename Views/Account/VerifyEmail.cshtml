@@ -1,0 +1,19 @@
+@model autodealer.dev.Models.EmailVerificationViewModel
+@using autodealer.dev.Models
+@{ ViewBag.Title = Model.IsVerified ? "Email confirmed" : "Email confirmation"; ViewBag.BodyClass = "account-page"; }
+<section class="site-hero page-hero"><div class="shell site-hero-shell"><div class="hero-copy"><span class="eyebrow">EMAIL VERIFICATION</span><h1>@(Model.IsVerified ? "Your workspace is active." : "We could not finish activation.")</h1><p>@(Model.IsVerified ? "Your verified credentials are on their way in a separate email." : "Your workspace and credentials remain protected while we resolve this step.")</p></div></div></section>
+<section class="section light-section account-content-section success-page"><div class="shell"><div class="success-card verification-pending-card">
+    @if (Model.Status == EmailVerificationStatus.Verified) {
+        <span class="success-mark">&#10003;</span><h2>Email confirmed</h2><p>Your workspace is active. We sent your API key, client number, plan information, sign-in guidance, and documentation links to <strong>@Model.Email</strong>.</p><p class="delivery-note">Keep the credentials email private and store the API key in a secret manager.</p>
+    } else if (Model.Status == EmailVerificationStatus.AlreadyVerified) {
+        <span class="success-mark">&#10003;</span><h2>Already confirmed</h2><p>This email address has already been verified and the workspace credentials were sent to <strong>@Model.Email</strong>.</p>
+    } else if (Model.Status == EmailVerificationStatus.Expired) {
+        <span class="success-mark verification-mail-mark">!</span><h2>This confirmation link expired</h2><p>The 24-hour confirmation window has passed. No API credential was issued.</p><p class="delivery-note">Please contact us to request a fresh verification message.</p>
+    } else if (Model.Status == EmailVerificationStatus.DeliveryFailed) {
+        <span class="success-mark verification-mail-mark">!</span><h2>Your email is confirmed</h2><p>The workspace was activated, but the separate credentials email could not be delivered just now.</p><p class="delivery-note">No credential is shown here. Use the confirmation link again to securely issue a replacement key and retry delivery.</p>
+        if (!string.IsNullOrWhiteSpace(Model.RetryUrl)) { <div class="button-row centered-row"><a class="button button-primary" href="@Model.RetryUrl">Retry credential delivery</a></div> }
+    } else {
+        <span class="success-mark verification-mail-mark">!</span><h2>This confirmation link is not valid</h2><p>The link may be incomplete or may not belong to an active verification request.</p><p class="delivery-note">No API credential was issued. Please use the full button from the original email.</p>
+    }
+    @if (Model.Status != EmailVerificationStatus.DeliveryFailed || string.IsNullOrWhiteSpace(Model.RetryUrl)) { <div class="button-row centered-row"><a class="button button-primary" href="@Url.Action("Login", "Account")">Sign in</a><a class="button button-outline" href="@Url.Action("Index", "Documentation")">API documentation</a></div> }
+</div></div></section>
