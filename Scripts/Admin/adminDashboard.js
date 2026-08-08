@@ -119,7 +119,8 @@
             });
         }
         function resetRecordModalPanels() {
-            modalElement.classList.remove('dashboard-email-modal', 'dashboard-subgrid-edit-modal', 'dashboard-new-client-modal');
+            modalElement.classList.remove('dashboard-email-modal', 'dashboard-subgrid-edit-modal', 'dashboard-new-client-modal', 'dashboard-confirmation-modal');
+            modalElement.setAttribute('aria-labelledby', 'dashboard-record-title');
             subgridEditorElement.classList.remove('account-content-section');
             subgridEditForm.classList.remove('account-form', 'dashboard-style-form', 'dashboard-style-form-body');
             profileElement.hidden = true;
@@ -274,6 +275,8 @@
                     text('dashboard-record-title', 'Customer created');
                     text('dashboard-record-subtitle', response.Message || 'The workspace is waiting for email confirmation.');
                     updateWorkspaceConfirmation(clientCreateResult, response.Email, response.VerificationEmailSent);
+                    modalElement.classList.add('dashboard-confirmation-modal');
+                    modalElement.setAttribute('aria-labelledby', 'workspace-confirmation-heading');
                     clientCreateResult.hidden = false;
                     subgridEditSave.hidden = true;
                     setIconButtonLabel(subgridEditCancel, 'Done');
@@ -778,7 +781,8 @@
             subgridEditSequence += 1;
             pendingSubgridEdit = null;
             clearEmailPreview();
-            modalElement.classList.remove('dashboard-email-modal', 'dashboard-subgrid-edit-modal');
+            modalElement.classList.remove('dashboard-email-modal', 'dashboard-subgrid-edit-modal', 'dashboard-new-client-modal', 'dashboard-confirmation-modal');
+            modalElement.setAttribute('aria-labelledby', 'dashboard-record-title');
             emailPreviewElement.hidden = true;
             subgridEditorElement.hidden = true;
             subgridEditError.hidden = true;

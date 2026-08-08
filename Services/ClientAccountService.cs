@@ -121,7 +121,7 @@ namespace autodealer.dev.Services {
             }
 
             var verificationUrl = SeoUrl.Absolute("account/verify-email?token=" + Uri.EscapeDataString(verificationToken));
-            var emailed = emailService != null && emailService.SendVerification(clientId, model.FirstName, model.Email.Trim(), verificationUrl);
+            var emailed = emailService != null && emailService.SendVerification(clientId, model.FirstName, model.LastName, model.Email.Trim(), verificationUrl);
             return new AccountCreatedViewModel { Email = model.Email, VerificationEmailSent = emailed };
         }
 

@@ -163,7 +163,7 @@ namespace autodealer.dev.Controllers {
 
                 model.PlanOptions = plans.Select(x => new SelectListItem {
                     Value = x.PlanCode,
-                    Text = x.DisplayName + (x.MonthlyPrice.HasValue ? " - " + x.MonthlyPrice.Value.ToString("$0.##") + "/mo" : " - Custom"),
+                    Text = x.DisplayName.ToUpperInvariant() + " (" + (x.MonthlyPrice.HasValue ? x.MonthlyPrice.Value.ToString("$0.##") : "Custom") + ")",
                     Selected = string.Equals(x.PlanCode, model.PlanCode, StringComparison.OrdinalIgnoreCase)
                 }).ToList();
             }
