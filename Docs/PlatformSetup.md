@@ -66,8 +66,8 @@ them to activate, renew, pause, or cancel subscriptions.
 
 ## Search, sitemap, and Google measurement setup
 
-Production publishing applies `Web.Release.config`, which enables indexing and
-disables compilation debugging. Confirm these deployment values rather than
+The application uses a single production-ready `Web.config`; no Debug or Release
+configuration transform is required. Confirm these deployment values rather than
 putting environment-specific IDs directly in a Razor view:
 
 ```xml
@@ -77,10 +77,12 @@ putting environment-specific IDs directly in a Razor view:
 <add key="GoogleSearchConsole:VerificationToken" value="verification-token" />
 ```
 
-Keep `Seo:AllowIndexing=false` in local, staging, and preview deployments. The
-application then emits `noindex,nofollow` and a blocking `robots.txt`. A Release
-deployment serves the public sitemap at `https://autodealer.dev/sitemap.xml` and
-references it from `https://autodealer.dev/robots.txt`.
+The checked-in configuration sets `Seo:AllowIndexing=true` for the public site.
+After GitHub deployment, the application serves the public sitemap at
+`https://autodealer.dev/sitemap.xml` and references it from
+`https://autodealer.dev/robots.txt`. If this repository is ever deployed to a
+public staging or preview hostname, override `Seo:AllowIndexing` to `false` in
+that environment so the preview is not indexed.
 
 For Google Analytics 4:
 
