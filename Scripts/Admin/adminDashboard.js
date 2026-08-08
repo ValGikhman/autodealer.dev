@@ -180,14 +180,28 @@
                     ? isNewClient ? 'Create the account, trial subscription, login, and primary credential.' : 'Update the customer identity, contact information, and account access.'
                     : isApiKey ? 'Update the credential lifecycle and access settings.'
                         : isNewSubscription ? 'Create a billing record for this dealer. All dates are UTC.' : 'Update billing state, plan, and service period. All dates are UTC.');
-                setEditFieldsActive(clientEditFields, isClient);
+                setEditFieldsActive(clientEditFields, isClient && !isNewClient);
                 setClientEditOnlyActive(isClient && !isNewClient);
                 setEditFieldsActive(clientCreateFields, isNewClient);
                 setEditFieldsActive(apiKeyEditFields, isApiKey);
                 setEditFieldsActive(subscriptionEditFields, !isClient && !isApiKey);
                 deleteClientOpen.hidden = !(isClient && !isNewClient);
 
-                if (isClient) {
+                if (isNewClient) {
+                    document.getElementById('create-client-number').value = response.ClientNumber || '';
+                    document.getElementById('create-client-business').value = '';
+                    document.getElementById('create-client-first-name').value = '';
+                    document.getElementById('create-client-last-name').value = '';
+                    document.getElementById('create-client-email').value = '';
+                    document.getElementById('create-client-phone').value = '';
+                    document.getElementById('create-client-password').value = response.TemporaryPassword || '';
+                    document.getElementById('create-client-confirm-password').value = response.TemporaryPassword || '';
+                    setSelectOptions(document.getElementById('create-client-plan'), response.PlanOptions, response.PlanCode);
+                    notifyInput(document.getElementById('create-client-email'));
+                    notifyInput(document.getElementById('create-client-password'));
+                    notifyInput(document.getElementById('create-client-confirm-password'));
+                    document.getElementById('create-client-business').focus();
+                } else if (isClient) {
                     document.getElementById('edit-client-number').value = response.ClientNumber || '';
                     document.getElementById('edit-client-created').value = response.CreatedUtc || '';
                     document.getElementById('edit-client-business').value = response.BusinessName || '';
@@ -196,16 +210,7 @@
                     document.getElementById('edit-client-email').value = response.Email || '';
                     document.getElementById('edit-client-phone').value = response.Phone || '';
                     document.getElementById('edit-client-email-verified').value = response.EmailVerifiedUtc || '';
-                    if (isNewClient) {
-                        document.getElementById('edit-client-created').value = 'Assigned when saved';
-                        document.getElementById('create-client-password').value = response.TemporaryPassword || '';
-                        document.getElementById('create-client-confirm-password').value = response.TemporaryPassword || '';
-                        setSelectOptions(document.getElementById('create-client-plan'), response.PlanOptions, response.PlanCode);
-                        notifyInput(document.getElementById('create-client-password'));
-                        notifyInput(document.getElementById('create-client-confirm-password'));
-                    } else {
-                        setSelectOptions(document.getElementById('edit-client-status'), response.StatusOptions, response.Status);
-                    }
+                    setSelectOptions(document.getElementById('edit-client-status'), response.StatusOptions, response.Status);
                     notifyInput(document.getElementById('edit-client-email'));
                     document.getElementById('edit-client-business').focus();
                 } else if (isApiKey) {
@@ -245,7 +250,7 @@
             if (context.kind !== 'client-new' && context.kind !== 'subscription-new')
                 data.push({ name: context.kind === 'client' ? 'ClientId' : context.kind === 'api' ? 'ApiKeyId' : 'SubscriptionId', value: context.id });
             if (context.kind === 'client-new')
-                data.push({ name: 'ClientNumber', value: document.getElementById('edit-client-number').value });
+                data.push({ name: 'ClientNumber', value: document.getElementById('create-client-number').value });
             if (context.kind === 'subscription-new')
                 data.push({ name: 'ClientId', value: context.clientId });
             data.push({

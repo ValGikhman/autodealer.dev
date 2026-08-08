@@ -4837,7 +4837,7 @@ h2, h3 {
 .page-hero.product-hero {
     height: 315px;
     min-height: 315px;
-    padding: 61px 0 20px
+    padding: 15px 0 20px
 }
 
 .product-hero .showroom-ad-visual {
@@ -7289,6 +7289,41 @@ body .form-card .button.button-primary.submit-button {
     margin-bottom: 0
 }
 
+.workspace-fields {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 18px 22px
+}
+
+    .workspace-fields > .form-field {
+        min-width: 0;
+        margin: 0
+    }
+
+    .workspace-fields > .workspace-field-wide,
+    .workspace-fields > .field-validation-error {
+        grid-column: 1/-1
+    }
+
+    .workspace-fields .password-policy-panel {
+        margin: 0
+    }
+
+    .workspace-fields .legal-consent-field {
+        margin-top: 0
+    }
+
+@media(max-width:760px) {
+    .workspace-fields {
+        grid-template-columns: 1fr
+    }
+
+    .workspace-fields > .workspace-field-wide,
+    .workspace-fields > .field-validation-error {
+        grid-column: auto
+    }
+}
+
 .password-policy-panel {
     position: relative;
     margin: 0 0 16px;
@@ -7692,8 +7727,8 @@ input.availability-invalid {
     line-height: 1.4
 }
 
-/* Aligned, accented persistent-session control shared by both login forms. */
-.account-content-section .dashboard-style-form .remember-field {
+/* One aligned, accented checkbox panel for session and legal choices. */
+.account-content-section .dashboard-style-form .accent-check-field {
     display: inline-flex;
     align-items: center;
     width: max-content;
@@ -7712,19 +7747,19 @@ input.availability-invalid {
     transition: border-color .18s ease,color .18s ease,box-shadow .18s ease,transform .18s ease
 }
 
-    .account-content-section .dashboard-style-form .remember-field:hover {
+    .account-content-section .dashboard-style-form .accent-check-field:hover {
         border-color: rgba(176,101,32,.68);
         color: #171b1e;
         transform: translateY(-1px)
     }
 
-    .account-content-section .dashboard-style-form .remember-field:has(input[type="checkbox"]:checked) {
+    .account-content-section .dashboard-style-form .accent-check-field:has(input[type="checkbox"]:checked) {
         border-color: rgba(185,105,32,.72);
         background: #d2b18d;
         box-shadow: inset 0 1px rgba(255,255,255,.32),0 8px 20px rgba(123,68,18,.16)
     }
 
-    .account-content-section .dashboard-style-form .remember-field input[type="checkbox"] {
+    .account-content-section .dashboard-style-form .accent-check-field input[type="checkbox"] {
         position: absolute;
         width: 1px;
         height: 1px;
@@ -7736,7 +7771,7 @@ input.availability-invalid {
         white-space: nowrap
     }
 
-    .account-content-section .dashboard-style-form .remember-field span {
+    .account-content-section .dashboard-style-form .accent-check-field > span {
         display: inline-flex;
         align-items: center;
         gap: 10px;
@@ -7744,7 +7779,7 @@ input.availability-invalid {
         white-space: nowrap
     }
 
-        .account-content-section .dashboard-style-form .remember-field span:before {
+        .account-content-section .dashboard-style-form .accent-check-field > span:before {
             content: "";
             display: grid;
             flex: 0 0 22px;
@@ -7760,7 +7795,7 @@ input.availability-invalid {
             transition: border-color .18s ease,color .18s ease,background .18s ease,box-shadow .18s ease
         }
 
-    .account-content-section .dashboard-style-form .remember-field input[type="checkbox"]:checked ~ span:before {
+    .account-content-section .dashboard-style-form .accent-check-field input[type="checkbox"]:checked ~ span:before {
         content: "\2713";
         border-color: #8b4d18;
         color: #fff;
@@ -7768,17 +7803,17 @@ input.availability-invalid {
         box-shadow: inset 0 1px rgba(255,255,255,.42),0 0 0 3px rgba(211,127,48,.16),0 4px 10px rgba(122,65,17,.28)
     }
 
-    .account-content-section .dashboard-style-form .remember-field input[type="checkbox"]:focus-visible ~ span:before {
+    .account-content-section .dashboard-style-form .accent-check-field input[type="checkbox"]:focus-visible ~ span:before {
         outline: 3px solid rgba(196,112,35,.28);
         outline-offset: 2px
     }
 
 @media(max-width:480px) {
-    .account-content-section .dashboard-style-form .remember-field {
+    .account-content-section .dashboard-style-form .accent-check-field {
         width: 100%
     }
 
-        .account-content-section .dashboard-style-form .remember-field span {
+        .account-content-section .dashboard-style-form .accent-check-field > span {
             white-space: normal
         }
 }

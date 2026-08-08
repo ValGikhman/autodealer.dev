@@ -761,37 +761,6 @@
     gap: 14px;
 }
 
-.admin-dashboard-page .dashboard-new-client-modal #client-edit-fields {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 10px 14px;
-}
-
-.admin-dashboard-page .dashboard-new-client-modal #client-edit-fields .dashboard-edit-field {
-    grid-column: span 2;
-}
-
-.admin-dashboard-page .dashboard-new-client-modal #client-edit-fields .dashboard-client-reference-field {
-    grid-column: span 3;
-}
-
-.admin-dashboard-page .dashboard-new-client-modal #client-edit-fields .dashboard-client-email-field {
-    grid-column: span 4;
-}
-
-.admin-dashboard-page .dashboard-password-fields {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px 14px;
-}
-
-.admin-dashboard-page .dashboard-password-fields .dashboard-edit-field:nth-child(2),
-.admin-dashboard-page .dashboard-password-fields .dashboard-edit-field:nth-child(3) {
-    margin-top: -2px;
-}
-
-.admin-dashboard-page .dashboard-password-fields .password-policy-panel {
-    margin: -2px 0 0;
-}
-
 .admin-dashboard-page #client-create-fields:not([hidden]) {
     margin-top: 14px;
 }
@@ -1588,16 +1557,6 @@
 
     .admin-dashboard-page .dashboard-subgrid-edit-fields {
         grid-template-columns: 1fr;
-    }
-
-    .admin-dashboard-page .dashboard-new-client-modal #client-edit-fields {
-        grid-template-columns: 1fr;
-    }
-
-    .admin-dashboard-page .dashboard-new-client-modal #client-edit-fields .dashboard-edit-field,
-    .admin-dashboard-page .dashboard-new-client-modal #client-edit-fields .dashboard-client-reference-field,
-    .admin-dashboard-page .dashboard-new-client-modal #client-edit-fields .dashboard-client-email-field {
-        grid-column: auto;
     }
 
     .admin-dashboard-page .dashboard-edit-field-wide {
