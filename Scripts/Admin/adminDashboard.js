@@ -120,6 +120,8 @@
         }
         function resetRecordModalPanels() {
             modalElement.classList.remove('dashboard-email-modal', 'dashboard-subgrid-edit-modal', 'dashboard-new-client-modal');
+            subgridEditorElement.classList.remove('account-content-section');
+            subgridEditForm.classList.remove('account-form', 'dashboard-style-form', 'dashboard-style-form-body');
             profileElement.hidden = true;
             emailPreviewElement.hidden = true;
             subgridEditorElement.hidden = true;
@@ -143,6 +145,10 @@
             resetRecordModalPanels();
             modalElement.classList.add('dashboard-subgrid-edit-modal');
             if (isNewClient) modalElement.classList.add('dashboard-new-client-modal');
+            subgridEditorElement.classList.toggle('account-content-section', isNewClient);
+            subgridEditForm.classList.toggle('account-form', isNewClient);
+            subgridEditForm.classList.toggle('dashboard-style-form', isNewClient);
+            subgridEditForm.classList.toggle('dashboard-style-form-body', isNewClient);
             text('dashboard-record-kicker', isNewClient ? 'NEW DEALER ACCOUNT' : isClient ? 'DEALER ACCOUNT' : isApiKey ? 'API KEY RECORD' : isNewSubscription ? 'NEW SUBSCRIPTION' : 'SUBSCRIPTION RECORD');
             text('dashboard-record-title', isNewClient ? 'Create a new customer' : isClient ? 'Edit dealer account' : isApiKey ? 'Edit API key' : isNewSubscription ? 'Create a new subscription' : 'Edit subscription');
             text('dashboard-record-subtitle', isNewClient ? 'Generating a fresh client number...' : isNewSubscription ? 'Preparing subscription defaults...' : 'Loading record #' + recordId + '...');
@@ -180,14 +186,28 @@
                     ? isNewClient ? 'Create the account, trial subscription, login, and primary credential.' : 'Update the customer identity, contact information, and account access.'
                     : isApiKey ? 'Update the credential lifecycle and access settings.'
                         : isNewSubscription ? 'Create a billing record for this dealer. All dates are UTC.' : 'Update billing state, plan, and service period. All dates are UTC.');
-                setEditFieldsActive(clientEditFields, isClient);
+                setEditFieldsActive(clientEditFields, isClient && !isNewClient);
                 setClientEditOnlyActive(isClient && !isNewClient);
                 setEditFieldsActive(clientCreateFields, isNewClient);
                 setEditFieldsActive(apiKeyEditFields, isApiKey);
                 setEditFieldsActive(subscriptionEditFields, !isClient && !isApiKey);
                 deleteClientOpen.hidden = !(isClient && !isNewClient);
 
-                if (isClient) {
+                if (isNewClient) {
+                    document.getElementById('create-client-number').value = response.ClientNumber || '';
+                    document.getElementById('create-client-business').value = '';
+                    document.getElementById('create-client-first-name').value = '';
+                    document.getElementById('create-client-last-name').value = '';
+                    document.getElementById('create-client-email').value = '';
+                    document.getElementById('create-client-phone').value = '';
+                    document.getElementById('create-client-password').value = response.TemporaryPassword || '';
+                    document.getElementById('create-client-confirm-password').value = response.TemporaryPassword || '';
+                    setSelectOptions(document.getElementById('create-client-plan'), response.PlanOptions, response.PlanCode);
+                    notifyInput(document.getElementById('create-client-email'));
+                    notifyInput(document.getElementById('create-client-password'));
+                    notifyInput(document.getElementById('create-client-confirm-password'));
+                    document.getElementById('create-client-business').focus();
+                } else if (isClient) {
                     document.getElementById('edit-client-number').value = response.ClientNumber || '';
                     document.getElementById('edit-client-created').value = response.CreatedUtc || '';
                     document.getElementById('edit-client-business').value = response.BusinessName || '';
@@ -196,16 +216,7 @@
                     document.getElementById('edit-client-email').value = response.Email || '';
                     document.getElementById('edit-client-phone').value = response.Phone || '';
                     document.getElementById('edit-client-email-verified').value = response.EmailVerifiedUtc || '';
-                    if (isNewClient) {
-                        document.getElementById('edit-client-created').value = 'Assigned when saved';
-                        document.getElementById('create-client-password').value = response.TemporaryPassword || '';
-                        document.getElementById('create-client-confirm-password').value = response.TemporaryPassword || '';
-                        setSelectOptions(document.getElementById('create-client-plan'), response.PlanOptions, response.PlanCode);
-                        notifyInput(document.getElementById('create-client-password'));
-                        notifyInput(document.getElementById('create-client-confirm-password'));
-                    } else {
-                        setSelectOptions(document.getElementById('edit-client-status'), response.StatusOptions, response.Status);
-                    }
+                    setSelectOptions(document.getElementById('edit-client-status'), response.StatusOptions, response.Status);
                     notifyInput(document.getElementById('edit-client-email'));
                     document.getElementById('edit-client-business').focus();
                 } else if (isApiKey) {
@@ -245,7 +256,7 @@
             if (context.kind !== 'client-new' && context.kind !== 'subscription-new')
                 data.push({ name: context.kind === 'client' ? 'ClientId' : context.kind === 'api' ? 'ApiKeyId' : 'SubscriptionId', value: context.id });
             if (context.kind === 'client-new')
-                data.push({ name: 'ClientNumber', value: document.getElementById('edit-client-number').value });
+                data.push({ name: 'ClientNumber', value: document.getElementById('create-client-number').value });
             if (context.kind === 'subscription-new')
                 data.push({ name: 'ClientId', value: context.clientId });
             data.push({
@@ -261,15 +272,21 @@
                     setEditFieldsActive(clientEditFields, false);
                     setEditFieldsActive(clientCreateFields, false);
                     text('dashboard-record-title', 'Customer created');
-                    text('dashboard-record-subtitle', response.Message || 'The new dealer account is ready.');
+                    text('dashboard-record-subtitle', response.Message || 'The workspace is waiting for email confirmation.');
                     document.getElementById('dashboard-client-create-message').textContent = response.Message || '';
-                    document.getElementById('created-client-number').textContent = response.ClientNumber || '';
-                    document.getElementById('created-client-password').textContent = response.TemporaryPassword || '';
-                    document.getElementById('created-client-api-key').textContent = response.ApiKey || '';
+                    document.getElementById('dashboard-client-create-primary').innerHTML = response.VerificationEmailSent
+                        ? 'Ask the customer to open the message sent to <b id="created-client-email"></b> and click the confirmation button within 24 hours.'
+                        : 'No confirmation message reached <b id="created-client-email"></b>. The workspace remains inactive and no API key was issued.';
+                    document.getElementById('created-client-email').textContent = response.Email || 'the customer email address';
+                    document.getElementById('dashboard-client-create-secondary').textContent = response.VerificationEmailSent
+                        ? 'After verification, AutoDealer.dev will activate the workspace and send the API key, client number, plan details, sign-in guidance, and supporting links in a separate private email.'
+                        : 'Verify the email address before arranging a new confirmation message.';
                     clientCreateResult.hidden = false;
                     subgridEditSave.hidden = true;
                     setIconButtonLabel(subgridEditCancel, 'Done');
-                    subgridEditNote.textContent = 'These credentials are shown once. Store them securely.';
+                    subgridEditNote.textContent = response.VerificationEmailSent
+                        ? 'No API key is issued until the customer confirms their email.'
+                        : 'The account is inactive. The confirmation email must be resent before activation.';
                     $('#customer-grid').pepGrid('refresh');
                     return;
                 }
@@ -288,25 +305,6 @@
                 subgridEditSave.disabled = false;
                 setButtonLabel(subgridEditSave, context.kind === 'subscription-new' ? 'Create subscription' : 'Save changes');
             });
-        });
-
-        clientCreateResult.addEventListener('click', function (event) {
-            var button = event.target.closest('[data-copy-target]');
-            if (!button) return;
-            var value = document.getElementById(button.getAttribute('data-copy-target')).textContent;
-            if (!value) return;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(value).then(function () { button.textContent = 'Copied'; });
-            } else {
-                var range = document.createRange();
-                var selection = window.getSelection();
-                range.selectNodeContents(document.getElementById(button.getAttribute('data-copy-target')));
-                selection.removeAllRanges();
-                selection.addRange(range);
-                document.execCommand('copy');
-                selection.removeAllRanges();
-                button.textContent = 'Copied';
-            }
         });
 
         function prepareClientDelete(client) {

@@ -42,27 +42,7 @@
             </div>
         </div>
 
-        <div class="dashboard-subgrid-edit-fields dashboard-password-fields" id="client-create-fields" hidden>
-            <div class="dashboard-edit-field">
-                <label for="create-client-plan">Starting plan</label>
-                <select id="create-client-plan" name="PlanCode" required></select>
-            </div>
-            <div class="dashboard-edit-field">
-                <label for="create-client-password">Temporary password</label>
-                <input id="create-client-password" name="TemporaryPassword" type="text" minlength="12" maxlength="100" required autocomplete="new-password" data-password-primary="true" />
-            </div>
-            <div class="dashboard-edit-field">
-                <label for="create-client-confirm-password">Confirm temporary password</label>
-                <input id="create-client-confirm-password" name="ConfirmTemporaryPassword" type="text" minlength="12" maxlength="100" required autocomplete="new-password" data-password-confirmation="true" />
-                <small class="password-confirmation-status" data-password-confirmation-status aria-live="polite">Re-enter the password to confirm it.</small>
-            </div>
-            <div class="dashboard-edit-field dashboard-edit-field-wide">
-                <div class="password-policy-panel" data-password-policy-panel>
-                    <div class="password-policy-heading"><span>Secure temporary password</span><small data-password-policy-count aria-live="polite">0 of 6 rules met</small></div>
-                    <ul class="password-policy-checklist" data-password-policy aria-label="Password requirements"><li data-password-rule="length">12–100 characters</li><li data-password-rule="lower">Lowercase letter</li><li data-password-rule="upper">Uppercase letter</li><li data-password-rule="number">Number</li><li data-password-rule="symbol">Symbol</li><li data-password-rule="spaces">No spaces</li></ul>
-                </div>
-            </div>
-        </div>
+        @Html.Partial("_WorkspaceFields", new autodealer.dev.Models.AccountRegistrationViewModel(), new ViewDataDictionary { { "WorkspaceAdminMode", true } })
 
         <div class="dashboard-subgrid-edit-fields" id="api-key-edit-fields">
             <div class="dashboard-edit-field dashboard-edit-field-readonly">
@@ -120,10 +100,8 @@
 
         <div class="dashboard-subgrid-edit-error" id="dashboard-subgrid-edit-error" role="alert" hidden></div>
         <div class="dashboard-client-create-result" id="dashboard-client-create-result" hidden>
-            <strong id="dashboard-client-create-message"></strong>
-            <div><span>Client number</span><code id="created-client-number"></code><button type="button" data-copy-target="created-client-number">Copy</button></div>
-            <div><span>Temporary password</span><code id="created-client-password"></code><button type="button" data-copy-target="created-client-password">Copy</button></div>
-            <div><span>Primary API key</span><code id="created-client-api-key"></code><button type="button" data-copy-target="created-client-api-key">Copy</button></div>
+            <span class="dashboard-client-create-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5M4 5h16a1 1 0 0 1 1 1v12H3V6a1 1 0 0 1 1-1Z" /></svg></span>
+            <div class="dashboard-client-create-copy"><strong id="dashboard-client-create-message"></strong><p id="dashboard-client-create-primary">Ask the customer to open the message sent to <b id="created-client-email"></b> and click the confirmation button within 24 hours.</p><p id="dashboard-client-create-secondary">After verification, AutoDealer.dev will activate the workspace and send the API key, client number, plan details, sign-in guidance, and supporting links in a separate private email.</p></div>
         </div>
         <div class="dashboard-subgrid-edit-actions">
             <button type="button" class="customer-delete-action dashboard-client-delete-open" id="dashboard-client-delete-open" aria-label="Delete customer" title="Delete customer" hidden><svg aria-hidden="true"><use href="#icon-trash"></use></svg></button>

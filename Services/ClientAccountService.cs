@@ -3,6 +3,7 @@ using autodealer.dev.Models;
 using System;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -32,9 +33,8 @@ namespace autodealer.dev.Services {
             var normalizedEmail = model.Email.Trim().ToLowerInvariant();
             var now = DateTime.UtcNow;
             var clientNumber = ResolveClientNumber(requestedClientNumber);
-            var keyId = "ad_live_" + RandomToken(9);
-            var secret = RandomToken(32);
-            var fullKey = keyId + "." + secret;
+            var verificationToken = RandomToken(32);
+            var verificationTokenHash = Sha256Hex(verificationToken);
             var passwordSalt = RandomBytes(32);
             long clientId = 0;
             byte[] passwordHash;
@@ -61,7 +61,7 @@ namespace autodealer.dev.Services {
                             LastName = model.LastName.Trim(),
                             Email = normalizedEmail,
                             Phone = string.IsNullOrWhiteSpace(model.Phone) ? null : model.Phone.Trim(),
-                            Status = "active",
+                            Status = "pending",
                             CreatedUtc = now,
                             UpdatedUtc = now
                         };
@@ -86,18 +86,6 @@ namespace autodealer.dev.Services {
                             UpdatedUtc = now
                         };
 
-                        var apiKey = new ApiKey {
-                            Client = client,
-                            Subscription = subscription,
-                            KeyId = keyId,
-                            SecretHash = Sha256(secret),
-                            KeyPrefix = keyId.Substring(0, Math.Min(20, keyId.Length)),
-                            Name = "Primary key",
-                            Scopes = "vin:read",
-                            Status = "active",
-                            CreatedUtc = now
-                        };
-
                         PaymentProfile paymentProfile = null;
                         if (!string.IsNullOrWhiteSpace(model.PaymentMethodToken)) {
                             paymentProfile = new PaymentProfile {
@@ -112,10 +100,17 @@ namespace autodealer.dev.Services {
                         context.Clients.InsertOnSubmit(client);
                         context.ClientCredentials.InsertOnSubmit(credential);
                         context.Subscriptions.InsertOnSubmit(subscription);
-                        context.ApiKeys.InsertOnSubmit(apiKey);
                         if (paymentProfile != null) context.PaymentProfiles.InsertOnSubmit(paymentProfile);
                         context.SubmitChanges();
                         clientId = client.ClientId;
+                        context.GetTable<ClientEmailVerificationRecord>().InsertOnSubmit(new ClientEmailVerificationRecord {
+                            ClientId = clientId,
+                            TokenHash = verificationTokenHash,
+                            CreatedByAdmin = emailTemporaryPassword,
+                            ExpiresUtc = now.AddHours(24),
+                            CreatedUtc = now
+                        });
+                        context.SubmitChanges();
                         transaction.Commit();
                     }
                     catch {
@@ -125,8 +120,139 @@ namespace autodealer.dev.Services {
                 }
             }
 
-            var emailed = emailService != null && emailService.Send(clientId, model.BusinessName, model.FirstName, model.LastName, model.Email.Trim(), model.Phone, clientNumber, fullKey, planCode, emailTemporaryPassword ? model.Password : null);
-            return new AccountCreatedViewModel { ClientNumber = clientNumber, ApiKey = fullKey, Email = model.Email, CredentialsEmailed = emailed };
+            var verificationUrl = SeoUrl.Absolute("account/verify-email?token=" + Uri.EscapeDataString(verificationToken));
+            var emailed = emailService != null && emailService.SendVerification(clientId, model.FirstName, model.Email.Trim(), verificationUrl);
+            return new AccountCreatedViewModel { ClientNumber = clientNumber, Email = model.Email, VerificationEmailSent = emailed };
+        }
+
+        public EmailVerificationViewModel VerifyEmail(string token) {
+            if (string.IsNullOrWhiteSpace(connectionString))
+                throw new InvalidOperationException("The AutoDealer.dev database connection is not configured.");
+
+            var normalizedToken = (token ?? string.Empty).Trim();
+            if (normalizedToken.Length < 40 || normalizedToken.Length > 100 ||
+                !System.Text.RegularExpressions.Regex.IsMatch(normalizedToken, @"^[A-Za-z0-9_-]+$"))
+                return new EmailVerificationViewModel { Status = EmailVerificationStatus.Invalid };
+
+            var tokenHash = Sha256Hex(normalizedToken);
+            var now = DateTime.UtcNow;
+            long verificationId;
+            long clientId;
+            string businessName;
+            string firstName;
+            string lastName;
+            string email;
+            string phone;
+            string clientNumber;
+            string planCode;
+            bool createdByAdmin;
+            string fullKey;
+
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                context.Connection.Open();
+                using (var transaction = context.Connection.BeginTransaction(IsolationLevel.Serializable)) {
+                    context.Transaction = transaction;
+                    try {
+                        var verification = context.GetTable<ClientEmailVerificationRecord>()
+                            .SingleOrDefault(x => x.TokenHash == tokenHash);
+                        if (verification == null) {
+                            transaction.Rollback();
+                            return new EmailVerificationViewModel { Status = EmailVerificationStatus.Invalid };
+                        }
+
+                        var client = context.Clients.SingleOrDefault(x => x.ClientId == verification.ClientId);
+                        if (client == null) {
+                            transaction.Rollback();
+                            return new EmailVerificationViewModel { Status = EmailVerificationStatus.Invalid };
+                        }
+                        if (verification.CredentialsSentUtc.HasValue) {
+                            transaction.Rollback();
+                            return new EmailVerificationViewModel { Status = EmailVerificationStatus.AlreadyVerified, Email = client.Email };
+                        }
+                        if (!verification.UsedUtc.HasValue && verification.ExpiresUtc < now) {
+                            transaction.Rollback();
+                            return new EmailVerificationViewModel { Status = EmailVerificationStatus.Expired, Email = client.Email };
+                        }
+
+                        var subscription = context.Subscriptions
+                            .Where(x => x.ClientId == client.ClientId)
+                            .OrderByDescending(x => x.CreatedUtc)
+                            .FirstOrDefault();
+                        if (subscription == null)
+                            throw new InvalidOperationException("The workspace subscription could not be found.");
+
+                        var firstConfirmation = !verification.UsedUtc.HasValue;
+
+                        // A failed credential email can be retried with the same confirmation link.
+                        // Revoke the undelivered key before issuing its replacement.
+                        foreach (var oldKey in context.ApiKeys.Where(x => x.ClientId == client.ClientId && x.Name == "Primary key" && x.Status == "active")) {
+                            oldKey.Status = "revoked";
+                            oldKey.RevokedUtc = now;
+                        }
+
+                        var keyId = "ad_live_" + RandomToken(9);
+                        var secret = RandomToken(32);
+                        fullKey = keyId + "." + secret;
+                        context.ApiKeys.InsertOnSubmit(new ApiKey {
+                            Client = client,
+                            Subscription = subscription,
+                            KeyId = keyId,
+                            SecretHash = Sha256(secret),
+                            KeyPrefix = keyId.Substring(0, Math.Min(20, keyId.Length)),
+                            Name = "Primary key",
+                            Scopes = "vin:read",
+                            Status = "active",
+                            CreatedUtc = now
+                        });
+
+                        client.Status = "active";
+                        client.EmailVerifiedUtc = client.EmailVerifiedUtc ?? now;
+                        client.UpdatedUtc = now;
+                        if (firstConfirmation) {
+                            subscription.CurrentPeriodStartUtc = now;
+                            subscription.CurrentPeriodEndUtc = now.AddDays(14);
+                            subscription.UpdatedUtc = now;
+                        }
+                        verification.UsedUtc = verification.UsedUtc ?? now;
+                        context.SubmitChanges();
+
+                        verificationId = verification.VerificationId;
+                        clientId = client.ClientId;
+                        businessName = client.BusinessName;
+                        firstName = client.FirstName;
+                        lastName = client.LastName;
+                        email = client.Email;
+                        phone = client.Phone;
+                        clientNumber = client.ClientNumber;
+                        planCode = subscription.Plan.PlanCode;
+                        createdByAdmin = verification.CreatedByAdmin;
+                        transaction.Commit();
+                    }
+                    catch {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+
+            var credentialsSent = emailService != null && emailService.SendCredentials(
+                clientId, businessName, firstName, lastName, email, phone, clientNumber, fullKey, planCode, createdByAdmin);
+            if (!credentialsSent)
+                return new EmailVerificationViewModel { Status = EmailVerificationStatus.DeliveryFailed, Email = email };
+
+            try {
+                using (var context = new AutoDealerDataContext(connectionString)) {
+                    var verification = context.GetTable<ClientEmailVerificationRecord>()
+                        .Single(x => x.VerificationId == verificationId);
+                    verification.CredentialsSentUtc = DateTime.UtcNow;
+                    context.SubmitChanges();
+                }
+            }
+            catch (Exception ex) {
+                Trace.TraceError("Email verification delivery status could not be recorded: {0}", ex);
+            }
+
+            return new EmailVerificationViewModel { Status = EmailVerificationStatus.Verified, Email = email };
         }
 
         public bool IsEmailAvailable(string email, long? excludedClientId) {
@@ -237,6 +363,13 @@ namespace autodealer.dev.Services {
 
         private static byte[] Sha256(string value) {
             using (var hash = SHA256.Create()) return hash.ComputeHash(Encoding.UTF8.GetBytes(value));
+        }
+
+        private static string Sha256Hex(string value) {
+            var bytes = Sha256(value);
+            var output = new StringBuilder(bytes.Length * 2);
+            foreach (var item in bytes) output.Append(item.ToString("x2"));
+            return output.ToString();
         }
 
         private static byte[] RandomBytes(int count) {

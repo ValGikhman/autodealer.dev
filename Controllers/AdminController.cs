@@ -186,31 +186,20 @@ namespace autodealer.dev.Controllers {
         [AdminAuthorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult NewClient(AdminClientCreateViewModel model) {
+        public ActionResult NewClient(AccountRegistrationViewModel model, string clientNumber) {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
             Response.Cache.SetNoStore();
             if (!ModelState.IsValid) return EditValidationFailure();
             try {
-                var result = clientAccountService.Create(new AccountRegistrationViewModel {
-                    BusinessName = model.BusinessName,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    Email = model.Email,
-                    Phone = model.Phone,
-                    Password = model.TemporaryPassword,
-                    ConfirmPassword = model.ConfirmTemporaryPassword,
-                    PlanCode = model.PlanCode,
-                    AcceptTerms = true
-                }, model.ClientNumber, true);
+                var result = clientAccountService.Create(model, clientNumber, true);
                 return Json(new {
                     Ok = true,
                     result.ClientNumber,
-                    ApiKey = result.ApiKey,
-                    TemporaryPassword = model.TemporaryPassword,
-                    result.CredentialsEmailed,
-                    Message = result.CredentialsEmailed
-                        ? "The customer was created and the credentials were emailed."
-                        : "The customer was created, but email delivery failed. Copy the credentials now."
+                    result.Email,
+                    result.VerificationEmailSent,
+                    Message = result.VerificationEmailSent
+                        ? "Customer saved. A confirmation email is waiting in their inbox."
+                        : "Customer saved, but the confirmation email could not be delivered."
                 });
             }
             catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException) {

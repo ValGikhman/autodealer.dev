@@ -59,9 +59,25 @@ namespace autodealer.dev.Models {
 
     public class AccountCreatedViewModel {
         public string ClientNumber { get; set; }
-        public string ApiKey { get; set; }
         public string Email { get; set; }
-        public bool CredentialsEmailed { get; set; }
+        public bool VerificationEmailSent { get; set; }
+    }
+
+    public enum EmailVerificationStatus {
+        Verified,
+        AlreadyVerified,
+        Invalid,
+        Expired,
+        DeliveryFailed
+    }
+
+    public class EmailVerificationViewModel {
+        public EmailVerificationStatus Status { get; set; }
+        public string Email { get; set; }
+        public string RetryUrl { get; set; }
+        public bool IsVerified {
+            get { return Status == EmailVerificationStatus.Verified || Status == EmailVerificationStatus.AlreadyVerified; }
+        }
     }
 
     public class AccountLoginViewModel {

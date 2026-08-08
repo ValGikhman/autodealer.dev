@@ -59,10 +59,13 @@
     }
 
     function attachEmailAvailability(form) {
-        var input = form.querySelector('[data-email-availability]');
-        var status = form.querySelector('[data-email-availability-status]');
+        var inputs = form.querySelectorAll('[data-email-availability]');
         var url = form.getAttribute('data-email-check-url');
-        if (!input || !status || !url || !$) return;
+        if (!inputs.length || !url || !$) return;
+
+        Array.prototype.forEach.call(inputs, function (input) {
+        var status = input.parentNode.querySelector('[data-email-availability-status]');
+        if (!status) return;
 
         var timer = null;
         var sequence = 0;
@@ -141,6 +144,7 @@
         input.addEventListener('input', schedule);
         input.addEventListener('blur', check);
         schedule();
+        });
     }
 
     function attach(form) {

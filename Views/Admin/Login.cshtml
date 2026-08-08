@@ -27,7 +27,7 @@
                 @Html.PasswordFor(m => m.Password, new { placeholder = "Administrator password", autocomplete = "current-password" })
                 @Html.ValidationMessageFor(m => m.Password)
             </div>
-            <label class="check-field remember-field">@Html.CheckBoxFor(m => m.RememberMe)<span>Keep me signed in on this device</span></label>
+            <label class="check-field remember-field accent-check-field">@Html.CheckBoxFor(m => m.RememberMe)<span>Keep me signed in on this device</span></label>
             <div class="dashboard-style-form-footer"><small class="form-secure">Role-protected session &middot; Password verified using PBKDF2</small><button class="button button-primary submit-button" type="submit">Sign in as administrator</button></div>
         }
     </div>
