@@ -824,56 +824,12 @@
 }
 
 .admin-dashboard-page .dashboard-client-create-result {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 18px;
-    border: 1px solid #687078;
-    border-radius: 12px;
-    color: #20262b;
-    background: #aeb4ba;
+    display: block;
 }
 
 .admin-dashboard-page .dashboard-client-create-result[hidden],
 .admin-dashboard-page .client-edit-only[hidden] {
     display: none;
-}
-
-.admin-dashboard-page .dashboard-client-create-icon {
-    display: grid;
-    flex: 0 0 44px;
-    width: 44px;
-    height: 44px;
-    place-items: center;
-    border-radius: 50%;
-    color: #fff;
-    background: #50575f;
-}
-
-.admin-dashboard-page .dashboard-client-create-icon svg {
-    width: 22px;
-    height: 22px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.7;
-}
-
-.admin-dashboard-page .dashboard-client-create-copy strong {
-    display: block;
-    margin-bottom: 7px;
-    color: #1d2429;
-    font-size: 14px;
-}
-
-.admin-dashboard-page .dashboard-client-create-copy p {
-    margin: 0 0 7px;
-    color: #30373d;
-    font-size: 12px;
-    line-height: 1.6;
-}
-
-.admin-dashboard-page .dashboard-client-create-copy p:last-child {
-    margin-bottom: 0;
 }
 
 .admin-dashboard-page .dashboard-subgrid-edit-actions {
@@ -1569,14 +1525,6 @@
         grid-column: auto;
     }
 
-    .admin-dashboard-page .dashboard-client-create-result > div {
-        grid-template-columns: 1fr auto;
-    }
-
-    .admin-dashboard-page .dashboard-client-create-result > div span {
-        grid-column: 1 / -1;
-    }
-
     .admin-dashboard-page .dashboard-subgrid-edit-actions {
         align-items: stretch;
         flex-direction: column;
@@ -1625,7 +1573,6 @@
 .admin-dashboard-page .admin-new-customer,
 .admin-dashboard-page .admin-new-opportunity,
 .admin-dashboard-page .customer-email-actions button,
-.admin-dashboard-page .dashboard-client-create-result button,
 .pg-filter-dropdown .btn {
     display: inline-flex;
     align-items: center;
@@ -1658,8 +1605,6 @@
 .admin-dashboard-page .admin-new-opportunity:focus-visible,
 .admin-dashboard-page .customer-email-actions button:hover,
 .admin-dashboard-page .customer-email-actions button:focus-visible,
-.admin-dashboard-page .dashboard-client-create-result button:hover,
-.admin-dashboard-page .dashboard-client-create-result button:focus-visible,
 .pg-filter-dropdown .btn:hover,
 .pg-filter-dropdown .btn:focus-visible {
     border-color: var(--control-silver-border,#85858e);
@@ -1675,7 +1620,6 @@
 .admin-dashboard-page .customer-api-copy:disabled,
 .admin-dashboard-page .admin-new-customer:disabled,
 .admin-dashboard-page .admin-new-opportunity:disabled,
-.admin-dashboard-page .dashboard-client-create-result button:disabled,
 .pg-filter-dropdown .btn:disabled {
     cursor: not-allowed;
     filter: grayscale(.25);

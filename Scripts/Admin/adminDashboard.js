@@ -273,14 +273,7 @@
                     setEditFieldsActive(clientCreateFields, false);
                     text('dashboard-record-title', 'Customer created');
                     text('dashboard-record-subtitle', response.Message || 'The workspace is waiting for email confirmation.');
-                    document.getElementById('dashboard-client-create-message').textContent = response.Message || '';
-                    document.getElementById('dashboard-client-create-primary').innerHTML = response.VerificationEmailSent
-                        ? 'Ask the customer to open the message sent to <b id="created-client-email"></b> and click the confirmation button within 24 hours.'
-                        : 'No confirmation message reached <b id="created-client-email"></b>. The workspace remains inactive and no API key was issued.';
-                    document.getElementById('created-client-email').textContent = response.Email || 'the customer email address';
-                    document.getElementById('dashboard-client-create-secondary').textContent = response.VerificationEmailSent
-                        ? 'After verification, AutoDealer.dev will activate the workspace and send the API key, client number, plan details, sign-in guidance, and supporting links in a separate private email.'
-                        : 'Verify the email address before arranging a new confirmation message.';
+                    updateWorkspaceConfirmation(clientCreateResult, response.Email, response.VerificationEmailSent);
                     clientCreateResult.hidden = false;
                     subgridEditSave.hidden = true;
                     setIconButtonLabel(subgridEditCancel, 'Done');
@@ -306,6 +299,22 @@
                 setButtonLabel(subgridEditSave, context.kind === 'subscription-new' ? 'Create subscription' : 'Save changes');
             });
         });
+
+        function updateWorkspaceConfirmation(container, email, delivered) {
+            var panel = container.querySelector('[data-workspace-confirmation]');
+            panel.setAttribute('data-verification-sent', delivered ? 'true' : 'false');
+            panel.querySelector('[data-confirmation-eyebrow]').textContent = delivered ? 'CONFIRMATION SENT' : 'DELIVERY NEEDS ATTENTION';
+            panel.querySelector('[data-confirmation-heading]').textContent = delivered ? 'Check your email to activate the workspace' : 'Your workspace was saved';
+            panel.querySelector('[data-confirmation-prefix]').textContent = delivered ? 'We sent a secure confirmation message to' : 'We could not deliver the confirmation message to';
+            panel.querySelector('[data-confirmation-email]').textContent = email || 'the customer email address';
+            panel.querySelector('[data-confirmation-suffix]').textContent = delivered
+                ? '. Open it and click the confirmation button within 24 hours.'
+                : '. The workspace remains safely inactive and no API key has been issued.';
+            panel.querySelector('[data-confirmation-next]').hidden = !delivered;
+            panel.querySelector('[data-confirmation-note]').textContent = delivered
+                ? 'The API key has not been created yet and will never be displayed in this window. If the message is not visible, check the spam or promotions folder.'
+                : 'Please verify the email address before arranging a new confirmation message.';
+        }
 
         function prepareClientDelete(client) {
             pendingClientDelete = {

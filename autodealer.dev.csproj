@@ -265,6 +265,7 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Shared\_WorkspaceFields.cshtml" />
+    <Content Include="Views\Shared\_WorkspaceConfirmation.cshtml" />
     <Content Include="Views\Shared\_InventorySizeOptions.cshtml" />
     <Content Include="Views\Shared\_LegalTermsPrivacy.cshtml" />
     <Content Include="Views\Home\About.cshtml" />

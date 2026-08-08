@@ -100,8 +100,7 @@
 
         <div class="dashboard-subgrid-edit-error" id="dashboard-subgrid-edit-error" role="alert" hidden></div>
         <div class="dashboard-client-create-result" id="dashboard-client-create-result" hidden>
-            <span class="dashboard-client-create-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5M4 5h16a1 1 0 0 1 1 1v12H3V6a1 1 0 0 1 1-1Z" /></svg></span>
-            <div class="dashboard-client-create-copy"><strong id="dashboard-client-create-message"></strong><p id="dashboard-client-create-primary">Ask the customer to open the message sent to <b id="created-client-email"></b> and click the confirmation button within 24 hours.</p><p id="dashboard-client-create-secondary">After verification, AutoDealer.dev will activate the workspace and send the API key, client number, plan details, sign-in guidance, and supporting links in a separate private email.</p></div>
+            @Html.Partial("_WorkspaceConfirmation", new autodealer.dev.Models.AccountCreatedViewModel { VerificationEmailSent = true })
         </div>
         <div class="dashboard-subgrid-edit-actions">
             <button type="button" class="customer-delete-action dashboard-client-delete-open" id="dashboard-client-delete-open" aria-label="Delete customer" title="Delete customer" hidden><svg aria-hidden="true"><use href="#icon-trash"></use></svg></button>
