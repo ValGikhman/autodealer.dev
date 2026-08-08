@@ -58,7 +58,6 @@ namespace autodealer.dev.Models {
     }
 
     public class AccountCreatedViewModel {
-        public string ClientNumber { get; set; }
         public string Email { get; set; }
         public bool VerificationEmailSent { get; set; }
     }
