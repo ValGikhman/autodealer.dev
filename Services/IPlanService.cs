@@ -5,5 +5,6 @@ namespace autodealer.dev.Services {
     public interface IPlanService {
         IList<PricingPlanViewModel> GetActivePlans();
         IList<PricingPlanViewModel> GetActivePlans(string customerEmail);
+        void PopulatePlanOptions(AccountRegistrationViewModel model);
     }
 }

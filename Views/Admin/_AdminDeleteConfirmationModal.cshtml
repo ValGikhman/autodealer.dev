@@ -4,16 +4,36 @@
     <div class="modal-dialog modal-dialog-centered">
         <form class="modal-content" id="@(prefix)-form">
             <div class="modal-header dashboard-record-header">
-                <div><span class="dashboard-record-kicker">PERMANENT DELETION</span><h2 class="modal-title" id="@(prefix)-title">@Model.Title</h2><p>This action cannot be undone.</p></div>
-                <button type="button" class="btn-close dashboard-modal-close" data-bs-dismiss="modal" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 7l10 10M17 7L7 17" /></svg></button>
+                <div>
+                    <span class="dashboard-record-kicker">PERMANENT DELETION</span>
+                    <h2 class="modal-title" id="@(prefix)-title">@Model.Title</h2>
+                    <p>This action cannot be undone.</p>
+                </div>
+                <button type="button" class="btn-close dashboard-modal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M7 7l10 10M17 7L7 17" />
+                    </svg>
+                </button>
             </div>
             <div class="modal-body">
-                <div class="dashboard-client-delete-summary"><strong id="@(prefix)-name"></strong><span id="@(prefix)-detail"></span></div>
+                <div class="dashboard-client-delete-summary">
+                    <strong id="@(prefix)-name">
+                    </strong>
+                    <span id="@(prefix)-detail">
+                    </span>
+                </div>
                 <p class="dashboard-client-delete-warning">@Model.Warning</p>
-                <label class="dashboard-client-delete-confirm" for="@(prefix)-confirm"><input id="@(prefix)-confirm" type="checkbox" required /><span>@Model.Confirmation</span></label>
-                <div class="dashboard-key-issue-error" id="@(prefix)-error" role="alert" hidden></div>
+                <label class="dashboard-client-delete-confirm" for="@(prefix)-confirm">
+                    <input id="@(prefix)-confirm" type="checkbox" required />
+                    <span>@Model.Confirmation</span>
+                </label>
+                <div class="dashboard-key-issue-error" id="@(prefix)-error" role="alert" hidden>
+                </div>
             </div>
-            <div class="modal-footer"><button type="button" class="dashboard-modal-done" data-bs-dismiss="modal">@Model.KeepButtonText</button><button type="submit" class="dashboard-client-delete-submit" id="@(prefix)-submit" disabled>@Model.DeleteButtonText</button></div>
+            <div class="modal-footer">
+                <button type="button" class="dashboard-modal-done" data-bs-dismiss="modal">@Model.KeepButtonText</button>
+                <button type="submit" class="dashboard-client-delete-submit" id="@(prefix)-submit" disabled>@Model.DeleteButtonText</button>
+            </div>
         </form>
     </div>
 </div>

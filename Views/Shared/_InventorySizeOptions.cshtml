@@ -1,6 +1,24 @@
 @model string
-<option value="" selected="@(string.IsNullOrWhiteSpace(Model) ? "selected" : null)">Select inventory size</option>
-<option value="Under 50 vehicles" selected="@(string.Equals(Model, "Under 50 vehicles", System.StringComparison.Ordinal) ? "selected" : null)">Under 50 vehicles</option>
-<option value="50-149 vehicles" selected="@(string.Equals(Model, "50-149 vehicles", System.StringComparison.Ordinal) ? "selected" : null)">50-149 vehicles</option>
-<option value="150-499 vehicles" selected="@(string.Equals(Model, "150-499 vehicles", System.StringComparison.Ordinal) ? "selected" : null)">150-499 vehicles</option>
-<option value="500+ vehicles" selected="@(string.Equals(Model, "500+ vehicles", System.StringComparison.Ordinal) ? "selected" : null)">500+ vehicles</option>
+@{
+    var comparison = System.StringComparison.Ordinal;
+}
+<option value=""
+        selected="@(string.IsNullOrWhiteSpace(Model) ? "selected" : null)">
+    Select inventory size
+</option>
+<option value="Under 50 vehicles"
+        selected="@(string.Equals(Model, "Under 50 vehicles", comparison) ? "selected" : null)">
+    Under 50 vehicles
+</option>
+<option value="50-149 vehicles"
+        selected="@(string.Equals(Model, "50-149 vehicles", comparison) ? "selected" : null)">
+    50-149 vehicles
+</option>
+<option value="150-499 vehicles"
+        selected="@(string.Equals(Model, "150-499 vehicles", comparison) ? "selected" : null)">
+    150-499 vehicles
+</option>
+<option value="500+ vehicles"
+        selected="@(string.Equals(Model, "500+ vehicles", comparison) ? "selected" : null)">
+    500+ vehicles
+</option>

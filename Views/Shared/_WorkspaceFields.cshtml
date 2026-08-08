@@ -10,48 +10,101 @@
     var confirmPasswordId = adminMode ? "create-client-confirm-password" : "ConfirmPassword";
     var planId = adminMode ? "create-client-plan" : "PlanCode";
 }
-<div class="workspace-fields" id="@(adminMode ? "client-create-fields" : "workspace-fields")" @(adminMode ? "hidden" : null)>
+<div class="workspace-fields"
+     id="@(adminMode ? "client-create-fields" : "workspace-fields")"
+     @(adminMode ? "hidden" : null)>
     <div class="form-field workspace-field-wide">
         @Html.LabelFor(m => m.BusinessName, new { @for = businessId })
-        @Html.TextBoxFor(m => m.BusinessName, new { id = businessId, placeholder = "Northstar Motors", autocomplete = "organization" })
+        @Html.TextBoxFor(m => m.BusinessName, new {
+            id = businessId,
+            placeholder = "Northstar Motors",
+            autocomplete = "organization"
+        })
         @Html.ValidationMessageFor(m => m.BusinessName)
     </div>
     <div class="form-field">
         @Html.LabelFor(m => m.FirstName, new { @for = firstNameId })
-        @Html.TextBoxFor(m => m.FirstName, new { id = firstNameId, placeholder = "Ben", autocomplete = "given-name" })
+        @Html.TextBoxFor(m => m.FirstName, new {
+            id = firstNameId,
+            placeholder = "Ben",
+            autocomplete = "given-name"
+        })
         @Html.ValidationMessageFor(m => m.FirstName)
     </div>
     <div class="form-field">
         @Html.LabelFor(m => m.LastName, new { @for = lastNameId })
-        @Html.TextBoxFor(m => m.LastName, new { id = lastNameId, placeholder = "Shapiro", autocomplete = "family-name" })
+        @Html.TextBoxFor(m => m.LastName, new {
+            id = lastNameId,
+            placeholder = "Shapiro",
+            autocomplete = "family-name"
+        })
         @Html.ValidationMessageFor(m => m.LastName)
     </div>
     <div class="form-field">
         @Html.LabelFor(m => m.Email, new { @for = emailId })
-        @Html.TextBoxFor(m => m.Email, new { id = emailId, type = "email", placeholder = "alex@dealership.com", autocomplete = "email", data_email_availability = "true" })
-        <small class="email-availability-status" data-email-availability-status aria-live="polite">Email availability will be checked here.</small>
+        @Html.TextBoxFor(m => m.Email, new {
+            id = emailId,
+            type = "email",
+            placeholder = "ben.shapiro@dealership.com",
+            autocomplete = "email",
+            data_email_availability = "true"
+        })
+        <small class="email-availability-status"
+               data-email-availability-status
+               aria-live="polite">
+            Email availability will be checked here.
+        </small>
         @Html.ValidationMessageFor(m => m.Email)
     </div>
     <div class="form-field">
         @Html.LabelFor(m => m.Phone, new { @for = phoneId })
-        @Html.TextBoxFor(m => m.Phone, new { id = phoneId, type = "tel", placeholder = "(555) 012-3456", autocomplete = "tel" })
+        @Html.TextBoxFor(m => m.Phone, new {
+            id = phoneId,
+            type = "tel",
+            placeholder = "(555) 227-7084",
+            autocomplete = "tel"
+        })
         @Html.ValidationMessageFor(m => m.Phone)
     </div>
     <div class="form-field">
         @Html.LabelFor(m => m.Password, new { @for = passwordId })
-        @Html.PasswordFor(m => m.Password, new { id = passwordId, placeholder = adminMode ? "Temporary password" : "Create a strong password", autocomplete = "new-password", data_password_primary = "true" })
+        @Html.PasswordFor(m => m.Password, new {
+            id = passwordId,
+            placeholder = adminMode ? "Temporary password" : "Create a strong password",
+            autocomplete = "new-password",
+            data_password_primary = "true"
+        })
         @Html.ValidationMessageFor(m => m.Password)
     </div>
     <div class="form-field">
         @Html.LabelFor(m => m.ConfirmPassword, new { @for = confirmPasswordId })
-        @Html.PasswordFor(m => m.ConfirmPassword, new { id = confirmPasswordId, placeholder = "Enter it again", autocomplete = "new-password", data_password_confirmation = "true" })
-        <small class="password-confirmation-status" data-password-confirmation-status aria-live="polite">Re-enter the password to confirm it.</small>
+        @Html.PasswordFor(m => m.ConfirmPassword, new {
+            id = confirmPasswordId,
+            placeholder = "Enter it again",
+            autocomplete = "new-password",
+            data_password_confirmation = "true"
+        })
+        <small class="password-confirmation-status"
+               data-password-confirmation-status
+               aria-live="polite">
+            Re-enter the password to confirm it.
+        </small>
         @Html.ValidationMessageFor(m => m.ConfirmPassword)
     </div>
     <div class="form-field workspace-field-wide">
         <div class="password-policy-panel" data-password-policy-panel>
-            <div class="password-policy-heading"><span>Secure password</span><small data-password-policy-count aria-live="polite">0 of 6 rules met</small></div>
-            <ul class="password-policy-checklist" data-password-policy aria-label="Password requirements"><li data-password-rule="length">12–100 characters</li><li data-password-rule="lower">Lowercase letter</li><li data-password-rule="upper">Uppercase letter</li><li data-password-rule="number">Number</li><li data-password-rule="symbol">Symbol</li><li data-password-rule="spaces">No spaces</li></ul>
+            <div class="password-policy-heading">
+                <span>Secure password</span>
+                <small data-password-policy-count aria-live="polite">0 of 6 rules met</small>
+            </div>
+            <ul class="password-policy-checklist" data-password-policy aria-label="Password requirements">
+                <li data-password-rule="length">12–100 characters</li>
+                <li data-password-rule="lower">Lowercase letter</li>
+                <li data-password-rule="upper">Uppercase letter</li>
+                <li data-password-rule="number">Number</li>
+                <li data-password-rule="symbol">Symbol</li>
+                <li data-password-rule="spaces">No spaces</li>
+            </ul>
         </div>
     </div>
     <div class="form-field workspace-field-wide">
@@ -59,11 +112,19 @@
         @Html.DropDownListFor(m => m.PlanCode, Model.PlanOptions, new { id = planId })
         @Html.ValidationMessageFor(m => m.PlanCode)
     </div>
-    @if (adminMode) {
-        <input id="create-client-number" type="hidden" />
-        <input name="AcceptTerms" type="hidden" value="true" />
-    } else {
-        <label class="check-field legal-consent-field accent-check-field workspace-field-wide">@Html.CheckBoxFor(m => m.AcceptTerms)<span>I agree to the <a href="@Url.Action("Legal", "Home")#service-terms" data-legal-modal data-legal-section="service-terms">service terms</a> and <a href="@Url.Action("Legal", "Home")#privacy-policy" data-legal-modal data-legal-section="privacy-policy">privacy policy</a>.</span></label>
-        @Html.ValidationMessageFor(m => m.AcceptTerms)
-    }
+    <input id="create-client-number" type="hidden" />
+    <label class="check-field legal-consent-field accent-check-field workspace-field-wide">
+        @Html.CheckBoxFor(m => m.AcceptTerms)
+        <span>
+            I agree to the
+            <a href="@Url.Action("Legal", "Home")#service-terms"
+               data-legal-modal
+               data-legal-section="service-terms">service terms</a>
+            and
+            <a href="@Url.Action("Legal", "Home")#privacy-policy"
+               data-legal-modal
+               data-legal-section="privacy-policy">privacy policy</a>.
+        </span>
+    </label>
+    @Html.ValidationMessageFor(m => m.AcceptTerms)
 </div>

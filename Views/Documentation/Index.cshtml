@@ -1,38 +1,80 @@
 @{ ViewBag.Title = "API documentation"; var demoApiKey = System.Configuration.ConfigurationManager.AppSettings["DemoApi:Key"] ?? "ad_live_demo.keysecret"; }
-<section class="site-hero page-hero"><div class="shell site-hero-shell"><div class="hero-copy"><span class="eyebrow">DOCUMENTATION</span><h1>Build your first integration.</h1><p>Authenticate, call the APIs, choose formats, and handle production responses.</p></div></div></section>
-<section class="docs-page light-section"><div class="shell docs-layout">
+<section class="site-hero page-hero">
+    <div class="shell site-hero-shell">
+        <div class="hero-copy">
+            <span class="eyebrow">DOCUMENTATION</span>
+            <h1>Build your first integration.</h1>
+            <p>Authenticate, call the APIs, choose formats, and handle production responses.</p>
+        </div>
+    </div>
+</section>
+<section class="docs-page light-section">
+    <div class="shell docs-layout">
     @Html.Partial("_DocsNav")
     <article class="docs-article">
-        <h2>Your first API request</h2><p>Create an account, copy the credential shown once, and place it in a server-side environment variable or secrets manager.</p>
-        <div class="doc-callout"><b>Keep registered credentials private</b><p>Never embed a registered customer API key in browser JavaScript, a public mobile bundle, or source control. The documented <code>ad_live_demo.keysecret</code> credential is the public, rate-limited exception.</p></div>
-        <h3>Decode a vehicle</h3><p>Send a valid 17-character VIN and your bearer credential. VINs are normalized to uppercase and cannot contain I, O, or Q.</p>
-        <div class="code-block" id="decode-code-samples"><div class="code-tabs"><button class="active" data-tab="curl">cURL</button><button data-tab="javascript">jQuery</button><button data-tab="csharp">C#</button><button class="copy" data-copy="#decode-code-samples pre:visible">Copy</button></div>
-            <pre data-code="curl"><code>curl --request GET "https://api.autodealer.dev/api/service/vin/1HGCM82633A004352/json" 
+        <h2>Your first API request</h2>
+        <p>
+            Create an account, copy the credential shown once, and place it in a server-side environment
+            variable or secrets manager.
+        </p>
+        <div class="doc-callout">
+            <b>Keep registered credentials private</b>
+            <p>Never embed a registered customer API key in browser JavaScript, a public mobile bundle, or source control. The documented <code>ad_live_demo.keysecret</code> credential is the public, rate-limited exception.</p>
+        </div>
+        <h3>Decode a vehicle</h3>
+        <p>
+            Send a valid 17-character VIN and your bearer credential. VINs are normalized to uppercase and
+            cannot contain I, O, or Q.
+        </p>
+        <div class="code-block" id="decode-code-samples">
+            <div class="code-tabs">
+                <button class="active" data-tab="curl">cURL</button>
+                <button data-tab="javascript">jQuery</button>
+                <button data-tab="csharp">C#</button>
+                <button class="copy" data-copy="#decode-code-samples pre:visible">Copy</button>
+            </div>
+            <pre data-code="curl">
+                <code>curl --request GET "https://api.autodealer.dev/api/service/vin/1HGCM82633A004352/json"
   --header "Authorization: Bearer $AUTODEALER_API_KEY" 
-  --header "Accept: application/json"</code></pre>
-            <pre data-code="javascript" hidden><code>$.ajax({
+  --header "Accept: application/json"</code>
+  </pre>
+            <pre data-code="javascript" hidden>
+                <code>$.ajax({
   url: "/api/service/vin/1HGCM82633A004352/json",
   headers: { Authorization: "Bearer " + apiKey },
   dataType: "json"
 }).done(function (vehicle) {
   console.log(vehicle);
-});</code></pre>
-            <pre data-code="csharp" hidden><code>client.DefaultRequestHeaders.Authorization =
+});</code>
+</pre>
+            <pre data-code="csharp" hidden>
+                <code>client.DefaultRequestHeaders.Authorization =
   new AuthenticationHeaderValue("Bearer", apiKey);
 var result = await client.GetStringAsync(
-  "api/service/vin/1HGCM82633A004352/json");</code></pre>
+  "api/service/vin/1HGCM82633A004352/json");</code>
+  </pre>
         </div>
-        <h3 id="html-embed">Render the HTML vehicle report</h3><p>Add one div with the VIN and your secure server-proxy URL. The widget requests the self-styled HTML fragment and renders the complete vehicle report inside that div.</p>
+        <h3 id="html-embed">Render the HTML vehicle report</h3>
+        <p>
+            Add one div with the VIN and your secure server-proxy URL. The widget requests the self-styled HTML
+            fragment and renders the complete vehicle report inside that div.
+        </p>
         <div class="code-block simple" id="html-widget-sample">
-            <div class="code-tabs"><button class="active" type="button" data-html-widget-tab="source">HTML</button><button type="button" data-html-widget-tab="render">Render</button><button class="copy" data-copy="#html-widget-code">Copy</button></div>
-            <pre data-html-widget-panel="source"><code id="html-widget-code">&lt;div id="vehicle-report"
+            <div class="code-tabs">
+                <button class="active" type="button" data-html-widget-tab="source">HTML</button>
+                <button type="button" data-html-widget-tab="render">Render</button>
+                <button class="copy" data-copy="#html-widget-code">Copy</button>
+            </div>
+            <pre data-html-widget-panel="source">
+                <code id="html-widget-code">&lt;div id="vehicle-report"
      data-autodealer-vin-report
      data-api-key="ad_live_demo.keysecret"
      data-vin="1HGCM82633A004352"
      data-loading-text="Loading vehicle details..."&gt;
 &lt;/div&gt;
 
-&lt;script src="https://autodealer.dev/Scripts/autodealer-vin-report.js"&gt;&lt;/script&gt;</code></pre>
+&lt;script src="https://autodealer.dev/Scripts/autodealer-vin-report.js"&gt;&lt;/script&gt;</code>
+</pre>
             <div class="html-widget-render-panel" data-html-widget-panel="render" hidden>
                 <div id="documentation-vehicle-report"
                      data-autodealer-vin-report
@@ -43,12 +85,45 @@ var result = await client.GetStringAsync(
                      data-loading-text="Rendering the live vehicle report...">Select Render to load the live HTML report.</div>
             </div>
         </div>
-        <div class="docs-sample-actions"><a class="button site-cta" href="@Url.Action("VinHtml")#live-example"><span>Open the working example</span><i aria-hidden="true">&rarr;</i></a><a class="text-link" href="@Url.Action("VinHtml")">Read the complete HTML integration guide</a></div>
-        <h3 id="vin">VIN Decode endpoints</h3><div class="endpoint-list"><div><b>GET</b><code>/api/service/vin/{vin}/json</code><span>Complete JSON record</span></div><div><b>GET</b><code>/api/service/vin/{vin}/xml</code><span>Complete XML record</span></div><div><b>GET</b><code>/api/service/vin/{vin}/html</code><span>Embeddable HTML fragment</span></div></div>
-        <h3 id="formats">Response formats</h3><p>VIN routes use explicit JSON, XML, and HTML format suffixes so clients always receive a predictable media type.</p>
-        <div class="next-doc"><a class="button site-cta" href="@Url.Action("Authentication")"><span>Authentication and API keys</span><i aria-hidden="true">&rarr;</i></a></div>
+        <div class="docs-sample-actions">
+            <a class="button site-cta" href="@Url.Action("VinHtml")#live-example">
+                <span>Open the working example</span>
+                <i aria-hidden="true">&rarr;</i>
+            </a>
+            <a class="text-link" href="@Url.Action("VinHtml")">Read the complete HTML integration guide</a>
+        </div>
+        <h3 id="vin">VIN Decode endpoints</h3>
+        <div class="endpoint-list">
+            <div>
+                <b>GET</b>
+                <code>/api/service/vin/{vin}/json</code>
+                <span>Complete JSON record</span>
+            </div>
+            <div>
+                <b>GET</b>
+                <code>/api/service/vin/{vin}/xml</code>
+                <span>Complete XML record</span>
+            </div>
+            <div>
+                <b>GET</b>
+                <code>/api/service/vin/{vin}/html</code>
+                <span>Embeddable HTML fragment</span>
+            </div>
+        </div>
+        <h3 id="formats">Response formats</h3>
+        <p>
+            VIN routes use explicit JSON, XML, and HTML format suffixes so clients always receive a predictable
+            media type.
+        </p>
+        <div class="next-doc">
+            <a class="button site-cta" href="@Url.Action("Authentication")">
+                <span>Authentication and API keys</span>
+                <i aria-hidden="true">&rarr;</i>
+            </a>
+        </div>
     </article>
-</div></section>
+</div>
+</section>
 
 @section scripts {
 @Scripts.Render("~/bundles/vin-report")

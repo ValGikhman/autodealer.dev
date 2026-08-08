@@ -9,19 +9,34 @@
     <p>Move through the essentials, jump to an endpoint, or compare the available response formats.</p>
     <nav class="docs-steps" aria-label="Documentation shortcuts">
         <a class="@(isQuickstart ? "active" : "")" href="@Url.Action("Index", "Documentation")" aria-current="@(isQuickstart ? "page" : null)">
-            <span><strong>Quickstart</strong><small>Make your first request</small></span>
+            <span>
+                <strong>Quickstart</strong>
+                <small>Make your first request</small>
+            </span>
         </a>
         <a class="@(isAuthentication ? "active" : "")" href="@Url.Action("Authentication", "Documentation")" aria-current="@(isAuthentication ? "page" : null)">
-            <span><strong>Authentication</strong><small>Keys, scopes, and security</small></span>
+            <span>
+                <strong>Authentication</strong>
+                <small>Keys, scopes, and security</small>
+            </span>
         </a>
         <a class="@(isErrors ? "active" : "")" href="@Url.Action("Errors", "Documentation")" aria-current="@(isErrors ? "page" : null)">
-            <span><strong>Errors &amp; limits</strong><small>Status codes and quotas</small></span>
+            <span>
+                <strong>Errors &amp; limits</strong>
+                <small>Status codes and quotas</small>
+            </span>
         </a>
         <a class="@(isVinHtml ? "active" : "")" href="@Url.Action("VinHtml", "Documentation")" aria-current="@(isVinHtml ? "page" : null)">
-            <span><strong>HTML VIN report</strong><small>Embed and render a vehicle</small></span>
+            <span>
+                <strong>HTML VIN report</strong>
+                <small>Embed and render a vehicle</small>
+            </span>
         </a>
         <a href="@Url.Action("Index", "Documentation")#formats">
-            <span><strong>JSON, XML &amp; HTML</strong><small>Choose the right output</small></span>
+            <span>
+                <strong>JSON, XML &amp; HTML</strong>
+                <small>Choose the right output</small>
+            </span>
         </a>
     </nav>
 </aside>

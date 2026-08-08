@@ -36,7 +36,15 @@
 @section head {
     <script type="application/ld+json">@Html.Raw(serviceJson)</script>
 }
-<section class="site-hero page-hero"><div class="shell site-hero-shell"><div class="hero-copy"><span class="eyebrow">SIMPLE PRICING</span><h1>Start focused. Scale freely.</h1><p>Every plan includes secure credentials, complete formats, metering, and documentation.</p></div></div></section>
+<section class="site-hero page-hero">
+    <div class="shell site-hero-shell">
+        <div class="hero-copy">
+            <span class="eyebrow">SIMPLE PRICING</span>
+            <h1>Start focused. Scale freely.</h1>
+            <p>Every plan includes secure credentials, complete formats, metering, and documentation.</p>
+        </div>
+    </div>
+</section>
 <section class="section light-section pricing-section">
     <div class="shell pricing-grid pricing-plans-grid">
             @if (Model.Plans.Count == 0) {
@@ -49,10 +57,16 @@
                     } else if (plan.IsRecommended) {
                         <span class="popular-label">RECOMMENDED</span>
                     }
-                    <span class="color-icon plan-icon" aria-hidden="true"><svg><use href="#icon-plan"></use></svg></span>
+                    <span class="color-icon plan-icon" aria-hidden="true">
+                        <svg>
+                            <use href="#icon-plan">
+                            </use>
+                        </svg>
+                    </span>
                     <span class="plan-name">@plan.DisplayName.ToUpperInvariant()</span>
                     @if (plan.MonthlyPrice.HasValue) {
-                        <h2>@plan.MonthlyPrice.Value.ToString("$0.##")<small>/month</small></h2>
+                        <h2>@plan.MonthlyPrice.Value.ToString("$0.##")<small>/month</small>
+                        </h2>
                     } else {
                         <h2>Custom</h2>
                     }
@@ -64,7 +78,8 @@
                         </div>
                     </div>
                     @if (plan.IsCurrentPlan) {
-                        <a class="button button-primary current-plan-button" href="@Url.Action("Dashboard", "Account")"><span aria-hidden="true">&#10003;</span> Current plan</a>
+                        <a class="button button-primary current-plan-button" href="@Url.Action("Dashboard", "Account")">
+                            <span aria-hidden="true">&#10003;</span> Current plan</a>
                     } else {
                         <a class="button @(plan.IsRecommended ? "button-primary" : "button-outline")" href="@Url.Action("Register", "Account", new { plan = plan.PlanCode })">Choose @plan.DisplayName</a>
                     }

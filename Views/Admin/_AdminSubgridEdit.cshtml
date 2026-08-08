@@ -34,10 +34,12 @@
             </div>
             <div class="dashboard-edit-field client-edit-only">
                 <label for="edit-client-status">Account status</label>
-                <select id="edit-client-status" name="Status" required></select>
+                <select id="edit-client-status" name="Status" required>
+                </select>
             </div>
             <div class="dashboard-edit-field client-edit-only">
-                <label for="edit-client-email-verified">Email verified <span>UTC — optional</span></label>
+                <label for="edit-client-email-verified">Email verified <span>UTC — optional</span>
+                </label>
                 <input id="edit-client-email-verified" name="EmailVerifiedUtc" type="datetime-local" />
             </div>
         </div>
@@ -55,18 +57,22 @@
             </div>
             <div class="dashboard-edit-field">
                 <label for="edit-api-key-status">Status</label>
-                <select id="edit-api-key-status" name="Status" required></select>
+                <select id="edit-api-key-status" name="Status" required>
+                </select>
             </div>
             <div class="dashboard-edit-field">
                 <label for="edit-api-key-scope">Scope</label>
-                <select id="edit-api-key-scope" name="Scopes" required></select>
+                <select id="edit-api-key-scope" name="Scopes" required>
+                </select>
             </div>
             <div class="dashboard-edit-field dashboard-edit-field-wide">
                 <label for="edit-api-key-subscription">Subscription</label>
-                <select id="edit-api-key-subscription" name="SubscriptionId" required></select>
+                <select id="edit-api-key-subscription" name="SubscriptionId" required>
+                </select>
             </div>
             <div class="dashboard-edit-field dashboard-edit-field-wide">
-                <label for="edit-api-key-expires">Expires <span>UTC — optional</span></label>
+                <label for="edit-api-key-expires">Expires <span>UTC — optional</span>
+                </label>
                 <input id="edit-api-key-expires" name="ExpiresUtc" type="datetime-local" />
             </div>
         </div>
@@ -74,23 +80,30 @@
         <div class="dashboard-subgrid-edit-fields" id="subscription-edit-fields" hidden>
             <div class="dashboard-edit-field">
                 <label for="edit-subscription-plan">Plan</label>
-                <select id="edit-subscription-plan" name="PlanId" required></select>
+                <select id="edit-subscription-plan" name="PlanId" required>
+                </select>
             </div>
             <div class="dashboard-edit-field">
                 <label for="edit-subscription-status">Status</label>
-                <select id="edit-subscription-status" name="Status" required></select>
+                <select id="edit-subscription-status" name="Status" required>
+                </select>
             </div>
             <div class="dashboard-edit-field">
-                <label for="edit-subscription-start">Period starts <span>UTC</span></label>
+                <label for="edit-subscription-start">Period starts <span>UTC</span>
+                </label>
                 <input id="edit-subscription-start" name="CurrentPeriodStartUtc" type="datetime-local" required />
             </div>
             <div class="dashboard-edit-field">
-                <label for="edit-subscription-end">Period ends <span>UTC</span></label>
+                <label for="edit-subscription-end">Period ends <span>UTC</span>
+                </label>
                 <input id="edit-subscription-end" name="CurrentPeriodEndUtc" type="datetime-local" required />
             </div>
             <div class="dashboard-edit-field">
                 <label for="edit-subscription-cancel">Cancel at period end</label>
-                <select id="edit-subscription-cancel" name="CancelAtPeriodEnd"><option value="false">No</option><option value="true">Yes</option></select>
+                <select id="edit-subscription-cancel" name="CancelAtPeriodEnd">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
             </div>
             <div class="dashboard-edit-field">
                 <label for="edit-subscription-provider">Provider subscription ID</label>
@@ -98,14 +111,33 @@
             </div>
         </div>
 
-        <div class="dashboard-subgrid-edit-error" id="dashboard-subgrid-edit-error" role="alert" hidden></div>
+        <div class="dashboard-subgrid-edit-error" id="dashboard-subgrid-edit-error" role="alert" hidden>
+        </div>
         <div class="dashboard-client-create-result" id="dashboard-client-create-result" hidden>
             @Html.Partial("_WorkspaceConfirmation", new autodealer.dev.Models.AccountCreatedViewModel { VerificationEmailSent = true })
         </div>
         <div class="dashboard-subgrid-edit-actions">
-            <button type="button" class="customer-delete-action dashboard-client-delete-open" id="dashboard-client-delete-open" aria-label="Delete customer" title="Delete customer" hidden><svg aria-hidden="true"><use href="#icon-trash"></use></svg></button>
+            <button type="button" class="customer-delete-action dashboard-client-delete-open" id="dashboard-client-delete-open" aria-label="Delete customer" title="Delete customer" hidden>
+                <svg aria-hidden="true">
+                    <use href="#icon-trash">
+                    </use>
+                </svg>
+            </button>
             <span id="dashboard-subgrid-edit-note">Double-check the values before saving.</span>
-            <div><button type="button" class="btn btn-secondary admin-modal-cancel" id="dashboard-subgrid-edit-cancel" data-bs-dismiss="modal" aria-label="Cancel" title="Cancel"><svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg><span>Cancel</span></button><button type="submit" class="customer-api-issue admin-save-button" id="dashboard-subgrid-edit-save"><svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5V4Z"/><path d="M8 4v6h8V4M8 16h8"/></svg><span>Save changes</span></button></div>
+            <div>
+                <button type="button" class="btn btn-secondary admin-modal-cancel" id="dashboard-subgrid-edit-cancel" data-bs-dismiss="modal" aria-label="Cancel" title="Cancel">
+                    <svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M7 7l10 10M17 7 7 17" />
+                    </svg>
+                    <span>Cancel</span>
+                </button>
+                <button type="submit" class="customer-api-issue admin-save-button" id="dashboard-subgrid-edit-save">
+                    <svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <use id="dashboard-subgrid-edit-save-icon" href="#icon-save"></use>
+                    </svg>
+                    <span>Save changes</span>
+                </button>
+            </div>
         </div>
     </form>
 </section>

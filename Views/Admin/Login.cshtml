@@ -1,34 +1,57 @@
 @model autodealer.dev.Models.AdminLoginViewModel
 @{ ViewBag.Title = "Administrator sign in"; ViewBag.BodyClass = "account-page login-page admin-login-page"; ViewBag.IncludeValidation = true; }
-<section class="site-hero page-hero"><div class="shell site-hero-shell">
+<section class="site-hero page-hero">
+    <div class="shell site-hero-shell">
     <div class="hero-copy">
         <span class="eyebrow">ADMINISTRATION</span>
         <h1>Authorized platform access.</h1>
         <p>Manage customers, subscriptions, opportunities, and API access.</p>
-    </div></div></section>
-<section class="section light-section account-content-section"><div class="shell account-form-shell">
+    </div>
+    </div>
+    </section>
+<section class="section light-section account-content-section">
+    <div class="shell account-form-shell">
     <div class="form-card login-card dashboard-style-form">
         <div class="dashboard-style-form-header">
             <span class="form-step">ADMIN SIGN IN</span>
             <h2>Open the control room</h2>
             <p>Authenticate with your administrator credentials.</p>
         </div>
-        @using (Html.BeginForm("Login", "Admin", FormMethod.Post, new { @class = "account-form dashboard-style-form-body", autocomplete = "on" })) {
+        @using (Html.BeginForm(
+            "Login",
+            "Admin",
+            FormMethod.Post,
+            new {
+                @class = "account-form dashboard-style-form-body",
+                autocomplete = "on"
+            })) {
             @Html.AntiForgeryToken()
             @Html.HiddenFor(m => m.ReturnUrl)
             @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
             <div class="form-field">
                 @Html.LabelFor(m => m.UserId)
-                @Html.TextBoxFor(m => m.UserId, new { placeholder = "Administrator user ID", autocomplete = "username", autofocus = "autofocus" })
+                @Html.TextBoxFor(m => m.UserId, new {
+                    placeholder = "Administrator user ID",
+                    autocomplete = "username",
+                    autofocus = "autofocus"
+                })
                 @Html.ValidationMessageFor(m => m.UserId)
             </div>
             <div class="form-field">
                 @Html.LabelFor(m => m.Password)
-                @Html.PasswordFor(m => m.Password, new { placeholder = "Administrator password", autocomplete = "current-password" })
+                @Html.PasswordFor(m => m.Password, new {
+                    placeholder = "Administrator password",
+                    autocomplete = "current-password"
+                })
                 @Html.ValidationMessageFor(m => m.Password)
             </div>
-            <label class="check-field remember-field accent-check-field">@Html.CheckBoxFor(m => m.RememberMe)<span>Keep me signed in on this device</span></label>
-            <div class="dashboard-style-form-footer"><small class="form-secure">Role-protected session &middot; Password verified using PBKDF2</small><button class="button button-primary submit-button" type="submit">Sign in as administrator</button></div>
+            <label class="check-field remember-field accent-check-field">@Html.CheckBoxFor(m => m.RememberMe)<span>Keep me signed in on this device</span>
+            </label>
+            <div class="dashboard-style-form-footer">
+                <small class="form-secure">Role-protected session &middot; Password verified using PBKDF2</small>
+                <button class="button button-primary submit-button" type="submit">Sign in as administrator</button>
+            </div>
         }
     </div>
-</div></section>
+</div>
+</section>
