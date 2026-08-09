@@ -89,7 +89,8 @@
             </p>
             <div class="code-block docs-code-tall">
                 <pre>
-                    <code>private static readonly Regex VinPattern =
+                    <code>
+private static readonly Regex VinPattern =
     new Regex("^[A-HJ-NPR-Z0-9]{17}$", RegexOptions.CultureInvariant);
 
 [HttpGet]
@@ -114,15 +115,17 @@ public async Task&lt;ActionResult&gt; VinReport(string vin) {
 
         return Content(body, "text/html", Encoding.UTF8);
     }
-}</code>
-</pre>
-</div>
+}
+                    </code>
+                </pre>
+            </div>
 
             <h3 id="jquery">jQuery without the widget</h3>
             <p>If the customer already uses jQuery, the same server proxy can be called directly.</p>
             <div class="code-block simple">
                 <pre>
-                    <code>var vin = "1HGCM82633A004352";
+                    <code>
+var vin = "1HGCM82633A004352";
 
 $.ajax({
   url: "/vehicles/vin-report",
