@@ -1,6 +1,7 @@
 using autodealer.dev.Models;
 using autodealer.dev.Services;
 using System;
+using System.Data.Linq;
 using System.Data.SqlClient;
 using System.ComponentModel.DataAnnotations;
 using System.Web;
@@ -93,10 +94,22 @@ namespace autodealer.dev.Controllers {
                 return View(result);
             }
             catch (SqlException) {
-                return View(new EmailVerificationViewModel { Status = EmailVerificationStatus.DeliveryFailed });
+                return View(new EmailVerificationViewModel {
+                    Status = EmailVerificationStatus.DeliveryFailed,
+                    RetryUrl = Url.Action("VerifyEmail", "Account", new { token })
+                });
+            }
+            catch (ChangeConflictException) {
+                return View(new EmailVerificationViewModel {
+                    Status = EmailVerificationStatus.DeliveryFailed,
+                    RetryUrl = Url.Action("VerifyEmail", "Account", new { token })
+                });
             }
             catch (InvalidOperationException) {
-                return View(new EmailVerificationViewModel { Status = EmailVerificationStatus.DeliveryFailed });
+                return View(new EmailVerificationViewModel {
+                    Status = EmailVerificationStatus.DeliveryFailed,
+                    RetryUrl = Url.Action("VerifyEmail", "Account", new { token })
+                });
             }
         }
 

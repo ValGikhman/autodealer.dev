@@ -23,6 +23,19 @@
         };
     }
 
+    function emptyStateMarkup() {
+        return '<span class="pg-empty-content">'
+            + '<span class="pg-empty-icon" aria-hidden="true">'
+            + '<svg viewBox="0 0 24 24" focusable="false">'
+            + '<path d="M4 13.5 6.4 6h11.2l2.4 7.5V19H4v-5.5Z" />'
+            + '<path d="M4.5 14h4l1.4 2h4.2l1.4-2h4" />'
+            + '<path class="pg-empty-icon-accent" d="M17.5 3v3M16 4.5h3" />'
+            + '</svg>'
+            + '</span>'
+            + '<span class="pg-empty-text">No records to display.</span>'
+            + '</span>';
+    }
+
     // ════════════════════════════════════════════════════════════════════════
     //  Default options
     // ════════════════════════════════════════════════════════════════════════
@@ -1287,8 +1300,8 @@
                     const getr = document.createElement('tr');
                     const getd = document.createElement('td');
                     getd.colSpan  = cols.length;
-                    getd.className = 'pg-state-msg';
-                    getd.innerHTML = '<i class="bi bi-inbox me-2 opacity-50"></i>No records to display.';
+                    getd.className = 'pg-state-msg pg-empty';
+                    getd.innerHTML = emptyStateMarkup();
                     getr.appendChild(getd);
                     frag.appendChild(getr);
                 } else {
@@ -1325,8 +1338,8 @@
                     const etr = document.createElement('tr');
                     const etd = document.createElement('td');
                     etd.colSpan  = cols.length;
-                    etd.className = 'pg-state-msg';
-                    etd.innerHTML = '<i class="bi bi-inbox me-2 opacity-50"></i>No records to display.';
+                    etd.className = 'pg-state-msg pg-empty';
+                    etd.innerHTML = emptyStateMarkup();
                     etr.appendChild(etd);
                     frag.appendChild(etr);
                 } else {

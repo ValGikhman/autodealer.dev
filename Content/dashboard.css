@@ -655,7 +655,8 @@
   font: 600 12px/1 var(--sans);
 }
 
-.admin-dashboard-page .pg-search-bar .admin-new-customer {
+.admin-dashboard-page .pg-search-bar .admin-new-customer,
+.admin-dashboard-page .pg-search-bar .admin-new-opportunity {
   margin-right: auto;
 }
 
@@ -1824,6 +1825,16 @@
 
 .admin-dashboard-page .admin-save-button {
   gap: 7px;
+}
+
+.admin-dashboard-page .admin-create-button {
+  gap: 7px;
+}
+
+.admin-dashboard-page .admin-create-button .admin-action-icon {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
 }
 
 .admin-dashboard-page .admin-save-button .admin-action-icon {

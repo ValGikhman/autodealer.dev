@@ -473,6 +473,64 @@ body.pg-col-resizing {
   min-height: 80px;
 }
 
+.pg-state-msg.pg-empty {
+  background: transparent;
+  display: table-cell;
+  height: 150px;
+  min-height: 0;
+  padding: 1.5rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.pg-grid-table tbody tr:hover .pg-state-msg.pg-empty {
+  background: transparent;
+}
+
+.pg-empty-content {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  justify-content: center;
+}
+
+.pg-empty-icon {
+  align-items: center;
+  background-color: var(--graphite-text);
+  border: 1px solid #d9dee3;
+  border-radius: 50%;
+  box-shadow:
+    0 8px 20px rgba(31, 41, 55, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  color: #737c85;
+  display: inline-flex;
+  height: 4.5rem;
+  justify-content: center;
+  width: 4.5rem;
+}
+
+.pg-empty-icon svg {
+  fill: none;
+  height: 2.35rem;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.65;
+  width: 2.35rem;
+}
+
+.pg-empty-icon .pg-empty-icon-accent {
+  stroke: #6991b9;
+  stroke-width: 1.8;
+}
+
+.pg-empty-text {
+  color: var(--graphite-text);
+  font-weight: 650;
+  letter-spacing: 0.015em;
+}
+
 .pg-state-msg.pg-loading {
   flex-direction: column;
   gap: 0.65rem;
