@@ -6,11 +6,11 @@
             <h1>Every VIN. Every detail.</h1>
             <p>Decode any VIN into a complete, application-ready vehicle record.</p>
             <div class="button-row">
-                <a class="button site-cta" href="@Url.Action("Register", "Account")">
+                <a class="button site-cta vin-run-api-button" href="@Url.Action("Register", "Account")">
                     <span>Get an API key</span>
                     <i aria-hidden="true">&rarr;</i>
                 </a>
-                <a class="button button-secondary" href="@Url.Action("Index", "Documentation")">View reference</a>
+                <a class="button button-secondary vin-run-api-button" href="@Url.Action("Index", "Documentation")">View reference</a>
             </div>
         </div>
         <figure class="showroom-ad-visual vin-hero-visual">
@@ -63,12 +63,12 @@
                 </span>
                 <div>
                     <em id="vin-demo-status">Ready</em>
-                    <button type="button" id="copy-vin-response" aria-label="Copy response" title="Copy response">
-                        <svg class="vin-copy-icon vin-copy-default" viewBox="0 0 24 24" aria-hidden="true">
+                    <button type="button" id="copy-vin-response" class="copy-action-button" aria-label="Copy response" title="Copy response">
+                        <svg class="copy-action-icon copy-action-default" viewBox="0 0 24 24" aria-hidden="true">
                             <rect x="8" y="8" width="11" height="11" rx="2"></rect>
                             <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
                         </svg>
-                        <svg class="vin-copy-icon vin-copy-check" viewBox="0 0 24 24" aria-hidden="true">
+                        <svg class="copy-action-icon copy-action-check" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="m5 12.5 4 4 10-9"></path>
                         </svg>
                     </button>

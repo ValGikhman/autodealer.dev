@@ -33,7 +33,15 @@
                 <button class="active" data-tab="curl">cURL</button>
                 <button data-tab="javascript">jQuery</button>
                 <button data-tab="csharp">C#</button>
-                <button class="copy" data-copy="#decode-code-samples pre:visible">Copy</button>
+                <button type="button" class="copy copy-action-button" data-copy="#decode-code-samples pre:visible" aria-label="Copy code" title="Copy code">
+                    <svg class="copy-action-icon copy-action-default" viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="8" y="8" width="11" height="11" rx="2"></rect>
+                        <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+                    </svg>
+                    <svg class="copy-action-icon copy-action-check" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m5 12.5 4 4 10-9"></path>
+                    </svg>
+                </button>
             </div>
             <pre data-code="curl">
                 <code>
@@ -69,7 +77,15 @@ var result = await client.GetStringAsync("api/service/vin/1HGCM82633A004352/json
             <div class="code-tabs">
                 <button class="active" type="button" data-html-widget-tab="source">HTML</button>
                 <button type="button" data-html-widget-tab="render">Render</button>
-                <button class="copy" data-copy="#html-widget-code">Copy</button>
+                <button type="button" class="copy copy-action-button" data-copy="#html-widget-code" aria-label="Copy code" title="Copy code">
+                    <svg class="copy-action-icon copy-action-default" viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="8" y="8" width="11" height="11" rx="2"></rect>
+                        <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+                    </svg>
+                    <svg class="copy-action-icon copy-action-check" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m5 12.5 4 4 10-9"></path>
+                    </svg>
+                </button>
             </div>
             <pre data-html-widget-panel="source">
                 <code id="html-widget-code">
@@ -93,7 +109,7 @@ var result = await client.GetStringAsync("api/service/vin/1HGCM82633A004352/json
             </div>
         </div>
         <div class="docs-sample-actions">
-            <a class="button site-cta" href="@Url.Action("VinHtml")#live-example">
+            <a class="button site-cta vin-run-api-button" href="@Url.Action("VinHtml")#live-example">
                 <span>Open the working example</span>
                 <i aria-hidden="true">&rarr;</i>
             </a>
@@ -123,7 +139,7 @@ var result = await client.GetStringAsync("api/service/vin/1HGCM82633A004352/json
             media type.
         </p>
         <div class="next-doc">
-            <a class="button site-cta" href="@Url.Action("Authentication")">
+            <a class="button site-cta vin-run-api-button" href="@Url.Action("Authentication")">
                 <span>Authentication and API keys</span>
                 <i aria-hidden="true">&rarr;</i>
             </a>

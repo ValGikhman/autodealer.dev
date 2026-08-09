@@ -6,6 +6,7 @@ namespace autodealer.dev.Services {
         NewApiAccount,
         DealerDemoOwnerNotification,
         DealerDemoCustomerConfirmation,
-        ContactInquiryNotification
+        ContactInquiryNotification,
+        FreeFormCustomerEmail
     }
 }

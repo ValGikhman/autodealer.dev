@@ -21,7 +21,7 @@
         <h2>Current customer activity.</h2>
         <span class="status-badge">Administrator</span>
     </div>
-    <div class="dashboard-grid admin-metrics">
+    <div class="dashboard-grid admin-metrics metrics-design-three">
         <article>
             <span class="color-icon metric-icon" aria-hidden="true">
                 <svg>
@@ -75,7 +75,7 @@
             </div>
             <span>@Model.Customers.Count active</span>
         </div>
-        <div id="customer-grid" class="admin-pep-grid" data-url="@Url.Action("CustomerGridData", "Admin")" data-email-url="@Url.Action("CustomerEmailGridData", "Admin")" data-account-detail-url="@Url.Action("CustomerAccountDetailData", "Admin")" data-issue-key-url="@Url.Action("IssueApiKey", "Admin")" data-new-client-url="@Url.Action("NewClient", "Admin")" data-edit-client-url="@Url.Action("EditClient", "Admin")" data-delete-client-url="@Url.Action("DeleteClient", "Admin")" data-edit-api-key-url="@Url.Action("EditApiKey", "Admin")" data-new-subscription-url="@Url.Action("NewSubscription", "Admin")" data-edit-subscription-url="@Url.Action("EditSubscription", "Admin")">
+        <div id="customer-grid" class="admin-pep-grid" data-url="@Url.Action("CustomerGridData", "Admin")" data-email-url="@Url.Action("CustomerEmailGridData", "Admin")" data-send-email-url="@Url.Action("SendCustomerEmail", "Admin")" data-account-detail-url="@Url.Action("CustomerAccountDetailData", "Admin")" data-issue-key-url="@Url.Action("IssueApiKey", "Admin")" data-new-client-url="@Url.Action("NewClient", "Admin")" data-edit-client-url="@Url.Action("EditClient", "Admin")" data-delete-client-url="@Url.Action("DeleteClient", "Admin")" data-edit-api-key-url="@Url.Action("EditApiKey", "Admin")" data-new-subscription-url="@Url.Action("NewSubscription", "Admin")" data-edit-subscription-url="@Url.Action("EditSubscription", "Admin")">
         </div>
     </section>
     <section class="admin-customer-panel dashboard-grid-panel" aria-labelledby="demo-grid-title">

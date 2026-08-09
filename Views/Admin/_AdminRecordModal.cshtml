@@ -1,3 +1,5 @@
+@{ var newEmailFromAddress = (System.Configuration.ConfigurationManager.AppSettings["Smtp:From"] ?? string.Empty).Trim(); }
+
 <div class="modal fade dashboard-record-modal" id="dashboard-record-modal" tabindex="-1" aria-labelledby="dashboard-record-title" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
@@ -78,10 +80,61 @@
                     <span>Cancel</span>
                 </button>
                 <button type="submit" class="customer-api-issue admin-create-button" id="issue-api-key-submit">
-                    <svg class="admin-action-icon" aria-hidden="true">
+                    <svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true">
                         <use href="#icon-key"></use>
                     </svg>
                     <span>Issue API key</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade dashboard-record-modal dashboard-new-email-modal" id="new-email-modal" tabindex="-1" aria-labelledby="new-email-title" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <form class="modal-content" id="new-email-form">
+            <div class="modal-header dashboard-record-header">
+                <div>
+                    <span class="dashboard-record-kicker">CUSTOMER EMAIL</span>
+                    <h2 class="modal-title" id="new-email-title">New email</h2>
+                    <p id="new-email-subtitle">Compose a message for this customer.</p>
+                </div>
+                <button type="button" class="btn-close dashboard-modal-close" data-bs-dismiss="modal" aria-label="Close">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M7 7l10 10M17 7L7 17" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="dashboard-subgrid-edit-fields new-email-address-fields">
+                    <div class="dashboard-edit-field">
+                        <label for="new-email-to">To</label>
+                        <input id="new-email-to" name="To" type="email" maxlength="254" required autocomplete="off" />
+                    </div>
+                    <div class="dashboard-edit-field dashboard-edit-field-readonly">
+                        <label for="new-email-from">From</label>
+                        <input id="new-email-from" name="From" type="email" value="@newEmailFromAddress" readonly />
+                    </div>
+                    <div class="dashboard-edit-field dashboard-edit-field-wide">
+                        <label for="new-email-subject">Subject</label>
+                        <input id="new-email-subject" name="Subject" type="text" maxlength="200" required autocomplete="off" />
+                    </div>
+                </div>
+                <textarea id="new-email-body" name="Body" aria-label="Email body"></textarea>
+                <div class="dashboard-key-issue-error" id="new-email-error" role="alert" hidden></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary admin-modal-cancel" data-bs-dismiss="modal" aria-label="Cancel" title="Cancel">
+                    <svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M7 7l10 10M17 7 7 17" />
+                    </svg>
+                    <span>Cancel</span>
+                </button>
+                <button type="submit" class="customer-api-issue admin-create-button" id="new-email-submit">
+                    <svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="#icon-mail"></use>
+                    </svg>
+                    <span>Send email</span>
                 </button>
             </div>
         </form>
@@ -207,7 +260,7 @@
 <div class="dashboard-antiforgery" hidden>@Html.AntiForgeryToken()</div>
 
 <script type="text/x-pepgrid-template" id="customer-status-template">
-    <span class="dashboard-grid-status">
+    <span class="dashboard-grid-status badge bg-{{SubscriptionBadgeClass}}">
     {{SubscriptionStatus}}
     </span>
 </script>
@@ -219,7 +272,6 @@
     </span>
 </script>
 <script type="text/x-pepgrid-template" id="customer-email-toggle-template">
-    {{#if EmailCount}}
     <span class="customer-grid-icon-action">
     <button type="button" class="customer-email-toggle" aria-label="Show {{EmailCount}} associated emails" aria-expanded="false">
     <svg aria-hidden="true">
@@ -231,20 +283,26 @@
     </span>
     </button>
     </span>
-    {{/if}}
 </script>
 <script type="text/x-pepgrid-template" id="customer-email-detail-template">
     <div class="customer-email-detail">
     <div class="customer-email-detail-heading">
-    <div>
-    <span>EMAIL HISTORY</span>
+    <div class="customer-detail-heading-primary">
     <h3>Associated messages</h3>
     </div>
+    <div class="customer-subgrid-heading-actions">
+    <button type="button" class="customer-api-issue customer-email-new admin-create-button customer-subgrid-create-button">
+    <svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <use href="#icon-mail"></use>
+    </svg>
+    <span>New email</span>
+    </button>
     <button type="button" class="customer-email-collapse" aria-label="Close email history" title="Close">
     <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M7 7l10 10M17 7 7 17" />
     </svg>
     </button>
+    </div>
     </div>
     <div class="customer-email-grid admin-pep-grid">
     </div>
@@ -252,7 +310,12 @@
 </script>
 <script type="text/x-pepgrid-template" id="customer-email-actions-template">
     <div class="customer-email-actions">
-    <button type="button" data-email-action="view" aria-label="View rendered email">View</button>
+    <button type="button" data-email-action="view" aria-label="View rendered email" title="View rendered email">
+    <svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path>
+    <circle cx="12" cy="12" r="2.75"></circle>
+    </svg>
+    </button>
     </div>
 </script>
 <script type="text/x-pepgrid-template" id="customer-api-toggle-template">
@@ -286,25 +349,35 @@
     <div class="customer-email-detail-heading">
     <div class="customer-detail-heading-primary">
     <h3>API keys</h3>
-    <button type="button" class="customer-api-issue admin-create-button">
-    <svg class="admin-action-icon" aria-hidden="true">
+    </div>
+    <div class="customer-subgrid-heading-actions">
+    <button type="button" class="customer-api-issue admin-create-button customer-subgrid-create-button">
+    <svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true">
     <use href="#icon-key"></use>
     </svg>
     <span>Issue API key</span>
     </button>
-    </div>
     <button type="button" class="customer-email-collapse" aria-label="Close API keys" title="Close">
     <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M7 7l10 10M17 7 7 17" />
     </svg>
     </button>
     </div>
+    </div>
     <div class="customer-api-issue-result" hidden>
     <span>
     </span>
     <code>
     </code>
-    <button type="button" class="customer-api-copy">Copy key</button>
+    <button type="button" class="customer-api-copy copy-action-button" aria-label="Copy API key" title="Copy API key">
+        <svg class="copy-action-icon copy-action-default" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="8" y="8" width="11" height="11" rx="2"></rect>
+            <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+        </svg>
+        <svg class="copy-action-icon copy-action-check" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m5 12.5 4 4 10-9"></path>
+        </svg>
+    </button>
     </div>
     <section class="customer-account-grid-section">
     <div class="customer-api-grid admin-pep-grid">
@@ -317,18 +390,20 @@
     <div class="customer-email-detail-heading">
     <div class="customer-detail-heading-primary">
     <h3>Subscription history</h3>
-    <button type="button" class="customer-api-issue customer-subscription-new admin-create-button">
-    <svg class="admin-action-icon" aria-hidden="true">
+    </div>
+    <div class="customer-subgrid-heading-actions">
+    <button type="button" class="customer-api-issue customer-subscription-new admin-create-button customer-subgrid-create-button">
+    <svg class="admin-action-icon" viewBox="0 0 24 24" aria-hidden="true">
     <use href="#icon-plan"></use>
     </svg>
     <span>New subscription</span>
     </button>
-    </div>
     <button type="button" class="customer-email-collapse" aria-label="Close subscriptions" title="Close">
     <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M7 7l10 10M17 7 7 17" />
     </svg>
     </button>
+    </div>
     </div>
     <section class="customer-account-grid-section">
     <div class="customer-subscription-grid admin-pep-grid">
@@ -337,7 +412,7 @@
     </div>
 </script>
 <script type="text/x-pepgrid-template" id="customer-key-status-template">
-    <span class="dashboard-grid-status">
+    <span class="dashboard-grid-status badge bg-{{StatusBadgeClass}}">
     {{Status}}
     </span>
 </script>

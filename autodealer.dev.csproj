@@ -44,6 +44,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="MailKitLite">
+      <Version>4.17.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <HintPath>..\GTX\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
@@ -194,6 +199,7 @@
     <Compile Include="Services\DealerDemoRequestService.cs" />
     <Compile Include="Services\EmailTemplateName.cs" />
     <Compile Include="Services\EmailTemplateRenderer.cs" />
+    <Compile Include="Services\AdminInboxService.cs" />
     <Compile Include="Services\SmtpMailSender.cs" />
     <Compile Include="Services\ICredentialEmailService.cs" />
     <Compile Include="Services\SmtpCredentialEmailService.cs" />
@@ -215,14 +221,17 @@
     <Content Include="Database\006_ClientEmailVerification.sql" />
     <Content Include="Content\dashboard.css" />
     <Content Include="Content\email.css" />
+    <Content Include="Content\pepTools\pepEdit.css" />
     <Content Include="Content\pepTools\pepGrid.css" />
     <Content Include="Content\Site.css" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\Admin\adminDashboard.js" />
+    <Content Include="Scripts\Admin\adminMail.js" />
     <Content Include="Scripts\accountCredentialValidation.js" />
     <Content Include="Scripts\passwordVisibility.js" />
     <Content Include="Scripts\Invoke-TrialExpiration.ps1" />
     <Content Include="Scripts\autodealer-vin-report.js" />
+    <Content Include="Scripts\pepTools\pepEdit.js" />
     <Content Include="Scripts\pepTools\pepGrid.js" />
     <Content Include="Web.config" />
     <None Include="Data\autodealer_dev.dbml.layout">
@@ -252,6 +261,7 @@
     <Content Include="Views\Admin\Dashboard.cshtml" />
     <Content Include="Views\Admin\Customers.cshtml" />
     <Content Include="Views\Admin\Opportunities.cshtml" />
+    <Content Include="Views\Admin\Mail.cshtml" />
     <Content Include="Views\Admin\_AdminRecordModal.cshtml" />
     <Content Include="Views\Admin\_AdminDeleteConfirmationModal.cshtml" />
     <Content Include="Views\Admin\_AdminSubgridEdit.cshtml" />
@@ -283,6 +293,7 @@
     <Content Include="Templates\Emails\dealer-demo-owner.html" />
     <Content Include="Templates\Emails\dealer-demo-confirmation.html" />
     <Content Include="Templates\Emails\contact-inquiry.html" />
+    <Content Include="Templates\Emails\free-form-customer.html" />
     <Content Include="Templates\Emails\trial-expired.html" />
     <Content Include="Content\images\landing-showcase\dealer-inventory-grid.png" />
     <Content Include="Content\images\landing-showcase\vehicle-details-gallery.png" />

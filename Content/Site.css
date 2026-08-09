@@ -547,6 +547,7 @@ h2 em {
   padding: 0 13px;
   display: flex;
   align-items: center;
+  gap: 4px;
   border-bottom: 1px solid #2a3647;
 }
 
@@ -7968,6 +7969,8 @@ body .vin-format-tabs button:disabled {
 }
 
 body .code-tabs button {
+  align-self: center;
+  height: 39px;
   color: var(--control-silver-text);
   font-weight: 700;
 }
@@ -7983,7 +7986,10 @@ body .code-tabs button.active {
 }
 
 body #copy-vin-response,
+body button.copy-action-button,
 body .vin-run-api-button,
+body .nav-logout button,
+body .code-tabs button,
 body .vin-format-tabs button {
   border: 1px solid #b9bec4 !important;
   border-radius: 6px;
@@ -8001,7 +8007,10 @@ body .vin-format-tabs button {
 }
 
 body #copy-vin-response:hover,
+body button.copy-action-button:hover,
 body .vin-run-api-button:hover,
+body .nav-logout button:hover,
+body .code-tabs button:hover,
 body .vin-format-tabs button:hover {
   border-color: #969da4 !important;
   color: #1f252a !important;
@@ -8012,7 +8021,10 @@ body .vin-format-tabs button:hover {
 }
 
 body #copy-vin-response:focus-visible,
+body button.copy-action-button:focus-visible,
 body .vin-run-api-button:focus-visible,
+body .nav-logout button:focus-visible,
+body .code-tabs button:focus-visible,
 body .vin-format-tabs button:focus-visible {
   border-color: #747c84 !important;
   color: #1f252a !important;
@@ -8023,6 +8035,9 @@ body .vin-format-tabs button:focus-visible {
   outline: 0;
 }
 
+body .code-tabs button.active,
+body .code-tabs button.active:hover,
+body .code-tabs button.active:focus-visible,
 body .vin-format-tabs button.active,
 body .vin-format-tabs button.active:hover,
 body .vin-format-tabs button.active:focus-visible {
@@ -8034,9 +8049,9 @@ body .vin-format-tabs button.active:focus-visible {
     0 2px 5px rgba(31, 37, 43, 0.24) !important;
 }
 
-body #copy-vin-response,
-body #copy-vin-response:hover,
-body #copy-vin-response:focus-visible {
+body button.copy-action-button,
+body button.copy-action-button:hover,
+body button.copy-action-button:focus-visible {
   width: 28px;
   min-width: 28px;
   height: 28px;
@@ -8045,7 +8060,7 @@ body #copy-vin-response:focus-visible {
   color: #252a2f !important;
 }
 
-.vin-copy-icon {
+.copy-action-icon {
   width: 13px;
   height: 13px;
   fill: none;
@@ -8055,15 +8070,15 @@ body #copy-vin-response:focus-visible {
   stroke-width: 1.8;
 }
 
-.vin-copy-check {
+.copy-action-check {
   display: none;
 }
 
-#copy-vin-response.copied .vin-copy-default {
+.copy-action-button.copied .copy-action-default {
   display: none;
 }
 
-#copy-vin-response.copied .vin-copy-check {
+.copy-action-button.copied .copy-action-check {
   display: block;
 }
 
