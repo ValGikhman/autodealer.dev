@@ -64,7 +64,7 @@
                     <h3>Vehicle report div</h3>
                     <p>No form is used. JavaScript loads this embedded div automatically when the page is ready.</p>
                 </div>
-                <button class="button button-primary" id="reload-live-vehicle" type="button">Reload live HTML</button>
+                <button class="button button-primary vin-run-api-button" id="reload-live-vehicle" type="button">Reload live HTML</button>
             </div>
             <p class="vin-widget-live-status" id="vin-widget-demo-status" role="status">
                 Loading the live HTML report...
@@ -220,7 +220,7 @@ AutoDealerVinReport.load(report, nextVin)
             </div>
 
             <div class="next-doc">
-                <a class="button site-cta" href="@Url.Action("Authentication")">
+                <a class="button site-cta vin-run-api-button" href="@Url.Action("Authentication")">
                     <span>Authentication and API keys</span>
                     <i aria-hidden="true">&rarr;</i>
                 </a>

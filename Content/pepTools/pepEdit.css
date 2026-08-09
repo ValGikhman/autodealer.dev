@@ -1,0 +1,469 @@
+/*
+ * PepEdit v1.0.0 – jQuery WYSIWYG editor styles
+ *
+ * All classes are prefixed with `pe-` to avoid collisions.
+ * Include this stylesheet alongside pepEdit.js.
+ *
+ * Bootstrap Icons are optional; local toolbar glyph fallbacks are included below.
+ */
+
+/* ================================================================
+   CSS Custom Properties
+   ================================================================ */
+:root {
+    /* — Colors — */
+    --pe-color-border:            #dfe3e8;
+    --pe-color-border-strong:     #cbd2d9;
+    --pe-color-border-focus:      #4f8ef0;
+
+    --pe-color-bg:                #ffffff;
+    --pe-color-bg-toolbar:        #fbfcfd;
+    --pe-color-bg-group:          #ffffff;
+    --pe-color-bg-btn-hover:      #eef2f7;
+    --pe-color-bg-btn-active:     #e6f0fd;
+
+    --pe-color-text:              #1e293b;
+    --pe-color-text-muted:        #64748b;
+    --pe-color-text-subtle:       #94a3b8;
+    --pe-color-placeholder:       #9aa5b1;
+
+    --pe-color-accent:            #2563eb;
+    --pe-color-shadow-focus:      rgba(37, 99, 235, 0.15);
+    --pe-color-shadow-toolbar:    rgba(15, 23, 42, 0.04);
+    --pe-color-shadow-group:      rgba(15, 23, 42, 0.06);
+    --pe-text-shadow:             0 1px 0 rgba(255, 255, 255, 0.6);
+
+    /* — Sizes — */
+    --pe-border-radius:           0.625rem;
+    --pe-border-radius-sm:        0.4rem;
+    --pe-border-radius-group:     0.5rem;
+    --pe-btn-size:                2.05rem;
+    --pe-toolbar-padding:         0.5rem 0.625rem;
+
+    /* — Motion — */
+    --pe-transition:              120ms ease;
+}
+
+/* ================================================================
+   Wrapper
+   ================================================================ */
+.pe-editor {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--pe-color-border);
+    border-radius: var(--pe-border-radius);
+    background: var(--pe-color-bg);
+    box-shadow: 0 1px 2px var(--pe-color-shadow-toolbar);
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    transition: border-color var(--pe-transition), box-shadow var(--pe-transition);
+}
+
+.pe-editor:focus-within {
+    border-color: var(--pe-color-border-focus);
+    box-shadow: 0 0 0 0.2rem var(--pe-color-shadow-focus);
+}
+
+/* ================================================================
+   Toolbar
+   ================================================================ */
+.pe-toolbar {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.375rem;
+    padding: var(--pe-toolbar-padding);
+    background: var(--pe-color-bg-toolbar);
+    border-bottom: 1px solid var(--pe-color-border);
+}
+
+.pe-tools-area {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* ── Toolbar settings (show/hide tools) ─────────────────────────────────── */
+.pe-settings-wrap {
+    position: relative;
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding-left: 0.375rem;
+    border-left: 1px solid var(--pe-color-border);
+}
+
+.pe-settings-btn {
+    color: var(--pe-color-text-muted);
+}
+
+.pe-settings-panel {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    right: 0;
+    z-index: 20;
+    width: 15rem;
+    max-height: 20rem;
+    overflow-y: auto;
+    background: var(--pe-color-bg);
+    border: 1px solid var(--pe-color-border);
+    border-radius: var(--pe-border-radius-sm);
+    box-shadow: 0 0.5rem 1.5rem rgba(15, 23, 42, 0.14);
+    padding: 0.5rem 0;
+}
+
+.pe-settings-title {
+    padding: 0.25rem 0.9rem 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--pe-color-text-subtle);
+    text-shadow: var(--pe-text-shadow);
+}
+
+.pe-settings-subtitle {
+    margin-top: 0.25rem;
+    padding: 0.5rem 0.9rem 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--pe-color-text-subtle);
+    border-top: 1px solid var(--pe-color-border);
+    text-shadow: var(--pe-text-shadow);
+}
+
+.pe-settings-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.pe-settings-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+    color: var(--pe-color-text);
+    cursor: pointer;
+    user-select: none;
+    text-shadow: var(--pe-text-shadow);
+}
+
+.pe-settings-item:hover {
+    background: var(--pe-color-bg-btn-hover);
+}
+
+.pe-settings-item input[type="checkbox"] {
+    margin: 0;
+    accent-color: var(--pe-color-accent);
+}
+
+.pe-settings-icon {
+    color: var(--pe-color-text-subtle);
+    width: 1rem;
+    text-align: center;
+}
+
+/* Each cluster of related tools renders as a subtle bordered pill,
+   visually separating concerns (text style, alignment, lists, etc.) */
+.pe-tool-group {
+    display: flex;
+    align-items: center;
+    gap: 0.0625rem;
+    padding: 0.125rem;
+    background: var(--pe-color-bg-group);
+    border: 1px solid var(--pe-color-border);
+    border-radius: var(--pe-border-radius-group);
+    box-shadow: 0 1px 1px var(--pe-color-shadow-group);
+}
+
+.pe-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--pe-btn-size);
+    height: var(--pe-btn-size);
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--pe-border-radius-sm);
+    background: transparent;
+    color: var(--pe-color-text);
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+    text-shadow: var(--pe-text-shadow);
+    transition: background-color var(--pe-transition), color var(--pe-transition), box-shadow var(--pe-transition);
+}
+
+.pe-btn:hover:not(:disabled) {
+    background: var(--pe-color-bg-btn-hover);
+}
+
+.pe-btn:active:not(:disabled) {
+    transform: translateY(0.5px);
+}
+
+.pe-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.15rem var(--pe-color-shadow-focus);
+}
+
+.pe-btn.pe-active {
+    background: var(--pe-color-bg-btn-active);
+    color: var(--pe-color-accent);
+    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.25);
+}
+
+.pe-btn:disabled,
+.pe-select:disabled,
+.pe-color-input:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.pe-select {
+    height: var(--pe-btn-size);
+    padding: 0 1.5rem 0 0.55rem;
+    border: 1px solid transparent;
+    border-radius: var(--pe-border-radius-sm);
+    background: transparent;
+    color: var(--pe-color-text);
+    font-size: 0.82rem;
+    max-width: 8.5rem;
+    cursor: pointer;
+    appearance: none;
+    text-shadow: var(--pe-text-shadow);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2364748b' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.55rem center;
+    transition: background-color var(--pe-transition);
+}
+
+.pe-select:hover:not(:disabled) {
+    background-color: var(--pe-color-bg-btn-hover);
+}
+
+.pe-select:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.15rem var(--pe-color-shadow-focus);
+}
+
+.pe-color-group {
+    position: relative;
+    display: inline-flex;
+}
+
+.pe-color-btn {
+    position: relative;
+    flex-direction: column;
+    gap: 0;
+    padding-top: 0.2rem;
+}
+
+.pe-color-swatch {
+    display: block;
+    width: 1.05rem;
+    height: 0.16rem;
+    margin-top: 0.15rem;
+    border-radius: 1px;
+    background: #1e293b;
+}
+
+.pe-color-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    border: 0;
+    padding: 0;
+}
+
+/* ================================================================
+   Editable body
+   ================================================================ */
+.pe-body {
+    min-height: 150px;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 0.9rem 1.1rem;
+    color: var(--pe-color-text);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    outline: none;
+    background: var(--pe-color-bg);
+}
+
+.pe-body:empty::before {
+    content: attr(data-placeholder);
+    color: var(--pe-color-placeholder);
+    pointer-events: none;
+}
+
+.pe-body p {
+    margin: 0 0 0.75rem;
+}
+
+.pe-body a {
+    color: var(--pe-color-accent);
+}
+
+.pe-body table.pe-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0.5rem 0 1rem;
+}
+
+.pe-body table.pe-table td {
+    border: 1px solid var(--pe-color-border-strong);
+    padding: 0.45rem 0.65rem;
+    min-width: 2rem;
+}
+
+/* ================================================================
+   Source view (viewHtml tool)
+   ================================================================ */
+.pe-source {
+    display: none;
+    width: 100%;
+    min-height: 150px;
+    max-height: 70vh;
+    border: 0;
+    padding: 0.9rem 1.1rem;
+    background: #0f172a;
+    color: #e2e8f0;
+    font-family: Consolas, "Cascadia Code", "Courier New", monospace;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    resize: vertical;
+    outline: none;
+}
+
+/* ================================================================
+   Read-only state
+   ================================================================ */
+.pe-editor.pe-readonly {
+    box-shadow: none;
+}
+
+.pe-editor.pe-readonly .pe-toolbar {
+    opacity: 0.6;
+}
+
+.pe-editor.pe-readonly .pe-body {
+    background: var(--pe-color-bg-toolbar);
+    color: var(--pe-color-text-muted);
+    cursor: default;
+}
+
+/* ================================================================
+   Selection context menu (right-click on selected text)
+   ================================================================ */
+.pe-context-menu {
+    position: fixed;
+    z-index: 1050;
+    min-width: 13rem;
+    max-width: 16rem;
+    max-height: 22rem;
+    overflow-y: auto;
+    background: var(--pe-color-bg);
+    border: 1px solid var(--pe-color-border);
+    border-radius: var(--pe-border-radius-sm);
+    box-shadow: 0 0.75rem 2rem rgba(15, 23, 42, 0.18);
+    padding: 0.35rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.pe-ctx-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    border: 0;
+    border-radius: var(--pe-border-radius-sm);
+    background: transparent;
+    color: var(--pe-color-text);
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.pe-ctx-btn:hover {
+    background: var(--pe-color-bg-btn-hover);
+}
+
+.pe-ctx-icon {
+    flex: 0 0 auto;
+    width: 1.1rem;
+    text-align: center;
+    color: var(--pe-color-text-muted);
+}
+
+.pe-ctx-label {
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: var(--pe-text-shadow);
+}
+
+.pe-ctx-row-select {
+    justify-content: space-between;
+}
+
+.pe-ctx-row-select .pe-select {
+    max-width: 7rem;
+    background-color: var(--pe-color-bg-toolbar);
+}
+
+.pe-ctx-row .pe-color-group {
+    flex: 0 0 auto;
+}
+
+.pe-ctx-empty {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.82rem;
+    color: var(--pe-color-text-subtle);
+}
+/* Local PepEdit icon fallback. The site does not load the Bootstrap Icons font. */
+.pe-editor .bi[class*="bi-"]::before {
+    display: inline-block;
+    min-width: 1em;
+    font-family: Arial, sans-serif;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    text-decoration: none;
+}
+
+.pe-editor .bi.bi-type-bold::before { content: "B"; font-weight: 900; }
+.pe-editor .bi.bi-type-italic::before { content: "I"; font-family: Georgia, serif; font-style: italic; }
+.pe-editor .bi.bi-type-underline::before { content: "U"; text-decoration: underline; text-underline-offset: 2px; }
+.pe-editor .bi.bi-type-strikethrough::before { content: "S"; text-decoration: line-through; }
+.pe-editor .bi.bi-subscript::before { content: "x\2082"; }
+.pe-editor .bi.bi-superscript::before { content: "x\00B2"; }
+.pe-editor .bi.bi-text-left::before { content: "\2261"; width: 1em; text-align: left; }
+.pe-editor .bi.bi-text-center::before { content: "\2261"; width: 1em; text-align: center; }
+.pe-editor .bi.bi-text-right::before { content: "\2261"; width: 1em; text-align: right; }
+.pe-editor .bi.bi-justify::before { content: "\2630"; }
+.pe-editor .bi.bi-list-ol::before { content: "1."; }
+.pe-editor .bi.bi-list-ul::before { content: "\2022"; font-size: 1.3em; }
+.pe-editor .bi.bi-text-indent-right::before { content: "\2192"; }
+.pe-editor .bi.bi-text-indent-left::before { content: "\2190"; }
+.pe-editor .bi.bi-palette::before { content: "A"; }
+.pe-editor .bi.bi-paint-bucket::before { content: "\25A0"; }
+.pe-editor .bi.bi-link-45deg::before { content: "\221E"; }
+.pe-editor .bi.bi-image::before { content: "\25A7"; }
+.pe-editor .bi.bi-table::before { content: "\25A6"; }
+.pe-editor .bi.bi-eraser::before { content: "\232B"; }
+.pe-editor .bi.bi-code-slash::before { content: "</>"; font-family: monospace; font-size: 0.72em; }
+.pe-editor .bi.bi-arrow-counterclockwise::before { content: "\21B6"; font-size: 1.2em; }
+.pe-editor .bi.bi-arrow-clockwise::before { content: "\21B7"; font-size: 1.2em; }
+.pe-editor .bi.bi-gear::before { content: "\2699"; }
+.pe-editor .bi.bi-sliders::before { content: "\2261"; }

@@ -188,6 +188,37 @@ namespace autodealer.dev.Models {
         public string HtmlBody { get; set; }
     }
 
+    public sealed class AdminCustomerEmailSendViewModel {
+        [Range(1, long.MaxValue)]
+        public long ClientId { get; set; }
+
+        [Required, EmailAddress, StringLength(254)]
+        [SanitizeInput(InputSanitizationKind.Email)]
+        public string To { get; set; }
+
+        [Required, StringLength(200)]
+        public string Subject { get; set; }
+
+        [Required, StringLength(200000), System.Web.Mvc.AllowHtml, PreserveInput]
+        public string Body { get; set; }
+    }
+
+    public sealed class AdminInboxEmailSendViewModel {
+        [Required, EmailAddress, StringLength(254)]
+        [SanitizeInput(InputSanitizationKind.Email)]
+        public string To { get; set; }
+
+        [Required, EmailAddress, StringLength(254)]
+        [SanitizeInput(InputSanitizationKind.Email)]
+        public string From { get; set; }
+
+        [Required, StringLength(200)]
+        public string Subject { get; set; }
+
+        [StringLength(200000), System.Web.Mvc.AllowHtml, PreserveInput]
+        public string Body { get; set; }
+    }
+
     public sealed class AdminDemoRequestViewModel {
         public Guid RequestId { get; set; }
         public string BusinessName { get; set; }

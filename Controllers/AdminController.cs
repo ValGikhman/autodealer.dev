@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Linq;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Principal;
 using System.Web;
@@ -81,6 +82,151 @@ namespace autodealer.dev.Controllers {
 
         [AdminAuthorize]
         [HttpGet]
+        public ActionResult Mail() {
+            return View();
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
+        public ActionResult InboxGridData() {
+            try {
+                var messages = AdminInboxService.GetInbox();
+                var rows = messages.Select(message => new {
+                    message.Uid,
+                    Received = message.ReceivedUtc == DateTime.MinValue
+                        ? string.Empty
+                        : message.ReceivedUtc.ToString("MMM d, yyyy HH:mm:ss 'UTC'"),
+                    ReceivedSort = message.ReceivedUtc == DateTime.MinValue
+                        ? string.Empty
+                        : message.ReceivedUtc.ToString("o"),
+                    message.From,
+                    message.FromEmail,
+                    message.Subject,
+                    message.IsUnread,
+                    View = true
+                });
+                return Json(new {
+                    Data = rows,
+                    UnreadCount = messages.Count(message => message.IsUnread),
+                    TotalCount = messages.Count
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex) {
+                Trace.TraceError("Admin inbox retrieval failed: {0}", ex);
+                Response.StatusCode = 503;
+                return Json(new {
+                    Data = new object[0],
+                    Message = "The inbox could not be loaded. Verify the IMAP configuration and try again."
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
+        public ActionResult InboxMessage(uint uid) {
+            try {
+                var message = AdminInboxService.GetMessage(uid);
+                return new JsonResult {
+                    Data = new {
+                        message.Uid,
+                        Received = message.ReceivedUtc.ToString("MMM d, yyyy HH:mm:ss 'UTC'"),
+                        message.From,
+                        message.FromEmail,
+                        message.Subject,
+                        message.HtmlBody,
+                        UnreadCount = AdminInboxService.GetUnreadCount()
+                    },
+                    JsonRequestBehavior = JsonRequestBehavior.AllowGet,
+                    MaxJsonLength = int.MaxValue
+                };
+            }
+            catch (Exception ex) {
+                Trace.TraceError("Admin inbox message retrieval failed for UID {0}: {1}", uid, ex);
+                Response.StatusCode = 503;
+                return Json(new {
+                    Message = "The message could not be loaded from the inbox."
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
+        public ActionResult InboxUnreadCount() {
+            try {
+                return Json(new { Count = AdminInboxService.GetUnreadCount() }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex) {
+                Trace.TraceError("Admin inbox unread count failed: {0}", ex);
+                Response.StatusCode = 503;
+                return Json(new { Message = "The inbox count is unavailable." }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteInboxMessage(uint uid) {
+            try {
+                var unreadCount = AdminInboxService.MoveToTrash(uid);
+                return Json(new { Ok = true, UnreadCount = unreadCount });
+            }
+            catch (Exception ex) {
+                Trace.TraceError("Admin inbox message deletion failed for UID {0}: {1}", uid, ex);
+                Response.StatusCode = 503;
+                return Json(new {
+                    Ok = false,
+                    Message = "The message could not be moved to Trash."
+                });
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SendInboxEmail(AdminInboxEmailSendViewModel model) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            if (!ModelState.IsValid) return EditValidationFailure();
+
+            try {
+                var configuredFrom = (System.Configuration.ConfigurationManager.AppSettings["Smtp:From"] ?? string.Empty).Trim();
+                if (!string.Equals((model.From ?? string.Empty).Trim(), configuredFrom, StringComparison.OrdinalIgnoreCase)) {
+                    Response.StatusCode = 400;
+                    return Json(new { Ok = false, Message = "From must match the configured sales mailbox." });
+                }
+
+                var customer = adminService.GetDashboard().Customers.FirstOrDefault(item =>
+                    string.Equals(item.Email, model.To, StringComparison.OrdinalIgnoreCase));
+                var recipientName = customer == null ? string.Empty : customer.ContactName;
+                var html = EmailTemplateRenderer.Render(
+                    EmailTemplateName.FreeFormCustomerEmail,
+                    new EmailTemplateValues()
+                        .Add("FROM_ADDRESS", configuredFrom)
+                        .AddAttribute("FROM_ADDRESS_ATTR", configuredFrom)
+                        .AddHtml("MESSAGE_BODY", model.Body ?? string.Empty));
+
+                SmtpMailSender.Send(
+                    model.To,
+                    recipientName,
+                    model.Subject,
+                    html,
+                    null,
+                    null);
+
+                return Json(new { Ok = true, Message = "The email was sent." });
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException || ex is FormatException || ex is System.Net.Mail.SmtpException) {
+                Trace.TraceError("Admin inbox email delivery failed: {0}", ex);
+                Response.StatusCode = 503;
+                return Json(new {
+                    Ok = false,
+                    Message = "The email could not be delivered. Verify the addresses and SMTP configuration, then try again."
+                });
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
         public ActionResult CustomerGridData() {
             var rows = adminService.GetDashboard().Customers.Select(customer => new {
                 customer.ClientId,
@@ -116,6 +262,7 @@ namespace autodealer.dev.Controllers {
                 key.KeyPrefix,
                 key.Scopes,
                 key.Status,
+                StatusBadgeClass = ApiKeyStatusBadgeClass(key.Status),
                 Created = key.CreatedUtc.ToString("MMM d, yyyy HH:mm 'UTC'"),
                 CreatedSort = key.CreatedUtc.ToString("o"),
                 LastUsed = key.LastUsedUtc.HasValue
@@ -178,6 +325,55 @@ namespace autodealer.dev.Controllers {
                     Ok = false,
                     Message = "The API key could not be issued because the database is temporarily unavailable."
                 });
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SendCustomerEmail(AdminCustomerEmailSendViewModel model) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            if (!ModelState.IsValid) return EditValidationFailure();
+
+            try {
+                var client = adminService.GetClientForEdit(model.ClientId);
+                var customerName = ((client.FirstName ?? string.Empty) + " " + (client.LastName ?? string.Empty)).Trim();
+                if (customerName.Length == 0) customerName = client.BusinessName;
+                var fromAddress = (System.Configuration.ConfigurationManager.AppSettings["Smtp:From"] ?? string.Empty).Trim();
+
+                var html = EmailTemplateRenderer.Render(
+                    EmailTemplateName.FreeFormCustomerEmail,
+                    new EmailTemplateValues()
+                        .Add("FROM_ADDRESS", fromAddress)
+                        .AddAttribute("FROM_ADDRESS_ATTR", fromAddress)
+                        .AddHtml("MESSAGE_BODY", model.Body));
+
+                SmtpMailSender.SendForClient(
+                    client.ClientId,
+                    model.To,
+                    customerName,
+                    model.Subject,
+                    html,
+                    null,
+                    null);
+
+                return Json(new {
+                    Ok = true,
+                    Message = "The email was sent and added to the customer history."
+                });
+            }
+            catch (KeyNotFoundException ex) {
+                Response.StatusCode = 404;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (SqlException) {
+                Response.StatusCode = 503;
+                return Json(new { Ok = false, Message = "The customer email could not be sent because the database is temporarily unavailable." });
+            }
+            catch (Exception ex) when (ex is InvalidOperationException || ex is FormatException || ex is System.Net.Mail.SmtpException) {
+                Response.StatusCode = 503;
+                return Json(new { Ok = false, Message = "The customer email could not be delivered. Verify the addresses and SMTP configuration, then try again." });
             }
         }
 
@@ -599,6 +795,13 @@ namespace autodealer.dev.Controllers {
                 string.Equals(status, "inactive", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(status, "past_due", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(status, "canceled", StringComparison.OrdinalIgnoreCase)) return "danger";
+            return "secondary";
+        }
+
+        private static string ApiKeyStatusBadgeClass(string status) {
+            if (string.Equals(status, "active", StringComparison.OrdinalIgnoreCase)) return "success";
+            if (string.Equals(status, "revoked", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(status, "expired", StringComparison.OrdinalIgnoreCase)) return "danger";
             return "secondary";
         }
 

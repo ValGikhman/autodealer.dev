@@ -26,14 +26,17 @@ namespace autodealer.dev {
 
             bundles.Add(new ScriptBundle("~/bundles/admin-dashboard").Include(
                       "~/Scripts/pepTools/pepGrid.js",
+                      "~/Scripts/pepTools/pepEdit.js",
                       "~/Scripts/accountCredentialValidation.js",
-                      "~/Scripts/Admin/adminDashboard.js"));
+                      "~/Scripts/Admin/adminDashboard.js",
+                      "~/Scripts/Admin/adminMail.js"));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/site.css"));
 
             bundles.Add(new StyleBundle("~/bundles/admin-css").Include(
                       "~/Content/pepTools/pepGrid.css",
+                      "~/Content/pepTools/pepEdit.css",
                       "~/Content/dashboard.css"));
         }
     }

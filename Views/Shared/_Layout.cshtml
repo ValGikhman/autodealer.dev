@@ -114,6 +114,10 @@
             <rect x="3" y="5" width="18" height="14" rx="2"/>
             <path d="m4 7 8 6 8-6"/>
         </symbol>
+        <symbol id="icon-view" viewBox="0 0 24 24">
+            <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/>
+            <circle cx="12" cy="12" r="2.75"/>
+        </symbol>
         <symbol id="icon-support" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="9"/>
             <circle cx="12" cy="12" r="4"/>
@@ -182,6 +186,10 @@
                     <a href="@Url.Action("Dashboard", "Admin")">Dashboard</a>
                     <a href="@Url.Action("Customers", "Admin")">Customers</a>
                     <a href="@Url.Action("Opportunities", "Admin")">Opportunities</a>
+                    <a class="admin-mail-nav-link" href="@Url.Action("Mail", "Admin")">
+                        <span>Mail</span>
+                        <span class="admin-mail-nav-badge" id="admin-mail-nav-badge" data-url="@Url.Action("InboxUnreadCount", "Admin")" aria-label="Unread inbox messages" hidden>0</span>
+                    </a>
                     using (Html.BeginForm("Logout", "Admin", FormMethod.Post, new { @class = "nav-logout" })) { @Html.AntiForgeryToken()<button type="submit">Sign out</button> }
                 } else {
                     <a href="@Url.Action("Index", "Solutions")">Solutions</a>
@@ -192,7 +200,7 @@
                         using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { @class = "nav-logout" })) { @Html.AntiForgeryToken()<button type="submit">Sign out</button> }
                     } else {
                         <a class="nav-quiet" href="@Url.Action("Login", "Account")">Sign in</a>
-                        <a class="button site-cta" href="@Url.Action("Register", "Account")">
+                        <a class="button site-cta vin-run-api-button" href="@Url.Action("Register", "Account")">
                             <span>Get an API key</span>
                             <i aria-hidden="true">&rarr;</i>
                         </a>
@@ -292,7 +300,15 @@
 
             $('.nav-toggle').on('click', function () { var open = $(this).attr('aria-expanded') === 'true'; $(this).attr('aria-expanded', !open); $('#site-nav').toggleClass('open', !open); });
             $('.site-nav a').on('click', function () { $('#site-nav').removeClass('open'); $('.nav-toggle').attr('aria-expanded', 'false'); });
-            $('[data-copy]').on('click', function () { var $button = $(this), text = $($button.data('copy')).text(); navigator.clipboard.writeText(text).then(function () { var old = $button.text(); $button.text('Copied'); setTimeout(function () { $button.text(old); }, 1400); }); });
+            $('[data-copy]').on('click', function () {
+                var $button = $(this), text = $($button.data('copy')).text();
+                navigator.clipboard.writeText(text).then(function () {
+                    $button.addClass('copied').attr({ 'aria-label': 'Copied', title: 'Copied' });
+                    setTimeout(function () {
+                        $button.removeClass('copied').attr({ 'aria-label': 'Copy code', title: 'Copy code' });
+                    }, 1400);
+                });
+            });
             $('[data-tab]').on('click', function () { var name = $(this).data('tab'); $('[data-tab]').removeClass('active'); $(this).addClass('active'); $('[data-code]').attr('hidden', true); $('[data-code="' + name + '"]').removeAttr('hidden'); });
             $(document).on('click', '[data-legal-modal]', function (event) {
                 if (!window.bootstrap || !document.getElementById('legal-modal')) return;

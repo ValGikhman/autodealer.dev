@@ -3,7 +3,7 @@
 
     $(function () {
         var modalElement = document.getElementById('dashboard-record-modal');
-        if (!modalElement || !window.bootstrap || !$.fn.pepGrid) return;
+        if (!modalElement || !window.bootstrap || !$.fn.pepGrid || !$.fn.pepEdit) return;
 
         var recordModal = window.bootstrap.Modal.getOrCreateInstance(modalElement);
         var sectionsElement = document.getElementById('dashboard-record-sections');
@@ -30,6 +30,15 @@
         var keyIssueName = document.getElementById('issue-api-key-name');
         var keyIssueSubmit = document.getElementById('issue-api-key-submit');
         var keyIssueError = document.getElementById('issue-api-key-error');
+        var newEmailModalElement = document.getElementById('new-email-modal');
+        var newEmailModal = window.bootstrap.Modal.getOrCreateInstance(newEmailModalElement);
+        var newEmailForm = document.getElementById('new-email-form');
+        var newEmailTo = document.getElementById('new-email-to');
+        var newEmailSubject = document.getElementById('new-email-subject');
+        var newEmailBody = document.getElementById('new-email-body');
+        var newEmailSubtitle = document.getElementById('new-email-subtitle');
+        var newEmailSubmit = document.getElementById('new-email-submit');
+        var newEmailError = document.getElementById('new-email-error');
         var deleteClientModalElement = document.getElementById('delete-client-modal');
         var deleteClientModal = window.bootstrap.Modal.getOrCreateInstance(deleteClientModalElement);
         var deleteClientForm = document.getElementById('delete-client-form');
@@ -50,6 +59,8 @@
         var opportunityRequestId = document.getElementById('opportunity-request-id');
         var opportunityDeleteOpen = document.getElementById('opportunity-delete-open');
         var pendingKeyIssue = null;
+        var pendingNewEmail = null;
+        var pendingNewEmailGreeting = '';
         var pendingSubgridEdit = null;
         var pendingClientDelete = null;
         var pendingOpportunityDelete = null;
@@ -58,6 +69,84 @@
         var expandedCustomerDetail = null;
         var clientDeleteParentModal = null;
         var opportunityDeleteParentModal = null;
+
+        $(newEmailBody).pepEdit({
+            height: 320,
+            placeholder: 'Write the email message...'
+        });
+
+        function openNewEmailModal(customer) {
+            pendingNewEmail = customer;
+            newEmailForm.reset();
+            newEmailTo.value = customer.Email || '';
+            newEmailSubject.value = '';
+            pendingNewEmailGreeting = 'Dear ' + valueOrEmpty(customer.ContactName || customer.BusinessName || 'Customer') + ',';
+            var greeting = $('<strong>').text(pendingNewEmailGreeting);
+            var editorTemplate = $('<div>')
+                .append($('<p>').append(greeting))
+                .append($('<p>').append('<br>'))
+                .html();
+            $(newEmailBody).pepEdit('value', editorTemplate);
+            newEmailSubtitle.textContent = 'Compose a message for ' + valueOrEmpty(customer.BusinessName) + '.';
+            newEmailError.hidden = true;
+            newEmailError.textContent = '';
+            newEmailSubmit.disabled = false;
+            setButtonLabel(newEmailSubmit, 'Send email');
+            newEmailModal.show();
+        }
+
+        newEmailForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var body = $(newEmailBody).pepEdit('value');
+            var bodyText = $('<div>').html(body).text().replace(/\u00a0/g, ' ').trim();
+            var hasMessage = bodyText && bodyText !== pendingNewEmailGreeting;
+            if (!pendingNewEmail || !newEmailForm.checkValidity() || !hasMessage) {
+                if (!newEmailForm.checkValidity()) newEmailForm.reportValidity();
+                if (!hasMessage) {
+                    newEmailError.textContent = 'Write an email message before sending.';
+                    newEmailError.hidden = false;
+                }
+                return;
+            }
+
+            newEmailBody.value = body;
+            var data = $(newEmailForm).serializeArray();
+            data.push({ name: 'ClientId', value: pendingNewEmail.ClientId });
+            data.push({
+                name: '__RequestVerificationToken',
+                value: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value
+            });
+            newEmailSubmit.disabled = true;
+            setButtonLabel(newEmailSubmit, 'Sending...');
+            newEmailError.hidden = true;
+
+            $.ajax({
+                url: $('#customer-grid').data('send-email-url'),
+                method: 'POST',
+                dataType: 'json',
+                data: data
+            }).done(function () {
+                newEmailModal.hide();
+                closeCustomerDetail();
+                $('#customer-grid').pepGrid('refresh');
+            }).fail(function (xhr) {
+                var response = xhr.responseJSON || {};
+                newEmailError.textContent = response.Message || 'The email could not be sent.';
+                newEmailError.hidden = false;
+            }).always(function () {
+                newEmailSubmit.disabled = false;
+                setButtonLabel(newEmailSubmit, 'Send email');
+            });
+        });
+
+        $(newEmailModalElement).on('hidden.bs.modal', function () {
+            pendingNewEmail = null;
+            pendingNewEmailGreeting = '';
+            newEmailForm.reset();
+            $(newEmailBody).pepEdit('value', '');
+            newEmailError.hidden = true;
+            newEmailError.textContent = '';
+        });
 
         function responseData(response) { return response && response.Data ? response.Data : []; }
         function clearEmailPreview() {
@@ -148,7 +237,7 @@
             });
         }
         function resetRecordModalPanels() {
-            modalElement.classList.remove('dashboard-email-modal', 'dashboard-subgrid-edit-modal', 'dashboard-new-client-modal', 'dashboard-confirmation-modal');
+            modalElement.classList.remove('dashboard-email-modal', 'dashboard-subgrid-edit-modal', 'dashboard-new-client-modal', 'dashboard-subscription-modal', 'dashboard-confirmation-modal');
             modalElement.setAttribute('aria-labelledby', 'dashboard-record-title');
             subgridEditorElement.classList.remove('account-content-section');
             subgridEditForm.classList.remove('account-form', 'dashboard-style-form', 'dashboard-style-form-body');
@@ -165,6 +254,7 @@
         function openSubgridEditor(kind, item, gridElement, clientId, detailUrl, separator) {
             var isNewClient = kind === 'client-new';
             var isNewSubscription = kind === 'subscription-new';
+            var isSubscription = kind === 'subscription' || isNewSubscription;
             var isClient = kind === 'client' || isNewClient;
             var isApiKey = kind === 'api';
             var editUrl = $('#customer-grid').data(isNewClient ? 'new-client-url' : isClient ? 'edit-client-url' : isApiKey ? 'edit-api-key-url' : isNewSubscription ? 'new-subscription-url' : 'edit-subscription-url');
@@ -175,6 +265,7 @@
             resetRecordModalPanels();
             modalElement.classList.add('dashboard-subgrid-edit-modal');
             if (isNewClient) modalElement.classList.add('dashboard-new-client-modal');
+            if (isSubscription) modalElement.classList.add('dashboard-subscription-modal');
             subgridEditorElement.classList.toggle('account-content-section', isNewClient);
             subgridEditForm.classList.toggle('account-form', isNewClient);
             subgridEditForm.classList.toggle('dashboard-style-form', isNewClient);
@@ -188,7 +279,7 @@
                         'Their primary API key will then be issued securely.'
                     : 'Changing account status affects customer access.'
                 : isApiKey ? 'Changing key status affects API access immediately.'
-                    : isNewSubscription ? 'Review the plan, status, and billing period before creating the subscription.' : 'Double-check status and billing dates before saving.';
+                    : '';
             subgridEditError.hidden = true;
             clientCreateResult.hidden = true;
             subgridEditSave.disabled = true;
@@ -502,6 +593,7 @@
 
         function openOpportunityEditor(item) {
             opportunityEditIsNew = !item || !item.RequestId;
+            opportunityEditModalElement.classList.toggle('dashboard-new-opportunity-modal', opportunityEditIsNew);
             opportunityEditForm.reset();
             opportunityRequestId.disabled = opportunityEditIsNew;
             opportunityRequestId.value = opportunityEditIsNew ? '' : item.RequestId;
@@ -513,7 +605,7 @@
             text('opportunity-edit-kicker', opportunityEditIsNew ? 'NEW OPPORTUNITY' : 'OPPORTUNITY');
             text('opportunity-edit-title', opportunityEditIsNew ? 'Add a new opportunity' : 'Edit opportunity');
             text('opportunity-edit-subtitle', opportunityEditIsNew ? 'Create a prospective dealer record for follow-up.' : 'Update the prospective dealer and follow-up status.');
-            text('opportunity-edit-created', opportunityEditIsNew ? 'Created when saved' : 'Loading...');
+            text('opportunity-edit-created', opportunityEditIsNew ? '' : 'Loading...');
             opportunityEditModal.show();
 
             $.getJSON($demoGrid.data(opportunityEditIsNew ? 'new-url' : 'edit-url'), opportunityEditIsNew ? {} : { id: item.RequestId })
@@ -530,7 +622,7 @@
                     opportunityValue('opportunity-message', response.Message);
                     setSelectOptions(document.getElementById('opportunity-contact-method'), response.ContactOptions, response.PreferredContact);
                     setSelectOptions(document.getElementById('opportunity-status'), response.StatusOptions, response.Status);
-                    text('opportunity-edit-created', opportunityEditIsNew ? 'Created when saved' : 'Received ' + (response.CreatedUtc || ''));
+                    text('opportunity-edit-created', opportunityEditIsNew ? '' : 'Received ' + (response.CreatedUtc || ''));
                     opportunityEditSave.disabled = false;
                     opportunityDeleteOpen.hidden = opportunityEditIsNew;
                     document.getElementById('opportunity-business').focus();
@@ -588,6 +680,7 @@
         });
 
         $(opportunityEditModalElement).on('hidden.bs.modal', function () {
+            opportunityEditModalElement.classList.remove('dashboard-new-opportunity-modal');
             opportunityEditForm.reset();
             opportunityRequestId.disabled = false;
             opportunityDeleteOpen.hidden = true;
@@ -633,6 +726,10 @@
                 context.issueResult.classList.remove('is-error');
                 context.issueResult.querySelector('span').textContent = response.Message + ' This full key is shown once:';
                 context.issueResult.querySelector('code').textContent = response.ApiKey;
+                var resultCopyButton = context.issueResult.querySelector('.customer-api-copy');
+                resultCopyButton.classList.remove('copied');
+                resultCopyButton.setAttribute('aria-label', 'Copy API key');
+                resultCopyButton.setAttribute('title', 'Copy API key');
                 context.issueResult.hidden = false;
                 context.detail.dataItem.ApiKeyCount = Number(context.detail.dataItem.ApiKeyCount || 0) + 1;
                 context.toggle.querySelector('span').textContent = context.detail.dataItem.ApiKeyCount;
@@ -814,7 +911,7 @@
             subgridEditSequence += 1;
             pendingSubgridEdit = null;
             clearEmailPreview();
-            modalElement.classList.remove('dashboard-email-modal', 'dashboard-subgrid-edit-modal', 'dashboard-new-client-modal', 'dashboard-confirmation-modal');
+            modalElement.classList.remove('dashboard-email-modal', 'dashboard-subgrid-edit-modal', 'dashboard-new-client-modal', 'dashboard-subscription-modal', 'dashboard-confirmation-modal');
             modalElement.setAttribute('aria-labelledby', 'dashboard-record-title');
             emailPreviewElement.hidden = true;
             subgridEditorElement.hidden = true;
@@ -827,7 +924,7 @@
 
         function expandCustomerEmails(detail) {
             var toggle = detail.event.target.closest('.customer-email-toggle');
-            if (!toggle || !detail.dataItem.EmailCount) return;
+            if (!toggle) return;
             detail.event.preventDefault();
             detail.event.stopPropagation();
 
@@ -849,6 +946,9 @@
             expandedCustomerDetail = { ownerRow: detail.rowElement, row: detailRow, toggle: toggle, kind: 'email' };
 
             detailRow.querySelector('.customer-email-collapse').addEventListener('click', closeCustomerDetail);
+            detailRow.querySelector('.customer-email-new').addEventListener('click', function () {
+                openNewEmailModal(detail.dataItem);
+            });
 
             var emailUrl = $('#customer-grid').data('email-url');
             var separator = String(emailUrl).indexOf('?') >= 0 ? '&' : '?';
@@ -920,8 +1020,18 @@
                 copyButton.addEventListener('click', function () {
                     var value = issueResult.querySelector('code').textContent;
                     if (!value) return;
+                    var showCopiedState = function () {
+                        copyButton.classList.add('copied');
+                        copyButton.setAttribute('aria-label', 'Copied');
+                        copyButton.setAttribute('title', 'Copied');
+                        window.setTimeout(function () {
+                            copyButton.classList.remove('copied');
+                            copyButton.setAttribute('aria-label', 'Copy API key');
+                            copyButton.setAttribute('title', 'Copy API key');
+                        }, 1400);
+                    };
                     if (navigator.clipboard && navigator.clipboard.writeText) {
-                        navigator.clipboard.writeText(value).then(function () { copyButton.textContent = 'Copied'; });
+                        navigator.clipboard.writeText(value).then(showCopiedState);
                     } else {
                         var selection = window.getSelection();
                         var range = document.createRange();
@@ -930,7 +1040,7 @@
                         selection.addRange(range);
                         document.execCommand('copy');
                         selection.removeAllRanges();
-                        copyButton.textContent = 'Copied';
+                        showCopiedState();
                     }
                 });
             } else {

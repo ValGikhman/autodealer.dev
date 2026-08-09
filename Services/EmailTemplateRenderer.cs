@@ -18,7 +18,8 @@ namespace autodealer.dev.Services {
                 { EmailTemplateName.NewApiAccount, "new-api-account.html" },
                 { EmailTemplateName.DealerDemoOwnerNotification, "dealer-demo-owner.html" },
                 { EmailTemplateName.DealerDemoCustomerConfirmation, "dealer-demo-confirmation.html" },
-                { EmailTemplateName.ContactInquiryNotification, "contact-inquiry.html" }
+                { EmailTemplateName.ContactInquiryNotification, "contact-inquiry.html" },
+                { EmailTemplateName.FreeFormCustomerEmail, "free-form-customer.html" }
             };
 
         public static string Render(EmailTemplateName templateName, EmailTemplateValues values) {

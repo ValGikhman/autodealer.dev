@@ -154,6 +154,28 @@ body {
   font-size: 18px;
 }
 
+.email-rich-message {
+  white-space: normal;
+}
+.email-rich-message > :first-child {
+  margin-top: 0;
+}
+.email-rich-message > :last-child {
+  margin-bottom: 0;
+}
+.email-footer {
+  padding: 22px 38px;
+  border-top: 1px solid #e2e5e8;
+  color: #747b82;
+  background: #f5f6f7;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.email-footer a {
+  color: #4c535a;
+  text-decoration: none;
+}
+
 @media only screen and (max-width: 680px) {
   .email-page-cell {
     padding: 12px 6px !important;
