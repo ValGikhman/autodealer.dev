@@ -25,14 +25,21 @@
 
     function emptyStateMarkup() {
         return '<span class="pg-empty-content">'
-            + '<span class="pg-empty-icon" aria-hidden="true">'
-            + '<svg viewBox="0 0 24 24" focusable="false">'
-            + '<path d="M4 13.5 6.4 6h11.2l2.4 7.5V19H4v-5.5Z" />'
-            + '<path d="M4.5 14h4l1.4 2h4.2l1.4-2h4" />'
-            + '<path class="pg-empty-icon-accent" d="M17.5 3v3M16 4.5h3" />'
+            + '<span class="pg-empty-visual" aria-hidden="true">'
+            + '<span class="pg-empty-card-back"></span>'
+            + '<span class="pg-empty-icon">'
+            + '<svg viewBox="0 0 36 36" focusable="false">'
+            + '<rect x="5" y="6" width="22" height="20" rx="3" />'
+            + '<path d="M5 12h22M11 12v14M15 16h7M15 20h5" />'
+            + '<circle class="pg-empty-icon-accent" cx="25" cy="25" r="6" />'
+            + '<path class="pg-empty-icon-lens" d="m29.5 29.5 3 3" />'
             + '</svg>'
             + '</span>'
-            + '<span class="pg-empty-text">No records to display.</span>'
+            + '</span>'
+            + '<span class="pg-empty-copy">'
+            + '<span class="pg-empty-text">No records yet</span>'
+            + '<span class="pg-empty-hint">New activity will appear here.</span>'
+            + '</span>'
             + '</span>';
     }
 
