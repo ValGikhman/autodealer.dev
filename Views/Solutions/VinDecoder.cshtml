@@ -46,7 +46,7 @@
                     </span>
                     <input id="demo-api-key" name="apiKey" type="text" value="@demoApiKey" autocomplete="off" />
                 </label>
-                <button class="button button-primary" type="submit">Run API call</button>
+                <button class="button button-secondary vin-run-api-button" type="submit">Run API call</button>
             </div>
             <div class="vin-endpoint">
                 <b>GET</b>
@@ -63,7 +63,15 @@
                 </span>
                 <div>
                     <em id="vin-demo-status">Ready</em>
-                    <button type="button" id="copy-vin-response">Copy</button>
+                    <button type="button" id="copy-vin-response" aria-label="Copy response" title="Copy response">
+                        <svg class="vin-copy-icon vin-copy-default" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="8" y="8" width="11" height="11" rx="2"></rect>
+                            <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path>
+                        </svg>
+                        <svg class="vin-copy-icon vin-copy-check" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m5 12.5 4 4 10-9"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
             <pre class="vin-source-panel" data-vin-panel="json">
@@ -230,7 +238,12 @@ $(function () {
     $('#copy-vin-response').on('click', function () {
         var text = format === 'html' && !$htmlPanel.is('[hidden]') ? $('#vin-html-source').text() : $('[data-vin-panel="' + format + '"]').text();
         var $button = $(this);
-        if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { $button.text('Copied'); setTimeout(function () { $button.text('Copy'); }, 1200); });
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () {
+            $button.addClass('copied').attr({ 'aria-label': 'Copied', title: 'Copied' });
+            setTimeout(function () {
+                $button.removeClass('copied').attr({ 'aria-label': 'Copy response', title: 'Copy response' });
+            }, 1200);
+        });
     });
 });
 </script>
