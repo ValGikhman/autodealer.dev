@@ -473,6 +473,107 @@ body.pg-col-resizing {
   min-height: 80px;
 }
 
+.pg-state-msg.pg-empty {
+  background: transparent;
+  display: table-cell;
+  height: 150px;
+  min-height: 0;
+  padding: 1.5rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.pg-grid-table tbody tr:hover .pg-state-msg.pg-empty {
+  background: transparent;
+}
+
+.pg-empty-content {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.pg-empty-visual {
+  align-items: center;
+  display: inline-flex;
+  height: 4.6rem;
+  justify-content: center;
+  position: relative;
+  width: 4.8rem;
+}
+
+.pg-empty-card-back {
+  background: rgba(105, 145, 185, 0.24);
+  border: 1px solid rgba(105, 145, 185, 0.55);
+  border-radius: 0.8rem;
+  height: 3.25rem;
+  position: absolute;
+  transform: translate(0.45rem, -0.35rem) rotate(5deg);
+  width: 3.45rem;
+}
+
+.pg-empty-icon {
+  align-items: center;
+  background-color: var(--graphite-text);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.9rem;
+  box-shadow:
+    0 9px 20px rgba(31, 41, 55, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  color: #343a40;
+  display: inline-flex;
+  height: 3.6rem;
+  justify-content: center;
+  position: relative;
+  transform: translate(-0.18rem, 0.12rem) rotate(-3deg);
+  width: 3.8rem;
+  z-index: 1;
+}
+
+.pg-empty-icon svg {
+  fill: none;
+  height: 2.45rem;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.55;
+  width: 2.45rem;
+}
+
+.pg-empty-icon .pg-empty-icon-accent {
+  fill: var(--graphite-text);
+  stroke: #6991b9;
+  stroke-width: 2;
+}
+
+.pg-empty-icon .pg-empty-icon-lens {
+  stroke: #6991b9;
+  stroke-width: 2.2;
+}
+
+.pg-empty-copy {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pg-empty-text {
+  color: var(--graphite-text);
+  font-size: 0.92rem;
+  font-weight: 750;
+  letter-spacing: 0.015em;
+}
+
+.pg-empty-hint {
+  color: var(--pg-color-text-muted);
+  font-size: 0.74rem;
+  font-weight: 550;
+  letter-spacing: 0.02em;
+}
+
 .pg-state-msg.pg-loading {
   flex-direction: column;
   gap: 0.65rem;

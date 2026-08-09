@@ -83,6 +83,17 @@
             if (label) label.textContent = value;
             else button.textContent = value;
         }
+        function setCreateButtonContent(button, iconId, label) {
+            var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            var use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+            var text = document.createElement('span');
+            svg.setAttribute('class', 'admin-action-icon');
+            svg.setAttribute('aria-hidden', 'true');
+            use.setAttribute('href', iconId);
+            text.textContent = label;
+            svg.appendChild(use);
+            button.replaceChildren(svg, text);
+        }
         function subgridSubmitLabel(kind, submitting) {
             if (kind === 'client-new') {
                 return submitting ? 'Creating account...' : 'Create account and issue key';
@@ -590,7 +601,7 @@
             keyIssueError.hidden = true;
             keyIssueError.textContent = '';
             keyIssueSubmit.disabled = false;
-            keyIssueSubmit.textContent = 'Issue API key';
+            setButtonLabel(keyIssueSubmit, 'Issue API key');
             keyIssueModal.show();
             window.setTimeout(function () { keyIssueName.focus(); keyIssueName.select(); }, 180);
         }
@@ -605,7 +616,7 @@
             var context = pendingKeyIssue;
             var keyName = keyIssueName.value.trim() || 'Additional key';
             keyIssueSubmit.disabled = true;
-            keyIssueSubmit.textContent = 'Issuing...';
+            setButtonLabel(keyIssueSubmit, 'Issuing...');
             keyIssueError.hidden = true;
 
             $.ajax({
@@ -635,7 +646,7 @@
                 keyIssueError.hidden = false;
             }).always(function () {
                 keyIssueSubmit.disabled = false;
-                keyIssueSubmit.textContent = 'Issue API key';
+                setButtonLabel(keyIssueSubmit, 'Issue API key');
             });
         });
 
@@ -1000,8 +1011,8 @@
 
                 var newCustomerButton = document.createElement('button');
                 newCustomerButton.type = 'button';
-                newCustomerButton.className = 'admin-new-customer';
-                newCustomerButton.textContent = 'New customer';
+                newCustomerButton.className = 'admin-new-customer admin-create-button';
+                setCreateButtonContent(newCustomerButton, '#icon-user-add', 'New customer');
                 newCustomerButton.addEventListener('click', function () {
                     openSubgridEditor('client-new', {}, document.getElementById('customer-grid'), null, null, null);
                 });
@@ -1059,8 +1070,8 @@
                 if (!searchBar || searchBar.querySelector('.admin-new-opportunity')) return;
                 var button = document.createElement('button');
                 button.type = 'button';
-                button.className = 'admin-new-opportunity';
-                button.textContent = 'New opportunity';
+                button.className = 'admin-new-opportunity admin-create-button';
+                setCreateButtonContent(button, '#icon-opportunity', 'New opportunity');
                 button.addEventListener('click', function () { openOpportunityEditor(null); });
                 var searchInputGroup = searchBar.querySelector('.pg-search-input-group');
                 searchBar.insertBefore(button, searchInputGroup || searchBar.firstChild);

@@ -23,6 +23,26 @@
         };
     }
 
+    function emptyStateMarkup() {
+        return '<span class="pg-empty-content">'
+            + '<span class="pg-empty-visual" aria-hidden="true">'
+            + '<span class="pg-empty-card-back"></span>'
+            + '<span class="pg-empty-icon">'
+            + '<svg viewBox="0 0 36 36" focusable="false">'
+            + '<rect x="5" y="6" width="22" height="20" rx="3" />'
+            + '<path d="M5 12h22M11 12v14M15 16h7M15 20h5" />'
+            + '<circle class="pg-empty-icon-accent" cx="25" cy="25" r="6" />'
+            + '<path class="pg-empty-icon-lens" d="m29.5 29.5 3 3" />'
+            + '</svg>'
+            + '</span>'
+            + '</span>'
+            + '<span class="pg-empty-copy">'
+            + '<span class="pg-empty-text">No records yet</span>'
+            + '<span class="pg-empty-hint">New activity will appear here.</span>'
+            + '</span>'
+            + '</span>';
+    }
+
     // ════════════════════════════════════════════════════════════════════════
     //  Default options
     // ════════════════════════════════════════════════════════════════════════
@@ -1287,8 +1307,8 @@
                     const getr = document.createElement('tr');
                     const getd = document.createElement('td');
                     getd.colSpan  = cols.length;
-                    getd.className = 'pg-state-msg';
-                    getd.innerHTML = '<i class="bi bi-inbox me-2 opacity-50"></i>No records to display.';
+                    getd.className = 'pg-state-msg pg-empty';
+                    getd.innerHTML = emptyStateMarkup();
                     getr.appendChild(getd);
                     frag.appendChild(getr);
                 } else {
@@ -1325,8 +1345,8 @@
                     const etr = document.createElement('tr');
                     const etd = document.createElement('td');
                     etd.colSpan  = cols.length;
-                    etd.className = 'pg-state-msg';
-                    etd.innerHTML = '<i class="bi bi-inbox me-2 opacity-50"></i>No records to display.';
+                    etd.className = 'pg-state-msg pg-empty';
+                    etd.innerHTML = emptyStateMarkup();
                     etr.appendChild(etd);
                     frag.appendChild(etr);
                 } else {

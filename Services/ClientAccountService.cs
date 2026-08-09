@@ -3,6 +3,7 @@ using autodealer.dev.Models;
 using System;
 using System.Configuration;
 using System.Data;
+using System.Data.Linq;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
@@ -136,104 +137,144 @@ namespace autodealer.dev.Services {
 
             var tokenHash = Sha256Hex(normalizedToken);
             var now = DateTime.UtcNow;
-            long verificationId;
-            long clientId;
-            string businessName;
-            string firstName;
-            string lastName;
-            string email;
-            string phone;
-            string clientNumber;
-            string planCode;
-            bool createdByAdmin;
-            string fullKey;
+            long verificationId = 0;
+            long clientId = 0;
+            string businessName = null;
+            string firstName = null;
+            string lastName = null;
+            string email = null;
+            string phone = null;
+            string clientNumber = null;
+            string planCode = null;
+            bool createdByAdmin = false;
+            string fullKey = null;
+            var verificationPrepared = false;
 
-            using (var context = new AutoDealerDataContext(connectionString)) {
-                context.Connection.Open();
-                using (var transaction = context.Connection.BeginTransaction(IsolationLevel.Serializable)) {
-                    context.Transaction = transaction;
-                    try {
-                        var verification = context.GetTable<ClientEmailVerificationRecord>()
-                            .SingleOrDefault(x => x.TokenHash == tokenHash);
-                        if (verification == null) {
+            const int maximumConflictAttempts = 3;
+            for (var attempt = 1; attempt <= maximumConflictAttempts; attempt++) {
+                using (var context = new AutoDealerDataContext(connectionString)) {
+                    context.Connection.Open();
+                    using (var transaction = context.Connection.BeginTransaction(IsolationLevel.Serializable)) {
+                        context.Transaction = transaction;
+                        try {
+                            var verification = context.GetTable<ClientEmailVerificationRecord>()
+                                .SingleOrDefault(x => x.TokenHash == tokenHash);
+                            if (verification == null) {
+                                transaction.Rollback();
+                                return new EmailVerificationViewModel {
+                                    Status = EmailVerificationStatus.Invalid
+                                };
+                            }
+
+                            var client = context.Clients
+                                .SingleOrDefault(x => x.ClientId == verification.ClientId);
+                            if (client == null) {
+                                transaction.Rollback();
+                                return new EmailVerificationViewModel {
+                                    Status = EmailVerificationStatus.Invalid
+                                };
+                            }
+                            if (verification.CredentialsSentUtc.HasValue) {
+                                transaction.Rollback();
+                                return new EmailVerificationViewModel {
+                                    Status = EmailVerificationStatus.AlreadyVerified,
+                                    Email = client.Email
+                                };
+                            }
+                            if (!verification.UsedUtc.HasValue && verification.ExpiresUtc < now) {
+                                transaction.Rollback();
+                                return new EmailVerificationViewModel {
+                                    Status = EmailVerificationStatus.Expired,
+                                    Email = client.Email
+                                };
+                            }
+
+                            var subscription = context.Subscriptions
+                                .Where(x => x.ClientId == client.ClientId)
+                                .OrderByDescending(x => x.CreatedUtc)
+                                .FirstOrDefault();
+                            if (subscription == null)
+                                throw new InvalidOperationException(
+                                    "The workspace subscription could not be found.");
+
+                            var firstConfirmation = !verification.UsedUtc.HasValue;
+
+                            // A failed credential email can be retried with the same confirmation link.
+                            // Revoke the undelivered key before issuing its replacement.
+                            var activePrimaryKeys = context.ApiKeys.Where(x =>
+                                x.ClientId == client.ClientId &&
+                                x.Name == "Primary key" &&
+                                x.Status == "active");
+                            foreach (var oldKey in activePrimaryKeys) {
+                                oldKey.Status = "revoked";
+                                oldKey.RevokedUtc = now;
+                            }
+
+                            var keyId = "ad_live_" + RandomToken(9);
+                            var secret = RandomToken(32);
+                            fullKey = keyId + "." + secret;
+                            context.ApiKeys.InsertOnSubmit(new ApiKey {
+                                Client = client,
+                                Subscription = subscription,
+                                KeyId = keyId,
+                                SecretHash = Sha256(secret),
+                                KeyPrefix = keyId.Substring(0, Math.Min(20, keyId.Length)),
+                                Name = "Primary key",
+                                Scopes = "vin:read",
+                                Status = "active",
+                                CreatedUtc = now
+                            });
+
+                            client.Status = "active";
+                            client.EmailVerifiedUtc = client.EmailVerifiedUtc ?? now;
+                            client.UpdatedUtc = now;
+                            if (firstConfirmation) {
+                                subscription.CurrentPeriodStartUtc = now;
+                                subscription.CurrentPeriodEndUtc = now.AddDays(14);
+                                subscription.UpdatedUtc = now;
+                            }
+                            verification.UsedUtc = verification.UsedUtc ?? now;
+                            context.SubmitChanges();
+
+                            verificationId = verification.VerificationId;
+                            clientId = client.ClientId;
+                            businessName = client.BusinessName;
+                            firstName = client.FirstName;
+                            lastName = client.LastName;
+                            email = client.Email;
+                            phone = client.Phone;
+                            clientNumber = client.ClientNumber;
+                            planCode = subscription.Plan.PlanCode;
+                            createdByAdmin = verification.CreatedByAdmin;
+                            transaction.Commit();
+                            verificationPrepared = true;
+                            break;
+                        }
+                        catch (ChangeConflictException ex) {
+                            var conflictedTypes = string.Join(
+                                ", ",
+                                context.ChangeConflicts
+                                    .Select(conflict => conflict.Object.GetType().Name)
+                                    .Distinct());
                             transaction.Rollback();
-                            return new EmailVerificationViewModel { Status = EmailVerificationStatus.Invalid };
+                            Trace.TraceWarning(
+                                "Email verification concurrency conflict on attempt {0} of {1}. Records: {2}. {3}",
+                                attempt,
+                                maximumConflictAttempts,
+                                conflictedTypes,
+                                ex.Message);
+                            if (attempt == maximumConflictAttempts) throw;
                         }
-
-                        var client = context.Clients.SingleOrDefault(x => x.ClientId == verification.ClientId);
-                        if (client == null) {
+                        catch {
                             transaction.Rollback();
-                            return new EmailVerificationViewModel { Status = EmailVerificationStatus.Invalid };
+                            throw;
                         }
-                        if (verification.CredentialsSentUtc.HasValue) {
-                            transaction.Rollback();
-                            return new EmailVerificationViewModel { Status = EmailVerificationStatus.AlreadyVerified, Email = client.Email };
-                        }
-                        if (!verification.UsedUtc.HasValue && verification.ExpiresUtc < now) {
-                            transaction.Rollback();
-                            return new EmailVerificationViewModel { Status = EmailVerificationStatus.Expired, Email = client.Email };
-                        }
-
-                        var subscription = context.Subscriptions
-                            .Where(x => x.ClientId == client.ClientId)
-                            .OrderByDescending(x => x.CreatedUtc)
-                            .FirstOrDefault();
-                        if (subscription == null)
-                            throw new InvalidOperationException("The workspace subscription could not be found.");
-
-                        var firstConfirmation = !verification.UsedUtc.HasValue;
-
-                        // A failed credential email can be retried with the same confirmation link.
-                        // Revoke the undelivered key before issuing its replacement.
-                        foreach (var oldKey in context.ApiKeys.Where(x => x.ClientId == client.ClientId && x.Name == "Primary key" && x.Status == "active")) {
-                            oldKey.Status = "revoked";
-                            oldKey.RevokedUtc = now;
-                        }
-
-                        var keyId = "ad_live_" + RandomToken(9);
-                        var secret = RandomToken(32);
-                        fullKey = keyId + "." + secret;
-                        context.ApiKeys.InsertOnSubmit(new ApiKey {
-                            Client = client,
-                            Subscription = subscription,
-                            KeyId = keyId,
-                            SecretHash = Sha256(secret),
-                            KeyPrefix = keyId.Substring(0, Math.Min(20, keyId.Length)),
-                            Name = "Primary key",
-                            Scopes = "vin:read",
-                            Status = "active",
-                            CreatedUtc = now
-                        });
-
-                        client.Status = "active";
-                        client.EmailVerifiedUtc = client.EmailVerifiedUtc ?? now;
-                        client.UpdatedUtc = now;
-                        if (firstConfirmation) {
-                            subscription.CurrentPeriodStartUtc = now;
-                            subscription.CurrentPeriodEndUtc = now.AddDays(14);
-                            subscription.UpdatedUtc = now;
-                        }
-                        verification.UsedUtc = verification.UsedUtc ?? now;
-                        context.SubmitChanges();
-
-                        verificationId = verification.VerificationId;
-                        clientId = client.ClientId;
-                        businessName = client.BusinessName;
-                        firstName = client.FirstName;
-                        lastName = client.LastName;
-                        email = client.Email;
-                        phone = client.Phone;
-                        clientNumber = client.ClientNumber;
-                        planCode = subscription.Plan.PlanCode;
-                        createdByAdmin = verification.CreatedByAdmin;
-                        transaction.Commit();
-                    }
-                    catch {
-                        transaction.Rollback();
-                        throw;
                     }
                 }
             }
+
+            if (!verificationPrepared)
+                throw new InvalidOperationException("Email verification could not be prepared.");
 
             var credentialsSent = emailService != null && emailService.SendCredentials(
                 clientId, businessName, firstName, lastName, email, phone, clientNumber, fullKey, planCode, createdByAdmin);
