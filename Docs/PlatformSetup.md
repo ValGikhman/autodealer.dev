@@ -133,10 +133,22 @@ For Google Search Console:
 
 ## Trial-expiration job
 
-Run `Database/003_ClientEmailHistory.sql` and
-`Database/004_TrialExpirationAutomation.sql`, then set `Billing:PaymentUrl` in
-`Web.config` to the authenticated hosted-payment flow. Do not point it at a form
-that posts raw card data to this application.
+Run `Database/003_ClientEmailHistory.sql`,
+`Database/004_TrialExpirationAutomation.sql`, and `Database/007_ScalePlan.sql`.
+Configure one HTTPS hosted-payment URL per stable plan code in `Web.config`:
+
+```xml
+<add key="Billing:PaymentUrl:NOVICE" value="https://buy.stripe.com/..." />
+<add key="Billing:PaymentUrl:COMPETENT" value="https://buy.stripe.com/..." />
+<add key="Billing:PaymentUrl:ADEPT" value="https://buy.stripe.com/..." />
+<add key="Billing:PaymentUrl:SCALE" value="https://buy.stripe.com/..." />
+```
+
+The account dashboard and trial-expiration job resolve the URL from the
+subscription's plan code. They append Stripe's `client_reference_id` and
+`prefilled_email` parameters for account reconciliation. Invalid, non-HTTPS,
+or missing mappings are rejected instead of falling back to another plan.
+Never point these settings at a form that posts raw card data to this application.
 
 Run the job manually from the application directory:
 

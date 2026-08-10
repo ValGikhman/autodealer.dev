@@ -72,9 +72,10 @@ GO
 
 MERGE dbo.Plans WITH (HOLDLOCK) AS target
 USING (VALUES
-    ('STARTER',  N'Starter',  CAST(50.00 AS decimal(10,2)),   50,  1),
-    ('GROWTH',   N'Growth',   CAST(150.00 AS decimal(10,2)), 150,  5),
-    ('PLATFORM', N'Platform', CAST(250.00 AS decimal(10,2)), 250, 20)
+    ('NOVICE',    N'NOVICE',    CAST(50.00 AS decimal(10,2)),   50,  1),
+    ('COMPETENT', N'COMPETENT', CAST(150.00 AS decimal(10,2)), 200,  5),
+    ('ADEPT',     N'ADEPT',     CAST(250.00 AS decimal(10,2)), 300, 20),
+    ('SCALE',     N'SCALE',     CAST(300.00 AS decimal(10,2)), 500, 30)
 ) AS source (PlanCode, DisplayName, MonthlyPrice, MonthlyRequestQuota, MaxApiKeys)
 ON target.PlanCode = source.PlanCode
 WHEN MATCHED THEN UPDATE SET DisplayName=source.DisplayName, MonthlyPrice=source.MonthlyPrice,

@@ -194,6 +194,7 @@
     <Compile Include="Services\IContactInquiryService.cs" />
     <Compile Include="Services\IPlanService.cs" />
     <Compile Include="Services\PlanService.cs" />
+    <Compile Include="Services\BillingPaymentUrlResolver.cs" />
     <Compile Include="Services\SeoUrl.cs" />
     <Compile Include="Services\IDealerDemoRequestService.cs" />
     <Compile Include="Services\DealerDemoRequestService.cs" />
@@ -219,6 +220,7 @@
     <Content Include="Database\004_TrialExpirationAutomation.sql" />
     <Content Include="Database\005_AdminClientDeletionPermissions.sql" />
     <Content Include="Database\006_ClientEmailVerification.sql" />
+    <Content Include="Database\007_ScalePlan.sql" />
     <Content Include="Content\dashboard.css" />
     <Content Include="Content\email.css" />
     <Content Include="Content\pepTools\pepEdit.css" />

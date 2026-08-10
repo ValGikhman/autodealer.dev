@@ -1,7 +1,6 @@
 using autodealer.dev.Data;
 using autodealer.dev.Models;
 using System;
-using System.Configuration;
 using System.Data;
 using System.Data.Linq;
 using System.Diagnostics;
@@ -377,7 +376,9 @@ namespace autodealer.dev.Services {
                 CurrentPeriodEndUtc = subscription == null ? (DateTime?)null : subscription.Item.CurrentPeriodEndUtc,
                 ActiveApiKeyCount = context.ApiKeys.Count(x => x.ClientId == client.ClientId && x.Status == "active"),
                 PaymentRequired = paymentRequired,
-                PaymentUrl = paymentRequired ? (ConfigurationManager.AppSettings["Billing:PaymentUrl"] ?? string.Empty).Trim() : string.Empty
+                PaymentUrl = paymentRequired && subscription != null
+                    ? BillingPaymentUrlResolver.Resolve(subscription.Plan.PlanCode, client.ClientNumber, client.Email)
+                    : string.Empty
             };
         }
 
