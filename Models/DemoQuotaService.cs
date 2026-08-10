@@ -51,12 +51,29 @@ namespace autodealer.dev.Models {
 
     public static class DemoApiAccess {
         public static bool IsDemoRequest(HttpRequestMessage request) {
-            if (request == null || request.Headers.Authorization == null ||
-                !string.Equals(request.Headers.Authorization.Scheme, "Bearer", StringComparison.OrdinalIgnoreCase))
+            string bearerToken;
+            if (!TryGetBearerToken(request, out bearerToken))
                 return false;
 
             var expected = ConfigurationManager.AppSettings["DemoApi:Key"];
-            return !string.IsNullOrWhiteSpace(expected) && FixedTimeEquals(request.Headers.Authorization.Parameter, expected);
+            return !string.IsNullOrWhiteSpace(expected) && FixedTimeEquals(bearerToken, expected);
+        }
+
+        public static bool TryGetBearerToken(HttpRequestMessage request, out string bearerToken) {
+            bearerToken = null;
+            if (request == null) return false;
+
+            var authorization = request.Headers.Authorization;
+            if (authorization != null) {
+                if (!string.Equals(authorization.Scheme, "Bearer", StringComparison.OrdinalIgnoreCase))
+                    return false;
+                bearerToken = authorization.Parameter;
+            }
+            else if (request.RequestUri != null) {
+                bearerToken = HttpUtility.ParseQueryString(request.RequestUri.Query)["access_token"];
+            }
+
+            return !string.IsNullOrWhiteSpace(bearerToken);
         }
 
         public static DemoQuotaResult Take(HttpRequestMessage request, string vin) {

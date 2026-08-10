@@ -17,6 +17,14 @@
             <code>Authorization: Bearer ad_live_KEY_ID.SECRET</code>
         </pre>
     </div>
+    <h3>Authenticate through a URL</h3>
+    <p>When a client cannot set headers, pass the credential as <code>access_token</code>. Use HTTPS. URLs may be retained in browser history and web-server, proxy, or analytics logs, so the authorization header remains the safer option.</p>
+    <div class="code-block simple">
+        <pre>
+            <code>https://autodealer.dev/api/service/vin/1HGCM82633A004352/json?access_token=ad_live_KEY_ID.SECRET</code>
+        </pre>
+    </div>
+    <p>If both methods are supplied, the <code>Authorization</code> header takes precedence.</p>
     <h3>Credential anatomy</h3>
     <div class="anatomy">
         <span>

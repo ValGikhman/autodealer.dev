@@ -29,11 +29,11 @@ namespace autodealer.dev.Models {
                 DemoApiAccess.IsDemoRequest(request))
                 return await base.SendAsync(request, cancellationToken);
 
-            var auth = request.Headers.Authorization;
-            if (auth == null || !string.Equals(auth.Scheme, "Bearer", StringComparison.OrdinalIgnoreCase))
-                return Error(HttpStatusCode.Unauthorized, "missing_api_key", "Send your API key as Authorization: Bearer <key>.");
+            string bearerToken;
+            if (!DemoApiAccess.TryGetBearerToken(request, out bearerToken))
+                return Error(HttpStatusCode.Unauthorized, "missing_api_key", "Send your API key as Authorization: Bearer <key> or in the access_token query parameter.");
 
-            var parts = (auth.Parameter ?? string.Empty).Split(new[] { '.' }, 2);
+            var parts = bearerToken.Split(new[] { '.' }, 2);
             if (parts.Length != 2 || !parts[0].StartsWith("ad_", StringComparison.Ordinal))
                 return Error(HttpStatusCode.Unauthorized, "invalid_api_key", "The API key is invalid.");
 
