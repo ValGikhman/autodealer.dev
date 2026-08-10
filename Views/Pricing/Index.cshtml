@@ -3,13 +3,20 @@
 @using autodealer.dev.Services
 @model autodealer.dev.Models.PricingPageViewModel
 @{
-    ViewBag.Title = "API Pricing Plans";
-    ViewBag.Description = "Compare AutoDealer.dev API pricing plans for VIN decoding, secure API keys, JSON, XML and HTML responses, usage tracking, and a 14-day trial.";
+    ViewBag.Title = "API and Dealer Website Pricing";
+    ViewBag.Description = "Compare AutoDealer.dev vehicle-data API plans and managed dealer website services with live inventory, administration, hosting, support, and scalable infrastructure.";
     ViewBag.CanonicalUrl = SeoUrl.Absolute("/pricing");
 
-    var offerItems = new List<Dictionary<string, object>>();
+    var overageRates = new Dictionary<decimal, decimal> {
+        { 50m, 0.90m },
+        { 150m, 0.75m },
+        { 250m, 0.60m },
+        { 300m, 0.45m }
+    };
+
+    var apiOfferItems = new List<Dictionary<string, object>>();
     foreach (var seoPlan in Model.Plans.Where(x => x.MonthlyPrice.HasValue)) {
-        offerItems.Add(new Dictionary<string, object> {
+        apiOfferItems.Add(new Dictionary<string, object> {
             { "@type", "Offer" },
             { "name", seoPlan.DisplayName + " API plan" },
             { "price", seoPlan.MonthlyPrice.Value },
@@ -20,90 +27,289 @@
         });
     }
 
-    var serviceData = new Dictionary<string, object> {
+    var dealerOfferItems = new List<Dictionary<string, object>> {
+        new Dictionary<string, object> { { "@type", "Offer" }, { "name", "Lot dealer website plan" }, { "price", 249 }, { "priceCurrency", "USD" }, { "url", SeoUrl.Absolute("/request-a-dealer-demo") }, { "description", "Managed dealer website and administration for up to 49 active vehicles." } },
+        new Dictionary<string, object> { { "@type", "Offer" }, { "name", "Dealer website plan" }, { "price", 399 }, { "priceCurrency", "USD" }, { "url", SeoUrl.Absolute("/request-a-dealer-demo") }, { "description", "Managed dealer website and administration for up to 149 active vehicles." } },
+        new Dictionary<string, object> { { "@type", "Offer" }, { "name", "Pro dealer website plan" }, { "price", 649 }, { "priceCurrency", "USD" }, { "url", SeoUrl.Absolute("/request-a-dealer-demo") }, { "description", "Managed dealer website and administration for up to 499 active vehicles." } },
+        new Dictionary<string, object> { { "@type", "Offer" }, { "name", "Dealer Group website plan" }, { "price", 999 }, { "priceCurrency", "USD" }, { "url", SeoUrl.Absolute("/request-a-dealer-demo") }, { "description", "Managed multi-location dealer website and administration for 500 to 1,000 active vehicles." } }
+    };
+
+    var structuredData = new Dictionary<string, object> {
         { "@context", "https://schema.org" },
-        { "@type", "Service" },
-        { "name", "AutoDealer.dev API access" },
-        { "description", ViewBag.Description },
-        { "provider", new Dictionary<string, object> { { "@type", "Organization" }, { "name", "AutoDealer.dev" }, { "url", SeoUrl.Absolute("/") } } },
-        { "serviceType", "Automotive data API" },
-        { "url", ViewBag.CanonicalUrl },
-        { "hasOfferCatalog", new Dictionary<string, object> { { "@type", "OfferCatalog" }, { "name", "API pricing plans" }, { "itemListElement", offerItems } } }
+        { "@graph", new object[] {
+            new Dictionary<string, object> {
+                { "@type", "Service" },
+                { "name", "AutoDealer.dev API access" },
+                { "provider", new Dictionary<string, object> { { "@type", "Organization" }, { "name", "AutoDealer.dev" }, { "url", SeoUrl.Absolute("/") } } },
+                { "serviceType", "Automotive data API" },
+                { "url", ViewBag.CanonicalUrl },
+                { "hasOfferCatalog", new Dictionary<string, object> { { "@type", "OfferCatalog" }, { "name", "API pricing plans" }, { "itemListElement", apiOfferItems } } }
+            },
+            new Dictionary<string, object> {
+                { "@type", "Service" },
+                { "name", "AutoDealer.dev managed dealer websites" },
+                { "provider", new Dictionary<string, object> { { "@type", "Organization" }, { "name", "AutoDealer.dev" }, { "url", SeoUrl.Absolute("/") } } },
+                { "serviceType", "Dealer website and inventory administration" },
+                { "url", SeoUrl.Absolute("/solutions/digital-showroom") },
+                { "hasOfferCatalog", new Dictionary<string, object> { { "@type", "OfferCatalog" }, { "name", "Dealer website pricing plans" }, { "itemListElement", dealerOfferItems } } }
+            }
+        } }
     };
     var jsonSettings = new Newtonsoft.Json.JsonSerializerSettings { StringEscapeHandling = Newtonsoft.Json.StringEscapeHandling.EscapeHtml };
-    var serviceJson = Newtonsoft.Json.JsonConvert.SerializeObject(serviceData, jsonSettings);
+    var pricingJson = Newtonsoft.Json.JsonConvert.SerializeObject(structuredData, jsonSettings);
 }
 @section head {
-    <script type="application/ld+json">@Html.Raw(serviceJson)</script>
+    <script type="application/ld+json">@Html.Raw(pricingJson)</script>
 }
-<section class="site-hero page-hero">
+
+<section class="site-hero page-hero pricing-hero">
     <div class="shell site-hero-shell">
         <div class="hero-copy">
-            <span class="eyebrow">SIMPLE PRICING</span>
-            <h1>Start focused. Scale freely.</h1>
-            <p>Every plan includes secure credentials, complete formats, metering, and documentation.</p>
+            <span class="eyebrow">CLEAR, SCALABLE PRICING</span>
+            <h1>Choose the service that moves you forward.</h1>
+            <p>Use automotive data in your own application or launch a complete dealer website backed by live inventory, administration, hosting, and support.</p>
         </div>
     </div>
 </section>
-<section class="section light-section pricing-section">
-    <div class="shell pricing-grid pricing-plans-grid">
-            @if (Model.Plans.Count == 0) {
-                <div class="pricing-empty">No plans are currently available.</div>
-            }
-            @foreach (var plan in Model.Plans) {
-                <article class="price-card @(plan.IsRecommended ? "featured-price" : "") @(plan.IsCurrentPlan ? "current-plan" : "")">
-                    @if (plan.IsCurrentPlan) {
-                        <span class="popular-label current-plan-label">CURRENT PLAN</span>
-                    } else if (plan.IsRecommended) {
-                        <span class="popular-label">RECOMMENDED</span>
-                    }
-                    <span class="color-icon plan-icon" aria-hidden="true">
-                        <svg>
-                            <use href="#icon-plan">
-                            </use>
-                        </svg>
-                    </span>
-                    <span class="plan-name">@plan.DisplayName.ToUpperInvariant()</span>
-                    @if (plan.MonthlyPrice.HasValue) {
-                        <h2>@plan.MonthlyPrice.Value.ToString("$0.##")<small>/month</small>
-                        </h2>
-                    } else {
-                        <h2>Custom</h2>
-                    }
-                    <p>@plan.DisplayName access for automotive applications and dealership teams.</p>
-                    <div class="plan-metrics">
-                        <div>
-                            <span>Monthly requests</span>
-                            <strong>@plan.MonthlyRequestQuota.ToString("N0")</strong>
-                        </div>
-                    </div>
-                    @if (plan.IsCurrentPlan) {
-                        <a class="button button-primary current-plan-button" href="@Url.Action("Dashboard", "Account")">
-                            <span aria-hidden="true">&#10003;</span> Current plan</a>
-                    } else {
-                        <a class="button @(plan.IsRecommended ? "button-primary" : "button-outline")" href="@Url.Action("Register", "Account", new { plan = plan.PlanCode })">Choose @plan.DisplayName</a>
-                    }
-                </article>
-            }
-            <article class="price-card pay-use-price">
-                <span class="popular-label">FLEXIBLE</span>
-                <span class="color-icon plan-icon" aria-hidden="true">
-                    <svg>
-                        <use href="#icon-plan">
-                        </use>
-                    </svg>
-                </span>
-                <span class="plan-name">PAY BY USE</span>
-                <h2>$2<small>/API call</small>
-                </h2>
-                <p>Skip the monthly plan and pay only when you make a successful API call. A simple option for occasional lookups, prototypes, and low-volume workflows.</p>
-                <div class="plan-metrics">
-                    <div>
-                        <span>Monthly commitment</span>
-                        <strong>None</strong>
-                    </div>
+
+<section class="section light-section pricing-section pricing-services-section">
+    <div class="shell pricing-page-shell">
+        <div class="nav nav-tabs pricing-service-tabs" role="tablist" aria-label="Pricing services">
+            <button class="nav-link active" id="api-services-tab" type="button" role="tab" aria-controls="api-services" aria-selected="true" data-bs-toggle="tab" data-bs-target="#api-services">
+                <span>API SERVICES</span>
+                <small>Vehicle data for applications</small>
+            </button>
+            <button class="nav-link" id="dealer-website-tab" type="button" role="tab" aria-controls="dealer-website" aria-selected="false" data-bs-toggle="tab" data-bs-target="#dealer-website">
+                <span>MANAGED DEALER WEBSITE</span>
+                <small>Website, inventory, and admin</small>
+            </button>
+        </div>
+
+        <div class="tab-content pricing-tab-content">
+            <section class="tab-pane fade show active" id="api-services" role="tabpanel" aria-labelledby="api-services-tab" tabindex="0">
+                <div class="pricing-tab-intro">
+                    <span class="eyebrow">API SERVICES</span>
+                    <h2>Automotive intelligence, ready to integrate.</h2>
+                    <p>Every API plan includes secure credentials, VIN decoding, JSON, XML and HTML responses, usage tracking, documentation, and a 14-day trial.</p>
                 </div>
-                <a class="button button-outline" href="@Url.Action("Contact", "Home")">Set up pay by use</a>
-            </article>
+
+                <div class="pricing-grid pricing-plans-grid">
+                    @if (Model.Plans.Count == 0) {
+                        <div class="pricing-empty">No API plans are currently available.</div>
+                    }
+                    @foreach (var plan in Model.Plans) {
+                        decimal overageRate = 0m;
+                        var hasOverageRate = plan.MonthlyPrice.HasValue && overageRates.TryGetValue(plan.MonthlyPrice.Value, out overageRate);
+                        <article class="price-card @(plan.IsRecommended ? "featured-price" : "") @(plan.IsCurrentPlan ? "current-plan" : "")">
+                            @if (plan.IsCurrentPlan) {
+                                <span class="popular-label current-plan-label">CURRENT PLAN</span>
+                            } else if (plan.IsRecommended) {
+                                <span class="popular-label">RECOMMENDED</span>
+                            }
+                            <span class="color-icon plan-icon" aria-hidden="true">
+                                <svg><use href="#icon-plan"></use></svg>
+                            </span>
+                            <span class="plan-name">@plan.DisplayName.ToUpperInvariant()</span>
+                            @if (plan.MonthlyPrice.HasValue) {
+                                <h2>@plan.MonthlyPrice.Value.ToString("$0.##")<small>/month</small></h2>
+                            } else {
+                                <h2>Custom</h2>
+                            }
+                            <p>@plan.DisplayName access for automotive applications and dealership teams.</p>
+                            <div class="plan-metrics">
+                                <div>
+                                    <span>Monthly requests</span>
+                                    <strong>@plan.MonthlyRequestQuota.ToString("N0")</strong>
+                                </div>
+                                @if (hasOverageRate) {
+                                    <div>
+                                        <span>Over-limit requests</span>
+                                        <strong>@overageRate.ToString("$0.00") each</strong>
+                                    </div>
+                                }
+                            </div>
+                            @if (plan.IsCurrentPlan) {
+                                <a class="button button-primary current-plan-button" href="@Url.Action("Dashboard", "Account")"><span aria-hidden="true">&#10003;</span> Current plan</a>
+                            } else {
+                                <a class="button @(plan.IsRecommended ? "button-primary" : "button-outline")" href="@Url.Action("Register", "Account", new { plan = plan.PlanCode })">Choose @plan.DisplayName</a>
+                            }
+                        </article>
+                    }
+                </div>
+            </section>
+
+            <section class="tab-pane fade" id="dealer-website" role="tabpanel" aria-labelledby="dealer-website-tab" tabindex="0">
+                <div class="pricing-tab-intro dealer-pricing-intro">
+                    <span class="eyebrow">MANAGED DEALER WEBSITE</span>
+                    <h2>Your digital showroom and inventory operation, together.</h2>
+                    <p>One predictable subscription covers the customer-facing website, inventory administration, hosting, maintenance, and practical support. Capacity is based only on active, published vehicles; sold and archived inventory does not count.</p>
+                </div>
+
+                <div class="pricing-grid pricing-plans-grid dealer-pricing-grid">
+                    <article class="price-card dealer-price-card">
+                        <span class="color-icon plan-icon" aria-hidden="true"><svg><use href="#icon-plan"></use></svg></span>
+                        <span class="plan-name">LOT</span>
+                        <h2>$249<small>/month</small></h2>
+                        <p>A professional starting point for an independent dealership.</p>
+                        <div class="plan-metrics">
+                            <div><span>Active inventory</span><strong>Up to 49</strong></div>
+                            <div><span>Administration</span><strong>5 users / 1 location</strong></div>
+                        </div>
+                        <ul class="dealer-plan-features">
+                            <li>Live inventory website</li>
+                            <li>VIN-powered vehicle details</li>
+                            <li>Inventory and photo administration</li>
+                            <li>Standard email support</li>
+                        </ul>
+                        <a class="button button-outline" href="@Url.Action("RequestDemo", "Solutions")">Request a Lot demo</a>
+                    </article>
+
+                    <article class="price-card dealer-price-card featured-price">
+                        <span class="popular-label">MOST POPULAR</span>
+                        <span class="color-icon plan-icon" aria-hidden="true"><svg><use href="#icon-plan"></use></svg></span>
+                        <span class="plan-name">DEALER</span>
+                        <h2>$399<small>/month</small></h2>
+                        <p>More capacity and support for an established independent dealer.</p>
+                        <div class="plan-metrics">
+                            <div><span>Active inventory</span><strong>Up to 149</strong></div>
+                            <div><span>Administration</span><strong>10 users / 1 location</strong></div>
+                        </div>
+                        <ul class="dealer-plan-features">
+                            <li>Everything in Lot</li>
+                            <li>Automated inventory imports</li>
+                            <li>Inventory history and analytics</li>
+                            <li>Priority support</li>
+                        </ul>
+                        <a class="button button-primary" href="@Url.Action("RequestDemo", "Solutions")">Request a Dealer demo</a>
+                    </article>
+
+                    <article class="price-card dealer-price-card">
+                        <span class="color-icon plan-icon" aria-hidden="true"><svg><use href="#icon-plan"></use></svg></span>
+                        <span class="plan-name">PRO</span>
+                        <h2>$649<small>/month</small></h2>
+                        <p>High-capacity inventory operations with room for a growing team.</p>
+                        <div class="plan-metrics">
+                            <div><span>Active inventory</span><strong>Up to 499</strong></div>
+                            <div><span>Administration</span><strong>15 users / 2 locations</strong></div>
+                        </div>
+                        <ul class="dealer-plan-features">
+                            <li>Everything in Dealer</li>
+                            <li>Multi-location inventory</li>
+                            <li>Advanced operational support</li>
+                            <li>Quarterly service review</li>
+                        </ul>
+                        <a class="button button-outline" href="@Url.Action("RequestDemo", "Solutions")">Request a Pro demo</a>
+                    </article>
+
+                    <article class="price-card dealer-price-card">
+                        <span class="color-icon plan-icon" aria-hidden="true"><svg><use href="#icon-plan"></use></svg></span>
+                        <span class="plan-name">DEALER GROUP</span>
+                        <h2>$999<small>/month</small></h2>
+                        <p>Managed scale for larger inventories and multi-location dealer groups.</p>
+                        <div class="plan-metrics">
+                            <div><span>Active inventory</span><strong>500&ndash;1,000</strong></div>
+                            <div><span>Administration</span><strong>20 users / 3 locations</strong></div>
+                        </div>
+                        <ul class="dealer-plan-features">
+                            <li>Everything in Pro</li>
+                            <li>Group-level inventory operations</li>
+                            <li>Priority managed support</li>
+                            <li>Monthly service review</li>
+                        </ul>
+                        <a class="button button-outline" href="@Url.Action("RequestDemo", "Solutions")">Discuss Dealer Group</a>
+                    </article>
+                </div>
+
+                <section class="dealer-cost-section" aria-labelledby="included-services-heading">
+                    <div class="pricing-explanation-heading">
+                        <span class="eyebrow">WHAT YOUR SUBSCRIPTION COVERS</span>
+                        <h2 id="included-services-heading">A managed service, not another piece of software to maintain.</h2>
+                        <p>The monthly plan is your fixed service price. The operating expenses below are included in that price; they are shown so you can understand the infrastructure and professional work behind the service.</p>
+                    </div>
+                    <div class="dealer-expense-grid">
+                        <article><strong>Managed hosting</strong><span>Production Windows infrastructure, SSL, deployment, and capacity management.</span><small>Typical platform expense: $125&ndash;$200/month initially</small></article>
+                        <article><strong>Protection and recovery</strong><span>Offsite backups, recovery preparation, monitoring, logging, and security maintenance.</span><small>Typical platform expense: $75&ndash;$225/month</small></article>
+                        <article><strong>Media delivery</strong><span>Vehicle-photo storage, bandwidth, content delivery, and transactional email.</span><small>Usage grows with inventory and shopper traffic</small></article>
+                        <article><strong>Ongoing engineering</strong><span>Platform updates, compatibility work, quality assurance, deployments, and bug fixes.</span><small>Baseline engineering allocation: approximately $1,500/month</small></article>
+                        <article><strong>Customer support</strong><span>Help with the platform, inventory workflows, imports, configuration, and operational questions.</span><small>Support allocation grows with each dealership</small></article>
+                        <article><strong>Vehicle data and billing</strong><span>Licensed automotive data usage and secure subscription processing.</span><small>Provider and payment-processing costs vary with usage</small></article>
+                    </div>
+                    <p class="pricing-cost-note">
+                        <strong>Included in your plan</strong>
+                        <span>These figures are operating estimates, not additional line-item charges. Third-party services and unusual custom requirements may be quoted separately before work begins.</span>
+                    </p>
+                </section>
+
+                <section class="hosting-growth-section" aria-labelledby="hosting-growth-heading">
+                    <div class="pricing-explanation-heading">
+                        <span class="eyebrow">HOSTING GROWTH PLAN</span>
+                        <h2 id="hosting-growth-heading">Infrastructure grows with the dealer network.</h2>
+                        <p>We add isolation, redundancy, and database capacity as adoption grows. Customers stay on their selected plan while AutoDealer.dev manages the underlying platform.</p>
+                    </div>
+                    <div class="pricing-table-wrap">
+                        <table class="pricing-explanation-table">
+                            <thead><tr><th>Dealer network</th><th>Infrastructure stage</th><th>Estimated platform budget</th><th>Customer benefit</th></tr></thead>
+                            <tbody>
+                                <tr><td data-label="Dealer network">1&ndash;10 dealers</td><td data-label="Infrastructure">Production VPS, external media storage, offsite backups</td><td data-label="Estimated budget">$175&ndash;$350/month</td><td data-label="Customer benefit">A reliable managed foundation without enterprise overhead</td></tr>
+                                <tr><td data-label="Dealer network">10&ndash;30 dealers</td><td data-label="Infrastructure">Separated web and database services</td><td data-label="Estimated budget">$350&ndash;$700/month</td><td data-label="Customer benefit">Better workload isolation and easier independent scaling</td></tr>
+                                <tr><td data-label="Dealer network">30&ndash;75 dealers</td><td data-label="Infrastructure">Redundant web services, managed database, load balancing</td><td data-label="Estimated budget">$800&ndash;$1,500/month</td><td data-label="Customer benefit">Improved availability and traffic resilience</td></tr>
+                                <tr><td data-label="Dealer network">75+ dealers</td><td data-label="Infrastructure">Redundant production and staging environments</td><td data-label="Estimated budget">Starting at $1,500/month</td><td data-label="Customer benefit">Controlled releases, recovery options, and enterprise capacity</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="dealer-commercial-section" aria-labelledby="onboarding-heading">
+                    <div class="pricing-explanation-heading">
+                        <span class="eyebrow">ONBOARDING AND DEVELOPMENT</span>
+                        <h2 id="onboarding-heading">Know what is included before the work begins.</h2>
+                        <p>Onboarding covers branding, domain and SSL configuration, initial inventory setup, feed configuration, testing, and staff training. Routine maintenance and support are included monthly; dealership-specific feature development is quoted separately.</p>
+                    </div>
+                    <div class="dealer-commercial-grid">
+                        <article>
+                            <h3>One-time onboarding</h3>
+                            <dl>
+                                <div><dt>Lot</dt><dd>$750</dd></div>
+                                <div><dt>Dealer</dt><dd>$1,250</dd></div>
+                                <div><dt>Pro</dt><dd>$2,500</dd></div>
+                                <div><dt>Dealer Group</dt><dd>From $5,000</dd></div>
+                            </dl>
+                        </article>
+                        <article>
+                            <h3>Custom development</h3>
+                            <p>New integrations, custom feeds, reports, workflows, and major design changes are outside routine support.</p>
+                            <strong>$125<small>/hour</small></strong>
+                            <span>Optional retainers: 4 hours for $500, 8 hours for $1,000, or 16 hours for $2,000.</span>
+                        </article>
+                    </div>
+                </section>
+            </section>
+        </div>
     </div>
 </section>
+
+@section scripts {
+<script>
+    (function () {
+        var allowedPanels = { '#api-services': true, '#dealer-website': true };
+
+        function showFromHash() {
+            var hash = window.location.hash;
+            if (!allowedPanels[hash] || !window.bootstrap) return;
+            var trigger = document.querySelector('[data-bs-target="' + hash + '"]');
+            if (trigger) bootstrap.Tab.getOrCreateInstance(trigger).show();
+        }
+
+        document.querySelectorAll('.pricing-service-tabs [data-bs-toggle="tab"]').forEach(function (trigger) {
+            trigger.addEventListener('shown.bs.tab', function () {
+                var target = trigger.getAttribute('data-bs-target');
+                if (allowedPanels[target] && window.history && window.history.replaceState)
+                    window.history.replaceState(null, '', target);
+            });
+        });
+
+        showFromHash();
+        window.addEventListener('hashchange', showFromHash);
+    }());
+</script>
+}

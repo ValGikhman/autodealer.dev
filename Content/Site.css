@@ -1132,6 +1132,521 @@ h2 em {
   }
 }
 
+/* API and managed dealer website pricing. */
+.pricing-hero .hero-copy {
+  max-width: 850px;
+}
+
+.pricing-services-section {
+  padding-top: 42px;
+}
+
+.pricing-page-shell {
+  width: min(1240px, calc(100% - 36px));
+}
+
+.pricing-service-tabs {
+  margin: 0 auto 54px;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  border: 1px solid rgba(74, 84, 93, 0.24);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #d8dde1, #abb2b8);
+  box-shadow:
+    0 16px 34px rgba(26, 32, 37, 0.16),
+    inset 0 1px rgba(255, 255, 255, 0.82);
+}
+
+.pricing-service-tabs button {
+  min-width: 0;
+  min-height: 72px;
+  padding: 12px 20px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  color: #49535b;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pricing-service-tabs button span,
+.pricing-service-tabs button small {
+  display: block;
+}
+
+.pricing-service-tabs button span {
+  margin-bottom: 4px;
+  color: inherit;
+  font-size: 16px;
+  font-weight: 850;
+  letter-spacing: -0.2px;
+}
+
+.pricing-service-tabs button small {
+  color: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  opacity: 0.78;
+}
+
+.pricing-service-tabs button.active {
+  color: #f4f6f7;
+  border-color: #3f474e;
+  background:
+    radial-gradient(circle at 95% 0, rgba(255, 255, 255, 0.12), transparent 38%),
+    linear-gradient(145deg, #4f575f, #2f353a);
+  box-shadow:
+    0 8px 18px rgba(25, 30, 35, 0.24),
+    inset 0 1px rgba(255, 255, 255, 0.16);
+}
+
+.pricing-service-tabs button:focus-visible {
+  outline: 3px solid rgba(57, 127, 209, 0.26);
+  outline-offset: 2px;
+}
+
+#api-services-tab,
+#dealer-website-tab {
+  text-align: center;
+}
+
+.pricing-tab-content > .tab-pane {
+  display: none;
+}
+
+.pricing-tab-content > .tab-pane.active {
+  display: block;
+}
+
+.pricing-tab-intro,
+.pricing-explanation-heading {
+  max-width: 850px;
+  margin: 0 auto 36px;
+  text-align: center;
+}
+
+.pricing-tab-intro h2,
+.pricing-explanation-heading h2,
+.dealer-pricing-final-cta h2 {
+  margin: 14px 0 12px;
+  color: #1e252a;
+  font-size: clamp(28px, 4vw, 43px);
+  letter-spacing: -1.7px;
+  line-height: 1.08;
+}
+
+.pricing-tab-intro p,
+.pricing-explanation-heading p,
+.dealer-pricing-final-cta p {
+  margin: 0;
+  color: #707b84;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.pricing-tab-content .pricing-plans-grid {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.dealer-pricing-intro {
+  max-width: 940px;
+}
+
+.pricing-tab-intro.dealer-pricing-intro h2 {
+  color: #fff;
+}
+
+.dealer-price-card .plan-metrics strong {
+  font-size: 17px;
+  letter-spacing: -0.35px;
+}
+
+.dealer-plan-features {
+  margin: -2px 0 28px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  border: 0 !important;
+  list-style: none;
+}
+
+.dealer-plan-features li {
+  position: relative;
+  padding-left: 20px;
+  color: #374149;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.dealer-plan-features li:before {
+  content: "\2713";
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: var(--plan-accent);
+  font-weight: 900;
+}
+
+.dealer-pricing-final-cta {
+  width: min(1120px, calc(100% - 48px));
+  margin: 28px auto 0;
+  padding: 30px 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  border: 1px solid rgba(69, 78, 86, 0.28);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 94% 4%, rgba(111, 157, 210, 0.18), transparent 34%),
+    linear-gradient(145deg, #eef1f3, #b9c0c6);
+  box-shadow:
+    0 22px 42px rgba(16, 21, 25, 0.18),
+    inset 0 1px rgba(255, 255, 255, 0.92);
+}
+
+.dealer-pricing-final-cta .button {
+  flex: 0 0 auto;
+}
+
+.dealer-cost-section,
+.hosting-growth-section,
+.dealer-commercial-section {
+  width: min(1120px, calc(100% - 48px));
+  margin: 82px auto 0;
+}
+
+.dealer-expense-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dealer-expense-grid article,
+.dealer-commercial-grid article {
+  min-width: 0;
+  padding: 25px;
+  border: 1px solid rgba(74, 84, 93, 0.23);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(190, 197, 203, 0.7));
+  box-shadow:
+    0 14px 27px rgba(27, 33, 38, 0.12),
+    inset 0 1px rgba(255, 255, 255, 0.92);
+}
+
+.dealer-expense-grid strong,
+.dealer-expense-grid span,
+.dealer-expense-grid small {
+  display: block;
+}
+
+.dealer-expense-grid strong {
+  margin-bottom: 9px;
+  color: #222a30;
+  font-size: 17px;
+}
+
+.dealer-expense-grid span {
+  min-height: 70px;
+  color: #4e5962;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.dealer-expense-grid small {
+  margin-top: 15px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(74, 84, 93, 0.18);
+  color: #354049;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.pricing-cost-note {
+  margin: 20px 0 0;
+  padding: 20px 22px 20px 68px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(57, 127, 209, 0.28);
+  border-radius: 14px;
+  color: #59656f;
+  background:
+    radial-gradient(circle at 100% 0, rgba(57, 127, 209, 0.13), transparent 38%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(205, 212, 218, 0.78));
+  box-shadow:
+    0 12px 25px rgba(27, 33, 38, 0.1),
+    inset 0 1px rgba(255, 255, 255, 0.92);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.pricing-cost-note:before {
+  content: "\2713";
+  position: absolute;
+  top: 20px;
+  left: 22px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(145deg, #5598eb, #397fd1);
+  box-shadow: 0 7px 16px rgba(57, 127, 209, 0.28);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.pricing-cost-note strong,
+.pricing-cost-note span {
+  display: block;
+}
+
+.pricing-cost-note strong {
+  margin-bottom: 4px;
+  color: #25313a;
+  font-size: 14px;
+  font-weight: 850;
+  letter-spacing: -0.15px;
+}
+
+.pricing-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(74, 84, 93, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 18px 34px rgba(27, 33, 38, 0.13);
+}
+
+.pricing-explanation-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #343e46;
+}
+
+.pricing-explanation-table th,
+.pricing-explanation-table td {
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(74, 84, 93, 0.16);
+  text-align: left;
+  vertical-align: top;
+}
+
+.pricing-explanation-table th {
+  color: #f3f5f6;
+  background: #3b434a;
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.pricing-explanation-table td {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
+.pricing-explanation-table td:first-child,
+.pricing-explanation-table td:nth-child(3) {
+  color: #1f272d;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.pricing-explanation-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.dealer-commercial-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.dealer-commercial-grid h3 {
+  margin: 0 0 20px;
+  color: #222a30;
+  font-size: 23px;
+}
+
+.dealer-commercial-grid dl {
+  margin: 0;
+}
+
+.dealer-commercial-grid dl div {
+  padding: 11px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid rgba(74, 84, 93, 0.17);
+}
+
+.dealer-commercial-grid dt,
+.dealer-commercial-grid dd {
+  margin: 0;
+  color: #3f4a53;
+  font-size: 13px;
+}
+
+.dealer-commercial-grid dd {
+  color: #1f272d;
+  font-weight: 850;
+}
+
+.dealer-commercial-grid article > p,
+.dealer-commercial-grid article > span {
+  color: #68747d;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.dealer-commercial-grid article > strong {
+  margin: 22px 0 9px;
+  display: block;
+  color: #1c242a;
+  font-size: 36px;
+  letter-spacing: -1.4px;
+}
+
+.dealer-commercial-grid article > strong small {
+  margin-left: 4px;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+.dealer-pricing-final-cta {
+  margin-top: 82px;
+  border-color: rgba(74, 84, 93, 0.28);
+  background: transparent;
+  box-shadow: none;
+}
+
+.dealer-pricing-final-cta > div {
+  max-width: 760px;
+}
+
+.dealer-pricing-final-cta h2 {
+  font-size: clamp(27px, 3vw, 37px);
+}
+
+@media (max-width: 980px) {
+  .dealer-expense-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dealer-pricing-final-cta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 760px) {
+  .pricing-page-shell {
+    width: min(100% - 20px, 600px);
+  }
+
+  .pricing-service-tabs {
+    margin-bottom: 40px;
+  }
+
+  .pricing-service-tabs button {
+    min-height: 66px;
+    padding: 10px 12px;
+  }
+
+  .pricing-service-tabs button span {
+    font-size: 14px;
+  }
+
+  .pricing-service-tabs button small {
+    font-size: 9px;
+  }
+
+  .dealer-pricing-final-cta,
+  .dealer-cost-section,
+  .hosting-growth-section,
+  .dealer-commercial-section {
+    width: min(100% - 10px, 560px);
+  }
+
+  .dealer-expense-grid,
+  .dealer-commercial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dealer-expense-grid span {
+    min-height: 0;
+  }
+
+  .pricing-explanation-table,
+  .pricing-explanation-table tbody,
+  .pricing-explanation-table tr,
+  .pricing-explanation-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .pricing-explanation-table thead {
+    display: none;
+  }
+
+  .pricing-explanation-table tr {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(74, 84, 93, 0.2);
+  }
+
+  .pricing-explanation-table tr:last-child {
+    border-bottom: 0;
+  }
+
+  .pricing-explanation-table td,
+  .pricing-explanation-table td:first-child,
+  .pricing-explanation-table td:nth-child(3) {
+    padding: 8px 0 8px 42%;
+    position: relative;
+    border: 0;
+    white-space: normal;
+  }
+
+  .pricing-explanation-table td:before {
+    content: attr(data-label);
+    position: absolute;
+    top: 8px;
+    left: 0;
+    width: 38%;
+    color: #69747d;
+    font-size: 8px;
+    font-weight: 850;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 460px) {
+  .pricing-service-tabs button small {
+    display: none;
+  }
+
+  .pricing-explanation-table td,
+  .pricing-explanation-table td:first-child,
+  .pricing-explanation-table td:nth-child(3) {
+    padding-left: 0;
+  }
+
+  .pricing-explanation-table td:before {
+    margin-bottom: 4px;
+    display: block;
+    position: static;
+    width: auto;
+  }
+}
+
 /* Compact viewport: keep primary content above the fold. */
 .section {
   padding: 72px 0;
@@ -5191,6 +5706,10 @@ h3 {
   padding: 17px 16px;
 }
 
+.pricing-plans-grid .plan-metrics > div + div {
+  border-top: 1px solid rgba(255, 255, 255, 0.11);
+}
+
 .pricing-plans-grid .plan-metrics span {
   display: block;
   margin-bottom: 7px;
@@ -5388,11 +5907,6 @@ h3 {
   --plan-accent-rgb: 182, 106, 23;
 }
 
-.pricing-section.light-section .pricing-plans-grid .price-card.pay-use-price {
-  --plan-accent: #6650bd;
-  --plan-accent-rgb: 102, 80, 189;
-}
-
 .pricing-section.light-section .pricing-plans-grid .price-card:hover {
   z-index: auto;
   border-color: rgba(224, 229, 233, 0.78);
@@ -5423,7 +5937,7 @@ h3 {
 .pricing-section.light-section .pricing-plans-grid .price-card h2 small,
 .pricing-section.light-section .pricing-plans-grid .price-card > p,
 .pricing-section.light-section .pricing-plans-grid .plan-metrics span {
-  color: #465059;
+  color: #5f6b75;
 }
 
 .pricing-section.light-section .pricing-plans-grid .plan-name {
@@ -5439,6 +5953,10 @@ h3 {
   box-shadow:
     inset 0 1px rgba(255, 255, 255, 0.72),
     0 1px 2px rgba(35, 42, 48, 0.08);
+}
+
+.pricing-section.light-section .pricing-plans-grid .plan-metrics > div + div {
+  border-top-color: rgba(74, 84, 93, 0.22);
 }
 
 .pricing-section.light-section .pricing-plans-grid .price-card .plan-icon {
@@ -8110,6 +8628,22 @@ body .vin-format-tabs button:disabled {
   cursor: not-allowed;
   filter: grayscale(0.25);
   opacity: 0.55;
+}
+
+body .payment-information-button {
+  color: #252a2f !important;
+  border-color: #b9bec4 !important;
+  background: linear-gradient(180deg, #f7f8f9, #d6dade) !important;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.92),
+    0 2px 5px rgba(35, 42, 48, 0.16) !important;
+}
+
+body .payment-information-button:hover,
+body .payment-information-button:focus-visible {
+  color: #1f252a !important;
+  border-color: #969da4 !important;
+  background: linear-gradient(180deg, #fff, #e3e6e9) !important;
 }
 
 body .code-tabs button {

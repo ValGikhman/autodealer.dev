@@ -20,6 +20,35 @@ function Get-ConfigValue {
     return [string]$node.value
 }
 
+function Get-BillingPaymentUrls {
+    param([xml]$Config)
+    $prefix = 'Billing:PaymentUrl:'
+    $urls = @{}
+    foreach ($node in $Config.configuration.appSettings.add) {
+        $key = [string]$node.key
+        if ([string]::IsNullOrWhiteSpace($key) -or -not $key.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) { continue }
+
+        $planCode = $key.Substring($prefix.Length).Trim().ToUpperInvariant()
+        $configuredUrl = ([string]$node.value).Trim()
+        $paymentUri = $null
+        if ($planCode.Length -eq 0 -or
+            -not [Uri]::TryCreate($configuredUrl, [UriKind]::Absolute, [ref]$paymentUri) -or
+            $paymentUri.Scheme -ine [Uri]::UriSchemeHttps) {
+            throw "App setting '$key' must contain an absolute HTTPS URL."
+        }
+        $urls[$planCode] = $paymentUri.AbsoluteUri
+    }
+    return $urls
+}
+
+function Add-BillingContext {
+    param([string]$PaymentUrl, [string]$ClientReferenceId, [string]$Email)
+    $separator = if ($PaymentUrl.Contains('?')) { '&' } else { '?' }
+    return $PaymentUrl + $separator +
+        'client_reference_id=' + [Uri]::EscapeDataString($ClientReferenceId) +
+        '&prefilled_email=' + [Uri]::EscapeDataString($Email)
+}
+
 function HtmlEncode([object]$Value) {
     return [System.Net.WebUtility]::HtmlEncode([string]$Value)
 }
@@ -41,7 +70,7 @@ if ([string]::IsNullOrWhiteSpace($ConnectionName)) {
 }
 
 $connectionString = Get-ConfigValue $config 'connectionStrings' $ConnectionName
-$billingUrl = Get-ConfigValue $config 'appSettings' 'Billing:PaymentUrl'
+$billingUrls = Get-BillingPaymentUrls $config
 $smtpHost = Get-ConfigValue $config 'appSettings' 'Smtp:Host'
 $smtpFrom = Get-ConfigValue $config 'appSettings' 'Smtp:From'
 $smtpFromName = Get-ConfigValue $config 'appSettings' 'Smtp:FromName'
@@ -51,7 +80,7 @@ $smtpPortText = Get-ConfigValue $config 'appSettings' 'Smtp:Port'
 $smtpSslText = Get-ConfigValue $config 'appSettings' 'Smtp:EnableSsl'
 
 if ([string]::IsNullOrWhiteSpace($connectionString)) { throw "Connection string '$ConnectionName' is not configured." }
-if ([string]::IsNullOrWhiteSpace($billingUrl)) { throw "App setting 'Billing:PaymentUrl' is required." }
+if ($billingUrls.Count -eq 0) { throw "At least one 'Billing:PaymentUrl:PLAN_CODE' app setting is required." }
 if ([string]::IsNullOrWhiteSpace($smtpHost) -or [string]::IsNullOrWhiteSpace($smtpFrom)) { throw 'SMTP host and sender must be configured.' }
 
 $smtpPort = 587
@@ -97,7 +126,7 @@ WHERE Status='trialing' AND CurrentPeriodEndUtc<=SYSUTCDATETIME();
 
     $candidateCommand = $connection.CreateCommand()
     $candidateCommand.CommandText = @"
-SELECT s.SubscriptionId,s.ClientId,c.Email,c.FirstName,c.BusinessName,p.DisplayName,s.CurrentPeriodEndUtc
+SELECT s.SubscriptionId,s.ClientId,c.ClientNumber,c.Email,c.FirstName,c.BusinessName,p.PlanCode,p.DisplayName,s.CurrentPeriodEndUtc
 FROM dbo.Subscriptions s
 JOIN dbo.Clients c ON c.ClientId=s.ClientId
 JOIN dbo.Plans p ON p.PlanId=s.PlanId
@@ -114,15 +143,22 @@ ORDER BY s.CurrentPeriodEndUtc,s.SubscriptionId;
     try {
         while ($reader.Read()) {
             $rows.Add([pscustomobject]@{
-                SubscriptionId = $reader.GetInt64(0); ClientId = $reader.GetInt64(1); Email = $reader.GetString(2)
-                FirstName = $reader.GetString(3); BusinessName = $reader.GetString(4); PlanName = $reader.GetString(5)
-                TrialEndUtc = $reader.GetDateTime(6)
+                SubscriptionId = $reader.GetInt64(0); ClientId = $reader.GetInt64(1); ClientNumber = $reader.GetString(2)
+                Email = $reader.GetString(3); FirstName = $reader.GetString(4); BusinessName = $reader.GetString(5)
+                PlanCode = $reader.GetString(6); PlanName = $reader.GetString(7); TrialEndUtc = $reader.GetDateTime(8)
             })
         }
     } finally { $reader.Close() }
 
     Write-Host "Found $($rows.Count) notice(s) ready for delivery."
     foreach ($row in $rows) {
+        $billingUrl = $billingUrls[$row.PlanCode.ToUpperInvariant()]
+        if ([string]::IsNullOrWhiteSpace($billingUrl)) {
+            $failures++
+            Write-Error "No billing payment URL is configured for plan '$($row.PlanCode)'." -ErrorAction Continue
+            continue
+        }
+        $billingUrl = Add-BillingContext $billingUrl $row.ClientNumber $row.Email
         if (-not $PSCmdlet.ShouldProcess($row.Email, "send trial-expiration notice")) { continue }
 
         $attemptCommand = $connection.CreateCommand()

@@ -20,7 +20,7 @@ namespace autodealer.dev {
             { "Solutions/VinDecoder", Page("VinSolution", "Decode VINs into complete vehicle specifications, equipment, pricing, styles, and responsive JSON, XML, or HTML reports.") },
             { "Solutions/DigitalShowroom", Page("ShowroomSolution", "Launch a fast dealership website powered by live inventory, vehicle search, transparent pricing, financing, and lead conversion.") },
             { "Solutions/RequestDemo", Page("DealerDemo", "Request a personalized AutoDealer.dev demonstration for your dealership website, inventory workflow, and automotive API needs.") },
-            { "Pricing/Index", Page("Pricing", "Compare AutoDealer.dev API plans with secure API keys, VIN decoding, JSON, XML and HTML responses, usage tracking, and a 14-day trial.") },
+            { "Pricing/Index", Page("Pricing", "Compare AutoDealer.dev vehicle-data API plans and managed dealer website services with inventory administration, hosting, support, and scalable infrastructure.") },
             { "Documentation/Index", Page("Documentation", "Start integrating AutoDealer.dev APIs with authentication, request examples, response formats, VIN decoding, and error guidance.") },
             { "Documentation/VinHtml", Page("DocsVinHtml", "Integrate a responsive HTML VIN report with AutoDealer.dev, including request parameters, examples, and secure API authentication.") },
             { "Documentation/Authentication", Page("DocsAuthentication", "Learn how to authenticate AutoDealer.dev API requests with secure scoped API keys and safe credential handling.") },
