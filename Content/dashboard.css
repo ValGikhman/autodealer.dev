@@ -2092,12 +2092,39 @@ body.admin-delete-confirmation-open .modal-backdrop.show:last-of-type {
 .admin-dashboard-page .copy-action-button,
 .admin-dashboard-page .copy-action-button:hover,
 .admin-dashboard-page .copy-action-button:focus-visible {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 28px;
   min-width: 28px;
   height: 28px;
   min-height: 28px;
   padding: 0;
   color: #252a2f !important;
+}
+
+.admin-dashboard-page .copy-action-button .copy-action-icon {
+  display: block;
+  flex: 0 0 13px;
+  width: 13px !important;
+  height: 13px !important;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.admin-dashboard-page .copy-action-button .copy-action-check {
+  display: none;
+}
+
+.admin-dashboard-page .copy-action-button.copied .copy-action-default {
+  display: none;
+}
+
+.admin-dashboard-page .copy-action-button.copied .copy-action-check {
+  display: block;
 }
 
 /* Shared foundation for the active admin overview metrics. */

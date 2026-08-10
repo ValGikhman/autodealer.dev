@@ -15,6 +15,18 @@ When `ApiSecurity:Enabled` is `true`, every request must also send:
 Authorization: Bearer ad_live_KEY_ID.SECRET
 ```
 
+For clients that cannot set request headers, the same credential may be passed
+in the `access_token` query parameter:
+
+```text
+GET /api/service/vin/{vin}/json?access_token=ad_live_KEY_ID.SECRET
+```
+
+The authorization header is preferred. Query-string credentials can appear in
+browser history and web-server, proxy, or analytics logs, so use this form only
+over HTTPS and use a short-lived or revocable key when possible. If an
+`Authorization` header is present, it takes precedence over `access_token`.
+
 The credential is issued during account creation and is displayed in full only
 once. Keep it in a server-side secret manager, never in browser JavaScript.
 
