@@ -47,6 +47,9 @@
     <PackageReference Include="MailKitLite">
       <Version>4.17.0</Version>
     </PackageReference>
+    <PackageReference Include="Stripe.net">
+      <Version>52.1.1</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
@@ -161,6 +164,7 @@
     <Compile Include="Controllers\PricingController.cs" />
     <Compile Include="Controllers\SeoController.cs" />
     <Compile Include="Controllers\SolutionsController.cs" />
+    <Compile Include="Controllers\StripeWebhookController.cs" />
     <Compile Include="Controllers\DecoderController.cs" />
     <Compile Include="Models\AccountRegistrationViewModel.cs" />
     <Compile Include="Models\ContactInquiryViewModel.cs" />
@@ -179,6 +183,7 @@
     </Compile>
     <Compile Include="Data\DealerDemoRequestRecord.cs" />
     <Compile Include="Data\ClientEmailVerificationRecord.cs" />
+    <Compile Include="Data\StripeWebhookEventRecord.cs" />
     <Compile Include="Services\ClientAccountService.cs" />
     <Compile Include="Services\ClientEmailHistoryRecorder.cs" />
     <Compile Include="Services\ContactInquiryService.cs" />
@@ -195,6 +200,8 @@
     <Compile Include="Services\IPlanService.cs" />
     <Compile Include="Services\PlanService.cs" />
     <Compile Include="Services\BillingPaymentUrlResolver.cs" />
+    <Compile Include="Services\IStripeWebhookService.cs" />
+    <Compile Include="Services\StripeWebhookService.cs" />
     <Compile Include="Services\SeoUrl.cs" />
     <Compile Include="Services\IDealerDemoRequestService.cs" />
     <Compile Include="Services\DealerDemoRequestService.cs" />
@@ -221,6 +228,7 @@
     <Content Include="Database\005_AdminClientDeletionPermissions.sql" />
     <Content Include="Database\006_ClientEmailVerification.sql" />
     <Content Include="Database\007_ScalePlan.sql" />
+    <Content Include="Database\008_StripeWebhooks.sql" />
     <Content Include="Content\dashboard.css" />
     <Content Include="Content\email.css" />
     <Content Include="Content\pepTools\pepEdit.css" />

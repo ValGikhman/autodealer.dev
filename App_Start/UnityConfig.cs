@@ -27,6 +27,7 @@ namespace autodealer.dev
             container.RegisterType<IPlanService, PlanService>();
             container.RegisterType<IDealerDemoRequestService, DealerDemoRequestService>();
             container.RegisterType<IContactInquiryService, ContactInquiryService>();
+            container.RegisterType<IStripeWebhookService, StripeWebhookService>();
             // container.RegisterType<IVinDecoderService, VinDecoderService>(new HierarchicalLifetimeManager());
 
             // Set MVC resolver

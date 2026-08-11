@@ -13,6 +13,7 @@ namespace autodealer.dev {
 
             routes.MapRoute("Robots", "robots.txt", new { controller = "Seo", action = "Robots" });
             routes.MapRoute("Sitemap", "sitemap.xml", new { controller = "Seo", action = "Sitemap" });
+            routes.MapRoute("StripeWebhook", "stripe/webhook", new { controller = "StripeWebhook", action = "Index" });
             routes.MapRoute("Home", "", new { controller = "Home", action = "Index" });
             routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
             routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });

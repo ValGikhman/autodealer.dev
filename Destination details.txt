@@ -1,0 +1,25 @@
+Destination details
+Destination ID
+we_1U33yTJuJqCK3FYNip1yCU0D
+Name
+charming-victory
+Endpoint URL
+https://autodealer.dev/stripe/webhook
+Description
+API version
+2026-07-29.dahlia
+Listening to
+2 events
+Hide events
+checkout.session.completed
+invoice.paid
+Signing secret
+Use this secret to verify that events come from Stripe. You can always view or roll this secret from the destination details page.
+whsec_gGYeKmTtCuOWvRCUHH8lrR0QV40HuNlk
+
+
+
+Event destinations
+charming-victory
+Active
+https://autodealer.dev/stripe/webhook

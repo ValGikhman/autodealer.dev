@@ -150,6 +150,27 @@ subscription's plan code. They append Stripe's `client_reference_id` and
 or missing mappings are rejected instead of falling back to another plan.
 Never point these settings at a form that posts raw card data to this application.
 
+### Stripe webhook
+
+Run `Database/008_StripeWebhooks.sql`, then configure the signed Stripe event
+destination at `https://autodealer.dev/stripe/webhook` for
+`checkout.session.completed` and `invoice.paid`. Set the endpoint-specific
+signing secret outside source control as `Stripe:WebhookSecret`. Configure each
+Payment Link's `plink_...` identifier separately from its public `buy.stripe.com`
+URL so checkout cannot activate a different plan:
+
+```xml
+<add key="Stripe:PaymentLinkId:NOVICE" value="plink_..." />
+<add key="Stripe:PaymentLinkId:COMPETENT" value="plink_..." />
+<add key="Stripe:PaymentLinkId:ADEPT" value="plink_..." />
+<add key="Stripe:PaymentLinkId:SCALE" value="plink_..." />
+```
+
+The webhook verifies Stripe's signature against the unmodified request body.
+Checkout links the returned Stripe subscription ID to the local subscription;
+`invoice.paid` then activates it and advances the local billing period. Processed
+Stripe event IDs are stored transactionally so delivery retries are safe.
+
 Run the job manually from the application directory:
 
 ```powershell

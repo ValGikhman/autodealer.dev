@@ -103,6 +103,19 @@ BEGIN
         CONSTRAINT CK_Subscriptions_Period CHECK (CurrentPeriodEndUtc > CurrentPeriodStartUtc)
     );
     CREATE INDEX IX_Subscriptions_Client_Status ON dbo.Subscriptions(ClientId, Status) INCLUDE (PlanId, CurrentPeriodStartUtc, CurrentPeriodEndUtc);
+    CREATE UNIQUE INDEX UX_Subscriptions_ProviderSubscriptionId ON dbo.Subscriptions(ProviderSubscriptionId)
+        WHERE ProviderSubscriptionId IS NOT NULL;
+END;
+GO
+
+IF OBJECT_ID('dbo.StripeWebhookEvents', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.StripeWebhookEvents (
+        StripeEventId nvarchar(255) NOT NULL CONSTRAINT PK_StripeWebhookEvents PRIMARY KEY,
+        EventType nvarchar(100) NOT NULL,
+        EventCreatedUtc datetime2(3) NOT NULL,
+        ProcessedUtc datetime2(3) NOT NULL CONSTRAINT DF_StripeWebhookEvents_ProcessedUtc DEFAULT (SYSUTCDATETIME())
+    );
 END;
 GO
 
@@ -300,7 +313,8 @@ Legacy procedure definitions end here.
 GRANT SELECT, INSERT ON dbo.Clients TO AutoDealerWeb;
 GRANT SELECT, INSERT, UPDATE ON dbo.ClientCredentials TO AutoDealerWeb;
 GRANT SELECT ON dbo.Plans TO AutoDealerWeb;
-GRANT SELECT, INSERT ON dbo.Subscriptions TO AutoDealerWeb;
+GRANT SELECT, INSERT, UPDATE ON dbo.Subscriptions TO AutoDealerWeb;
+GRANT SELECT, INSERT ON dbo.StripeWebhookEvents TO AutoDealerWeb;
 GRANT SELECT, INSERT, UPDATE ON dbo.ApiKeys TO AutoDealerWeb;
 GRANT INSERT ON dbo.PaymentProfiles TO AutoDealerWeb;
 GRANT SELECT, INSERT, UPDATE ON dbo.ApiUsageLog TO AutoDealerWeb;
