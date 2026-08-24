@@ -1113,6 +1113,54 @@
 
         var $customerGrid = $('#customer-grid');
         if ($customerGrid.length) {
+            function showSmsTestStatus(message, isError) {
+                var panel = $customerGrid[0].closest('.dashboard-grid-panel');
+                if (!panel) return;
+                var status = panel.querySelector('.customer-sms-test-status');
+                if (!status) {
+                    status = document.createElement('div');
+                    status.className = 'customer-sms-test-status';
+                    status.setAttribute('role', 'status');
+                    status.setAttribute('aria-live', 'polite');
+                    panel.insertBefore(status, $customerGrid[0]);
+                }
+                status.classList.toggle('is-error', !!isError);
+                status.textContent = message;
+                status.hidden = false;
+            }
+
+            function sendTestSms(detail) {
+                var button = detail.event.target.closest('.customer-sms-test');
+                if (!button || button.disabled) return;
+                detail.event.preventDefault();
+                detail.event.stopPropagation();
+                button.disabled = true;
+                setButtonLabel(button, 'Sending...');
+
+                $.ajax({
+                    url: $customerGrid.data('test-sms-url'),
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        __RequestVerificationToken: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value,
+                        clientId: detail.dataItem.ClientId
+                    }
+                }).done(function (response) {
+                    setButtonLabel(button, 'Sent');
+                    showSmsTestStatus(response.Message || 'Test SMS sent.', false);
+                }).fail(function (xhr) {
+                    var response = xhr.responseJSON || {};
+                    setButtonLabel(button, 'Failed');
+                    showSmsTestStatus(response.Message || 'The test SMS could not be sent.', true);
+                }).always(function () {
+                    window.setTimeout(function () {
+                        if (!button.isConnected) return;
+                        button.disabled = false;
+                        setButtonLabel(button, 'Test SMS');
+                    }, 2500);
+                });
+            }
+
             function ensureNewCustomerToolbarButton() {
                 var customerSearchBar = $customerGrid[0].querySelector('.pg-search-bar');
                 if (!customerSearchBar || customerSearchBar.querySelector('.admin-new-customer')) {
@@ -1140,6 +1188,10 @@
                     ensureNewCustomerToolbarButton();
                 },
                 onCellClick: function (detail) {
+                    if (detail.field === 'TestSms') {
+                        sendTestSms(detail);
+                        return;
+                    }
                     if (detail.field === 'Delete') {
                         var deleteButton = detail.event.target.closest('.customer-delete-action');
                         if (!deleteButton) return;
@@ -1154,19 +1206,20 @@
                     if (detail.field === 'SubscriptionCount') expandCustomerAccount(detail, 'subscription');
                 },
                 onCellDblClick: function (detail) {
-                    if (detail.field !== 'EmailCount' && detail.field !== 'ApiKeyCount' && detail.field !== 'SubscriptionCount')
+                    if (detail.field !== 'TestSms' && detail.field !== 'EmailCount' && detail.field !== 'ApiKeyCount' && detail.field !== 'SubscriptionCount')
                         openSubgridEditor('client', detail.dataItem, document.getElementById('customer-grid'), detail.dataItem.ClientId, null, null);
                 },
                 onRowDblClick: function (detail) {
                     openSubgridEditor('client', detail.dataItem, document.getElementById('customer-grid'), detail.dataItem.ClientId, null, null);
                 },
                 columns: [
-                    { field: 'BusinessName', title: 'Customer', width: '15%' },
-                    { field: 'ClientNumber', title: 'Client number', width: '13%' },
-                    { field: 'ContactName', title: 'Contact', width: '14%' },
-                    { field: 'Email', title: 'Email', width: '18%' },
-                    { field: 'ApiKeyCount', title: 'API keys', width: '10%', sortable: false, filterable: false, template: '#customer-api-toggle-template' },
-                    { field: 'SubscriptionCount', title: 'Subscription', width: '13%', sortable: false, filterable: false, template: '#customer-subscription-toggle-template' },
+                    { field: 'BusinessName', title: 'Customer', width: '13%' },
+                    { field: 'ClientNumber', title: 'Client number', width: '12%' },
+                    { field: 'ContactName', title: 'Contact', width: '12%' },
+                    { field: 'Email', title: 'Email', width: '16%' },
+                    { field: 'TestSms', title: 'SMS', width: '9%', sortable: false, filterable: false, template: '#customer-sms-test-template' },
+                    { field: 'ApiKeyCount', title: 'API keys', width: '9%', sortable: false, filterable: false, template: '#customer-api-toggle-template' },
+                    { field: 'SubscriptionCount', title: 'Subscription', width: '12%', sortable: false, filterable: false, template: '#customer-subscription-toggle-template' },
                     { field: 'EmailCount', title: 'Mail', width: '8%', sortable: false, filterable: false, template: '#customer-email-toggle-template' },
                     { field: 'Delete', title: '', width: '9%', sortable: false, filterable: false, template: '#customer-delete-action-template' }
                 ]

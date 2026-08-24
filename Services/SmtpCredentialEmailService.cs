@@ -78,6 +78,13 @@ namespace autodealer.dev.Services {
                 var recipientName = ConfigurationManager.AppSettings["AccountNotification:RecipientName"];
                 var subject = "New API account — " + SafeSubject(businessName);
                 SmtpMailSender.SendForClient(clientId, recipient, recipientName, subject, body, email, ((firstName ?? string.Empty) + " " + (lastName ?? string.Empty)).Trim());
+                TwilioSmsSender.TrySendNewCustomer(
+                    businessName,
+                    ((firstName ?? string.Empty) + " " + (lastName ?? string.Empty)).Trim(),
+                    email,
+                    phone,
+                    clientNumber,
+                    planCode);
             }
             catch (Exception ex) {
                 Trace.TraceError("Account notification SMTP delivery failed: {0}", ex);

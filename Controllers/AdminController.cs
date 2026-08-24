@@ -378,6 +378,36 @@ namespace autodealer.dev.Controllers {
         }
 
         [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SendTestSms(long clientId) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            try {
+                var client = adminService.GetClientForEdit(clientId);
+                var contactName = ((client.FirstName ?? string.Empty) + " " + (client.LastName ?? string.Empty)).Trim();
+                string failureMessage;
+                if (!TwilioSmsSender.TrySendTest(client.BusinessName, contactName, out failureMessage)) {
+                    Response.StatusCode = 503;
+                    return Json(new { Ok = false, Message = failureMessage });
+                }
+
+                return Json(new {
+                    Ok = true,
+                    Message = "Test SMS sent for " + client.BusinessName + "."
+                });
+            }
+            catch (KeyNotFoundException ex) {
+                Response.StatusCode = 404;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (SqlException) {
+                Response.StatusCode = 503;
+                return Json(new { Ok = false, Message = "The customer could not be loaded for the SMS test." });
+            }
+        }
+
+        [AdminAuthorize]
         [HttpGet]
         public ActionResult NewClient() {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
