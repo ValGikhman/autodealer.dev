@@ -46,37 +46,7 @@ If SMTP is unavailable, registration still succeeds and the one-time credential
 is displayed in the browser. For stronger delivery guarantees, replace direct
 SMTP with an outbox table and background mail worker.
 
-## 4. Configure SMS alerts
-
-The application sends a best-effort Twilio SMS after the sales email succeeds
-for a new customer account or dealer demo request. SMS delivery failures are
-logged and do not fail the customer or demo workflow.
-
-Set all four values through protected deployment configuration or environment
-variables. Phone numbers must use E.164 format, such as `+15135550123`:
-
-```text
-AUTODEALER_TWILIO_ACCOUNT_SID=AC...
-AUTODEALER_TWILIO_AUTHTOKEN=...
-AUTODEALER_TWILIO_FROMNUMBER=+1...
-AUTODEALER_TWILIO_ALERTTONUMBER=+1...
-```
-
-The standard names used by Twilio's samples are also supported:
-
-```text
-TWILIO_ACCOUNT_SID=AC...
-TWILIO_AUTH_TOKEN=...
-TWILIO_PHONE_NUMBER=+1...
-TWILIO_ALERT_TO_NUMBER=+1...
-```
-
-The corresponding `Web.config` keys are `Twilio:AccountSid`,
-`Twilio:AuthToken`, `Twilio:FromNumber`, and `Twilio:AlertToNumber`. Never
-commit the Auth Token. The sender must be a Twilio SMS-capable number associated
-with the account; the recipient is the single phone that receives sales alerts.
-
-## 5. Configure payments safely
+## 4. Configure payments safely
 
 Use a PCI-compliant provider's hosted checkout or hosted fields. Browser card
 fields must submit directly to that provider, which returns an opaque payment
@@ -87,7 +57,7 @@ or CVVs. `PaymentProfiles` stores provider identifiers plus optional card brand,
 last four digits, and expiry for display. Verify provider webhooks before using
 them to activate, renew, pause, or cancel subscriptions.
 
-## 6. Production checklist
+## 5. Production checklist
 
 - Rotate any DataOne credentials that previously appeared in configuration and
   inject replacements outside source control.

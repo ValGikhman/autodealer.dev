@@ -8,7 +8,9 @@ namespace autodealer.dev.Services {
         private const string ProductionConnectionName = "AutoDealer.dev.Production";
 
         public static string Resolve() {
-            var connectionName = string.Equals(Environment.MachineName, DevelopmentMachine, StringComparison.OrdinalIgnoreCase)
+            var isDevelopmentMachine = string.Equals(Environment.MachineName, DevelopmentMachine, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(Environment.MachineName, "PC-67C5JX3", StringComparison.OrdinalIgnoreCase);
+            var connectionName = isDevelopmentMachine
                 ? DevelopmentConnectionName
                 : ProductionConnectionName;
             var setting = ConfigurationManager.ConnectionStrings[connectionName];

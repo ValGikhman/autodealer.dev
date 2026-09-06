@@ -120,12 +120,6 @@ namespace autodealer.dev.Services {
 
             var subject = "A dealership is ready to talk — " + SafeSubject(request.BusinessName);
             SmtpMailSender.Send(recipient, recipientName, subject, body, request.Email, request.ContactName);
-            TwilioSmsSender.TrySendDemoRequest(
-                request.BusinessName,
-                request.ContactName,
-                request.Email,
-                request.Phone,
-                PreferredContact(request));
         }
 
         private static bool SendCustomerConfirmation(DealerDemoRequestViewModel request, Guid requestId) {

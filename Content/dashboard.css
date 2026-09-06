@@ -334,37 +334,6 @@
   cursor: pointer;
 }
 
-.admin-dashboard-page .customer-sms-test {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 70px;
-  height: 32px;
-  padding: 0 9px;
-  border: 1px solid #85858e;
-  border-radius: 8px;
-  font: 700 10px/1 var(--mono);
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.admin-dashboard-page .customer-sms-test-status {
-  margin: 0 18px 14px;
-  padding: 10px 12px;
-  border: 1px solid #9bb6a1;
-  border-radius: 8px;
-  color: #24462c;
-  background: #e9f5ec;
-  font: 600 12px/1.45 var(--sans);
-}
-
-.admin-dashboard-page .customer-sms-test-status.is-error {
-  border-color: #c9a0a0;
-  color: #692f2f;
-  background: #faecec;
-}
-
 .admin-dashboard-page .customer-email-toggle:hover,
 .admin-dashboard-page .customer-email-toggle:focus-visible,
 .admin-dashboard-page .customer-email-toggle.is-open,

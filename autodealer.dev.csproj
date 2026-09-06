@@ -209,7 +209,6 @@
     <Compile Include="Services\EmailTemplateRenderer.cs" />
     <Compile Include="Services\AdminInboxService.cs" />
     <Compile Include="Services\SmtpMailSender.cs" />
-    <Compile Include="Services\TwilioSmsSender.cs" />
     <Compile Include="Services\ICredentialEmailService.cs" />
     <Compile Include="Services\SmtpCredentialEmailService.cs" />
     <Compile Include="Global.asax.cs">
