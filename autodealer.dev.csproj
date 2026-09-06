@@ -314,9 +314,6 @@
     <Content Include="Content\images\landing-showcase\vin-decoder-report.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
     <None Include="Docs\VinDecoderApi.md" />
     <None Include="Docs\PlatformSetup.md" />
