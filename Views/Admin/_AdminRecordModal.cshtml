@@ -117,10 +117,18 @@
                     </div>
                     <div class="dashboard-edit-field dashboard-edit-field-wide">
                         <label for="new-email-subject">Subject</label>
-                        <input id="new-email-subject" name="Subject" type="text" maxlength="200" required autocomplete="off" />
+                        <div class="new-email-subject-row">
+                            <input id="new-email-subject" name="Subject" type="text" maxlength="200" required autocomplete="off" />
+                            <div id="opportunity-email-preview-controls" class="opportunity-email-preview-controls" hidden>
+                                <button type="button" id="opportunity-email-preview-toggle" class="customer-api-issue admin-create-button">Edit message</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <textarea id="new-email-body" name="Body" aria-label="Email body"></textarea>
+                <div id="new-email-editor">
+                    <textarea id="new-email-body" name="Body" aria-label="Email body"></textarea>
+                </div>
+                <iframe id="opportunity-email-preview-frame" class="opportunity-email-preview-frame" title="Email preview" sandbox="" referrerpolicy="no-referrer" hidden></iframe>
                 <div class="dashboard-key-issue-error" id="new-email-error" role="alert" hidden></div>
             </div>
             <div class="modal-footer">
@@ -439,5 +447,13 @@
     </use>
     </svg>
     </button>
+    </span>
+</script>
+<script type="text/x-pepgrid-template" id="opportunity-reply-action-template">
+    <span class="customer-grid-icon-action">
+        <button type="button" class="opportunity-reply-action admin-create-button" aria-label="Reply to {{BusinessName}}" title="Reply to opportunity">
+            <svg class="admin-action-icon" aria-hidden="true"><use href="#icon-mail"></use></svg>
+            <span>Reply</span>
+        </button>
     </span>
 </script>

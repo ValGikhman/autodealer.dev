@@ -39,6 +39,13 @@
         var newEmailSubtitle = document.getElementById('new-email-subtitle');
         var newEmailSubmit = document.getElementById('new-email-submit');
         var newEmailError = document.getElementById('new-email-error');
+        var replyPreviewFrame = document.getElementById('opportunity-email-preview-frame');
+        var replyPreviewControls = document.getElementById('opportunity-email-preview-controls');
+        var replyPreviewToggle = document.getElementById('opportunity-email-preview-toggle');
+        var newEmailEditor = document.getElementById('new-email-editor');
+        var replyPreviewSequence = 0;
+        var replyPreviewRequest = null;
+        var newEmailSending = false;
         var deleteClientModalElement = document.getElementById('delete-client-modal');
         var deleteClientModal = window.bootstrap.Modal.getOrCreateInstance(deleteClientModalElement);
         var deleteClientForm = document.getElementById('delete-client-form');
@@ -76,9 +83,13 @@
         });
 
         function openNewEmailModal(customer) {
+            if (newEmailSending) return;
+            resetReplyPreview();
             pendingNewEmail = customer;
             newEmailForm.reset();
             newEmailTo.value = customer.Email || '';
+            newEmailTo.readOnly = false;
+            document.getElementById('new-email-title').textContent = 'New email';
             newEmailSubject.value = '';
             pendingNewEmailGreeting = 'Dear ' + valueOrEmpty(customer.ContactName || customer.BusinessName || 'Customer') + ',';
             var greeting = $('<strong>').text(pendingNewEmailGreeting);
@@ -95,8 +106,93 @@
             newEmailModal.show();
         }
 
+        function openOpportunityReply(opportunity) {
+            if (newEmailSending) return;
+            openNewEmailModal(opportunity);
+            newEmailTo.value = opportunity.Email || '';
+            newEmailTo.readOnly = true;
+            document.getElementById('new-email-title').textContent = 'Reply to opportunity';
+            newEmailSubtitle.textContent = 'Reply to ' + valueOrEmpty(opportunity.ContactName || opportunity.BusinessName) + ' at ' + valueOrEmpty(opportunity.Email) + '.';
+            newEmailSubject.value = 'Thank you for your interest in AutoDealer.dev — let’s arrange your demo';
+            var draft = $('<div>')
+                .append($('<p>').append($('<strong>').text(pendingNewEmailGreeting)))
+                .append($('<p>').text('Thank you for your interest in AutoDealer.dev and for telling us about ' + valueOrEmpty(opportunity.BusinessName || 'your dealership') + '.'))
+                .append($('<p>').text('We would love to show you how AutoDealer.dev can support your dealership with a personalized demo at your convenience.'))
+                .append($('<p>').append($('<strong>').text('Please reply with a day and time that work best for you, along with your time zone and preferred way to connect.')))
+                .append($('<p>').text('We will follow up to confirm the details. If you have any questions or specific goals you would like us to cover, please include them in your reply.'))
+                .append($('<p>').text('We look forward to meeting you!'))
+                .append($('<p>').text('Best regards,')).append($('<p>').append($('<strong>').text('The AutoDealer.dev team')));
+            $(newEmailBody).pepEdit('value', draft.html());
+            replyPreviewControls.hidden = false;
+            showReplyPreview();
+        }
+
+        function resetReplyPreview() {
+            cancelReplyPreview();
+            replyPreviewControls.hidden = true;
+            replyPreviewFrame.hidden = true;
+            replyPreviewFrame.removeAttribute('srcdoc');
+            newEmailEditor.hidden = false;
+        }
+
+        function cancelReplyPreview() {
+            replyPreviewSequence++;
+            if (replyPreviewRequest) {
+                replyPreviewRequest.abort();
+                replyPreviewRequest = null;
+            }
+        }
+
+        function showReplyPreview() {
+            if (newEmailSending) return;
+            cancelReplyPreview();
+            var sequence = ++replyPreviewSequence;
+            newEmailEditor.hidden = true;
+            replyPreviewFrame.hidden = false;
+            replyPreviewFrame.removeAttribute('srcdoc');
+            replyPreviewToggle.textContent = 'Edit message';
+            newEmailError.hidden = true;
+            newEmailSubmit.disabled = true;
+            replyPreviewRequest = $.ajax({
+                url: $('#demo-request-grid').data('reply-url'),
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    RequestId: pendingNewEmail.RequestId,
+                    Subject: newEmailSubject.value,
+                    Body: $(newEmailBody).pepEdit('value'),
+                    preview: true,
+                    __RequestVerificationToken: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value
+                }
+            }).done(function (response) {
+                if (sequence !== replyPreviewSequence) return;
+                newEmailTo.value = response.Recipient;
+                replyPreviewFrame.srcdoc = response.Html;
+                newEmailSubmit.disabled = false;
+            }).fail(function (xhr) {
+                if (sequence !== replyPreviewSequence) return;
+                newEmailError.textContent = (xhr.responseJSON || {}).Message || 'The email preview could not be loaded. Refresh the dashboard and try again.';
+                newEmailError.hidden = false;
+            });
+        }
+
+        replyPreviewToggle.addEventListener('click', function () {
+            if (newEmailSending) return;
+            if (newEmailEditor.hidden) {
+                cancelReplyPreview();
+                newEmailEditor.hidden = false;
+                replyPreviewFrame.hidden = true;
+                replyPreviewToggle.textContent = 'Preview message';
+                newEmailSubmit.disabled = false;
+                newEmailError.hidden = true;
+            } else {
+                showReplyPreview();
+            }
+        });
+
         newEmailForm.addEventListener('submit', function (event) {
             event.preventDefault();
+            if (newEmailSending || newEmailSubmit.disabled) return;
             var body = $(newEmailBody).pepEdit('value');
             var bodyText = $('<div>').html(body).text().replace(/\u00a0/g, ' ').trim();
             var hasMessage = bodyText && bodyText !== pendingNewEmailGreeting;
@@ -111,35 +207,55 @@
 
             newEmailBody.value = body;
             var data = $(newEmailForm).serializeArray();
-            data.push({ name: 'ClientId', value: pendingNewEmail.ClientId });
+            var isOpportunityReply = !!pendingNewEmail.RequestId;
+            data.push({ name: isOpportunityReply ? 'RequestId' : 'ClientId', value: isOpportunityReply ? pendingNewEmail.RequestId : pendingNewEmail.ClientId });
             data.push({
                 name: '__RequestVerificationToken',
                 value: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value
             });
             newEmailSubmit.disabled = true;
+            newEmailSending = true;
+            replyPreviewToggle.disabled = true;
             setButtonLabel(newEmailSubmit, 'Sending...');
             newEmailError.hidden = true;
 
             $.ajax({
-                url: $('#customer-grid').data('send-email-url'),
+                url: isOpportunityReply ? $('#demo-request-grid').data('reply-url') : $('#customer-grid').data('send-email-url'),
                 method: 'POST',
                 dataType: 'json',
                 data: data
-            }).done(function () {
+            }).done(function (response) {
+                newEmailSending = false;
                 newEmailModal.hide();
+                if (isOpportunityReply) {
+                    $('#opportunity-reply-status').text(response.Message);
+                    return;
+                }
                 closeCustomerDetail();
                 $('#customer-grid').pepGrid('refresh');
             }).fail(function (xhr) {
                 var response = xhr.responseJSON || {};
-                newEmailError.textContent = response.Message || 'The email could not be sent.';
+                var message = 'The email could not be sent. Please try again.';
+                if (xhr.status === 404) message = 'The email action is unavailable. Rebuild the application and refresh the dashboard.';
+                else if (xhr.status === 401 || xhr.status === 403 || (xhr.status === 200 && !xhr.responseJSON))
+                    message = 'Your admin session may have expired. Refresh the dashboard and sign in again.';
+                else if (xhr.status === 0) message = 'The server could not be reached. Check your connection and try again.';
+                newEmailError.textContent = response.Message || message;
                 newEmailError.hidden = false;
             }).always(function () {
+                newEmailSending = false;
+                replyPreviewToggle.disabled = false;
                 newEmailSubmit.disabled = false;
                 setButtonLabel(newEmailSubmit, 'Send email');
             });
         });
 
+        $(newEmailModalElement).on('hide.bs.modal', function (event) {
+            if (newEmailSending) event.preventDefault();
+        });
+
         $(newEmailModalElement).on('hidden.bs.modal', function () {
+            resetReplyPreview();
             pendingNewEmail = null;
             pendingNewEmailGreeting = '';
             newEmailForm.reset();
@@ -1161,12 +1277,12 @@
                     openSubgridEditor('client', detail.dataItem, document.getElementById('customer-grid'), detail.dataItem.ClientId, null, null);
                 },
                 columns: [
-                    { field: 'BusinessName', title: 'Customer', width: '15%' },
-                    { field: 'ClientNumber', title: 'Client number', width: '13%' },
-                    { field: 'ContactName', title: 'Contact', width: '14%' },
-                    { field: 'Email', title: 'Email', width: '18%' },
-                    { field: 'ApiKeyCount', title: 'API keys', width: '10%', sortable: false, filterable: false, template: '#customer-api-toggle-template' },
-                    { field: 'SubscriptionCount', title: 'Subscription', width: '13%', sortable: false, filterable: false, template: '#customer-subscription-toggle-template' },
+                    { field: 'BusinessName', title: 'Customer', width: '18%' },
+                    { field: 'ClientNumber', title: 'Client number', width: '12%' },
+                    { field: 'ContactName', title: 'Contact', width: '12%' },
+                    { field: 'Email', title: 'Email', width: '20%' },
+                    { field: 'ApiKeyCount', title: 'API keys', width: '9%', sortable: false, filterable: false, template: '#customer-api-toggle-template' },
+                    { field: 'SubscriptionCount', title: 'Subscription', width: '12%', sortable: false, filterable: false, template: '#customer-subscription-toggle-template' },
                     { field: 'EmailCount', title: 'Mail', width: '8%', sortable: false, filterable: false, template: '#customer-email-toggle-template' },
                     { field: 'Delete', title: '', width: '9%', sortable: false, filterable: false, template: '#customer-delete-action-template' }
                 ]
@@ -1193,6 +1309,13 @@
                 defaultSort: [{ field: 'CreatedSort', dir: 'desc' }],
                 onDataBound: ensureNewOpportunityToolbarButton,
                 onCellClick: function (detail) {
+                    if (detail.field === 'Reply') {
+                        if (!detail.event.target.closest('.opportunity-reply-action')) return;
+                        detail.event.preventDefault();
+                        detail.event.stopPropagation();
+                        openOpportunityReply(detail.dataItem);
+                        return;
+                    }
                     if (detail.field !== 'Delete') return;
                     var deleteButton = detail.event.target.closest('.opportunity-delete-action');
                     if (!deleteButton) return;
@@ -1202,18 +1325,19 @@
                     deleteOpportunityModal.show();
                 },
                 onCellDblClick: function (detail) {
-                    if (detail.field !== 'Delete') openOpportunityEditor(detail.dataItem);
+                    if (detail.field !== 'Delete' && detail.field !== 'Reply') openOpportunityEditor(detail.dataItem);
                 },
                 onRowDblClick: function (detail) {
-                    if (!detail.event.target.closest('.opportunity-delete-action')) openOpportunityEditor(detail.dataItem);
+                    if (!detail.event.target.closest('.opportunity-delete-action, .opportunity-reply-action')) openOpportunityEditor(detail.dataItem);
                 },
                 columns: [
-                    { field: 'BusinessName', title: 'Dealership', width: '15%' },
-                    { field: 'ContactName', title: 'Contact', width: '15%' },
-                    { field: 'Email', title: 'Email', width: '15%' },
-                    { field: 'Phone', title: 'Phone', width: '15%' },
-                    { field: 'Inventory', title: 'Inventory', width: '15%' },
-                    { field: 'Status', title: 'Status', width: '15%', template: '#demo-status-template' },
+                    { field: 'BusinessName', title: 'Dealership', width: '16%' },
+                    { field: 'ContactName', title: 'Contact', width: '13%' },
+                    { field: 'Email', title: 'Email', width: '19%' },
+                    { field: 'Phone', title: 'Phone', width: '12%' },
+                    { field: 'Inventory', title: 'Inventory', width: '10%' },
+                    { field: 'Status', title: 'Status', width: '10%', template: '#demo-status-template' },
+                    { field: 'Reply', title: 'Reply', width: '10%', sortable: false, filterable: false, template: '#opportunity-reply-action-template' },
                     { field: 'Delete', title: '', width: '10%', sortable: false, filterable: false, template: '#opportunity-delete-action-template' }
                 ]
             });
