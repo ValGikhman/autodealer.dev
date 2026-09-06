@@ -86,7 +86,8 @@
             </div>
             <span>@Model.DemoRequests.Count recent</span>
         </div>
-        <div id="demo-request-grid" class="admin-pep-grid" data-url="@Url.Action("DemoRequestGridData", "Admin")" data-new-url="@Url.Action("NewDemoRequest", "Admin")" data-edit-url="@Url.Action("EditDemoRequest", "Admin")" data-delete-url="@Url.Action("DeleteDemoRequest", "Admin")">
+        <p id="opportunity-reply-status" role="status" aria-live="polite"></p>
+        <div id="demo-request-grid" class="admin-pep-grid" data-reply-url="@Url.Action("ReplyToDemoRequest", "Admin")" data-url="@Url.Action("DemoRequestGridData", "Admin")" data-new-url="@Url.Action("NewDemoRequest", "Admin")" data-edit-url="@Url.Action("EditDemoRequest", "Admin")" data-delete-url="@Url.Action("DeleteDemoRequest", "Admin")">
         </div>
     </section>
 </div>

@@ -203,6 +203,17 @@ namespace autodealer.dev.Models {
         public string Body { get; set; }
     }
 
+    public sealed class AdminOpportunityReplyViewModel {
+        [Required]
+        public Guid? RequestId { get; set; }
+
+        [Required, StringLength(200)]
+        public string Subject { get; set; }
+
+        [Required, StringLength(200000), System.Web.Mvc.AllowHtml, PreserveInput]
+        public string Body { get; set; }
+    }
+
     public sealed class AdminInboxEmailSendViewModel {
         [Required, EmailAddress, StringLength(254)]
         [SanitizeInput(InputSanitizationKind.Email)]

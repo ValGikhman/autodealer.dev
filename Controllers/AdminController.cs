@@ -833,6 +833,52 @@ namespace autodealer.dev.Controllers {
         }
 
         [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ReplyToDemoRequest(AdminOpportunityReplyViewModel model, bool preview = false) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            if (model.RequestId == Guid.Empty) ModelState.AddModelError("RequestId", "Select a valid opportunity.");
+            if (!ModelState.IsValid) return EditValidationFailure();
+            try {
+                var request = adminService.GetDemoRequestForEdit(model.RequestId.Value);
+                var recipient = (request.Email ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(recipient) || !new EmailAddressAttribute().IsValid(recipient)) {
+                    Response.StatusCode = 400;
+                    return Json(new { Ok = false, Message = "Update this opportunity with a valid prospect email address before replying." });
+                }
+                var fromAddress = (System.Configuration.ConfigurationManager.AppSettings["Smtp:From"] ?? string.Empty).Trim();
+                var html = EmailTemplateRenderer.Render(
+                    EmailTemplateName.FreeFormCustomerEmail,
+                    new EmailTemplateValues()
+                        .Add("FROM_ADDRESS", fromAddress)
+                        .AddAttribute("FROM_ADDRESS_ATTR", fromAddress)
+                        .AddHtml("MESSAGE_BODY", model.Body));
+                if (preview) {
+                    var logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content", "images", "autodealer-logo.png");
+                    var logo = System.IO.File.Exists(logoPath)
+                        ? "<div class=\"email-logo\"><img class=\"email-logo-image\" src=\"data:image/png;base64," + Convert.ToBase64String(System.IO.File.ReadAllBytes(logoPath)) + "\" width=\"240\" alt=\"AutoDealer.dev\"></div>"
+                        : "<div class=\"email-logo email-logo-text\">AutoDealer.dev</div>";
+                    return Json(new { Ok = true, Recipient = recipient, Html = html.Replace(SmtpMailSender.LogoToken, logo) });
+                }
+                SmtpMailSender.Send(recipient, request.ContactName, model.Subject, html, fromAddress, "AutoDealer.dev");
+                return Json(new { Ok = true, Message = "Reply sent to " + recipient + "." });
+            }
+            catch (KeyNotFoundException ex) {
+                Response.StatusCode = 404;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (SqlException) {
+                Response.StatusCode = 503;
+                return Json(new { Ok = false, Message = "The opportunity could not be loaded. Please try again." });
+            }
+            catch (Exception ex) when (ex is InvalidOperationException || ex is FormatException || ex is System.Net.Mail.SmtpException) {
+                Response.StatusCode = 503;
+                return Json(new { Ok = false, Message = "The reply could not be delivered. Check SMTP configuration and try again." });
+            }
+        }
+
+        [AdminAuthorize]
         [HttpGet]
         public ActionResult DemoRequestGridData() {
             var rows = adminService.GetDashboard().DemoRequests.Select(request => new {
