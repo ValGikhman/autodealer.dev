@@ -77,6 +77,10 @@
 .admin-dashboard-page .pg-search-bar {
   min-height: 54px;
   padding: 8px 14px;
+}
+
+.admin-dashboard-page .pg-search-bar,
+.admin-dashboard-page .customer-usage-detail {
   background: linear-gradient(145deg, #a0a6ac 0%, #858c93 48%, #6f767e 100%);
 }
 
@@ -319,6 +323,7 @@
 
 .admin-dashboard-page .customer-email-toggle,
 .admin-dashboard-page .customer-api-toggle,
+.admin-dashboard-page .customer-usage-toggle,
 .admin-dashboard-page .customer-subscription-toggle {
   position: relative;
   display: inline-flex;
@@ -340,6 +345,7 @@
 .admin-dashboard-page .customer-api-toggle:hover,
 .admin-dashboard-page .customer-api-toggle:focus-visible,
 .admin-dashboard-page .customer-api-toggle.is-open,
+.admin-dashboard-page .customer-usage-toggle,
 .admin-dashboard-page .customer-subscription-toggle:hover,
 .admin-dashboard-page .customer-subscription-toggle:focus-visible,
 .admin-dashboard-page .customer-subscription-toggle.is-open {
@@ -352,6 +358,7 @@
 
 .admin-dashboard-page .customer-email-toggle svg,
 .admin-dashboard-page .customer-api-toggle svg,
+.admin-dashboard-page .customer-usage-toggle svg,
 .admin-dashboard-page .customer-subscription-toggle svg {
   width: 18px;
   height: 18px;
@@ -449,6 +456,255 @@
   color: #fff;
   font-size: 18px;
   font-weight: 500;
+}
+
+.admin-dashboard-page .customer-usage-toggle:focus-visible {
+  outline: 2px solid #252a2f;
+  outline-offset: 2px;
+}
+
+.admin-dashboard-page .customer-usage-icon {
+  flex: 0 0 auto;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-dashboard-page .customer-usage-detail {
+  padding: 24px;
+  border: 1px solid #aeb6be;
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 35%), 0 8px 24px rgb(25 35 45 / 12%);
+  color: #202e3c;
+  white-space: normal;
+}
+
+.admin-dashboard-page .customer-usage-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #66717b;
+}
+
+.admin-dashboard-page .customer-usage-header > .customer-usage-close {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+}
+
+.admin-dashboard-page .customer-usage-detail .customer-usage-kicker {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 8px;
+  border: 1px solid #a2a8ae;
+  border-radius: 5px;
+  background: #e7eaed;
+  color: #3c434a;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.admin-dashboard-page .customer-usage-kicker svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.admin-dashboard-page .customer-usage-detail .customer-usage-title {
+  grid-column: 2;
+  grid-row: 1;
+  text-align: center;
+  white-space: nowrap;
+  margin: 0;
+  color: #30363c;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.admin-dashboard-page .customer-usage-detail .customer-detail-heading-primary p {
+  margin: 0;
+  color: #25394a;
+  font-size: 12px;
+}
+
+.admin-dashboard-page .customer-usage-detail .customer-detail-heading-primary {
+  display: contents;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.admin-dashboard-page .customer-usage-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 18px;
+}
+
+.admin-dashboard-page .customer-usage-stat,
+.admin-dashboard-page .customer-usage-chart-frame {
+  background: linear-gradient(135deg, #f5f7f9, #dce2e8);
+  border: 1px solid #929ba4;
+}
+
+.admin-dashboard-page .customer-usage-stat {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 20px;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgb(25 35 45 / 8%);
+}
+
+.admin-dashboard-page .customer-usage-stat::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: #778b9d;
+}
+
+.admin-dashboard-page .customer-usage-stat dt {
+  color: #353c43;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-dashboard-page .customer-usage-stat dd {
+  margin: 8px 0 4px;
+  color: #203747;
+  font-size: clamp(22px, 2.3vw, 32px);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.admin-dashboard-page .customer-usage-stat span {
+  color: #454d55;
+  font-size: 11px;
+}
+
+.admin-dashboard-page .customer-usage-stat-used::before {
+  background: #737b83;
+}
+
+.admin-dashboard-page .customer-usage-stat-left::before {
+  background: #737b83;
+}
+
+.admin-dashboard-page .customer-usage-stat-left dd {
+  color: #30363c;
+}
+
+.admin-dashboard-page .customer-usage-chart-frame {
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgb(25 35 45 / 8%);
+}
+
+.admin-dashboard-page .customer-usage-chart-heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px 0 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #b7c0c8;
+  text-align: center;
+}
+
+.admin-dashboard-page .customer-usage-detail .customer-usage-chart-heading h4 {
+  margin: 0;
+  color: #30363c;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.admin-dashboard-page .customer-usage-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: #526477;
+  font-size: 11px;
+}
+
+.admin-dashboard-page .customer-usage-legend span::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 2px;
+  background: #2474b5;
+}
+
+.admin-dashboard-page .customer-usage-legend span:last-child::before {
+  background: #c8d2dc;
+}
+
+.admin-dashboard-page .customer-usage-empty {
+  margin: 12px 0 0;
+  padding: 12px;
+  border: 1px dashed #c8d2dc;
+  border-radius: 8px;
+  color: #526477;
+  text-align: center;
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .admin-dashboard-page .customer-usage-detail { padding: 14px; }
+}
+
+.admin-dashboard-page .customer-usage-chart {
+  overflow-x: auto;
+}
+
+.admin-dashboard-page .customer-usage-chart svg {
+  display: block;
+  width: 100%;
+  min-width: 640px;
+  height: auto;
+  font: 12px sans-serif;
+  fill: #526477;
+}
+
+.admin-dashboard-page .usage-chart-gridline {
+  stroke: #b7c0c8;
+}
+
+.admin-dashboard-page .usage-chart-bar {
+  fill: #2474b5;
+}
+
+.admin-dashboard-page .usage-chart-bar:hover {
+  fill: #154c7a;
+}
+
+.admin-dashboard-page .usage-chart-future {
+  fill: #c8d2dc;
 }
 
 .admin-dashboard-page .customer-detail-heading-primary {
@@ -996,6 +1252,39 @@
   cursor: default;
 }
 
+.admin-dashboard-page .customer-api-grid .pg-grid-table > tbody > tr:not(.customer-usage-detail-row) > td {
+  padding: 6px 8px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+
+.admin-dashboard-page .customer-api-grid .pg-th-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  line-height: 1.35;
+}
+
+.admin-dashboard-page .customer-api-grid .pg-grid-table > thead > tr > th {
+  padding: 6px 4px;
+}
+
+.admin-dashboard-page .customer-api-grid .pg-th-inner {
+  gap: 2px;
+  padding-right: var(--pg-resize-handle-width);
+  grid-template-columns: var(--pg-th-icon-size) minmax(0, 1fr) var(--pg-th-icon-size);
+}
+
+.admin-dashboard-page .customer-api-grid .pg-th-inner.pg-th-plain {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.admin-dashboard-page .customer-api-grid .dashboard-grid-status {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .admin-dashboard-page .customer-account-error {
   margin: 14px 0 0;
   padding: 10px 12px;
@@ -1500,6 +1789,49 @@
   background: transparent;
 }
 
+.pg-filter-dropdown .pg-filter-footer {
+  flex-wrap: nowrap;
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.pg-filter-dropdown .pg-filter-footer > div {
+  flex-wrap: nowrap;
+  gap: 4px !important;
+}
+
+.pg-filter-dropdown .pg-filter-footer .btn {
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: 26px;
+  padding: 3px 7px !important;
+  border-radius: 5px;
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.pg-filter-dropdown .pg-filter-footer .pg-filter-select-all {
+  border-color: #8aa8be !important;
+  color: #254c68 !important;
+  background: linear-gradient(180deg, #e1edf5, #b8cfdf) !important;
+}
+
+.pg-filter-dropdown .pg-filter-footer .pg-filter-apply {
+  border-color: #619885 !important;
+  color: #174e3e !important;
+  background: linear-gradient(180deg, #d4e9e0, #9ec5b5) !important;
+}
+
+.pg-filter-dropdown .pg-filter-footer .pg-filter-select-all:hover {
+  background: linear-gradient(180deg, #eff6fb, #c8dce9) !important;
+}
+
+.pg-filter-dropdown .pg-filter-footer .pg-filter-apply:hover {
+  background: linear-gradient(180deg, #e6f3ed, #b2d6c7) !important;
+}
+
 .pg-filter-dropdown .btn:hover {
   border-color: #b8bec4;
   color: #fff;
@@ -1916,6 +2248,24 @@
 .admin-dashboard-page .new-email-subject-row input {
   flex: 1 1 0;
   min-width: 0;
+  padding: 3px 0 3px 14px;
+  border-left: 3px solid #b6cfe1;
+  color: #f4f7fa;
+}
+
+.admin-dashboard-page .customer-detail-heading-primary h3 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.admin-dashboard-page .customer-detail-heading-primary p {
+  margin: 0;
+  max-width: 70ch;
+  color: #e1e8ee;
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .admin-dashboard-page .opportunity-email-preview-controls {

@@ -357,6 +357,7 @@
     <div class="customer-email-detail-heading">
     <div class="customer-detail-heading-primary">
     <h3>API keys</h3>
+    <p>Token usage this month (UTC). One API request uses one token. Keys on the same subscription share a balance.</p>
     </div>
     <div class="customer-subgrid-heading-actions">
     <button type="button" class="customer-api-issue admin-create-button customer-subgrid-create-button">
@@ -418,6 +419,41 @@
     </div>
     </section>
     </div>
+</script>
+<script type="text/x-pepgrid-template" id="customer-key-usage-template">
+    <span class="customer-grid-icon-action">
+    <button type="button" class="customer-usage-toggle" aria-expanded="false" aria-label="Toggle daily usage for {{Name}}" title="View daily usage">
+        <svg class="customer-usage-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <use href="#icon-gauge"></use>
+        </svg>
+    </button>
+    </span>
+</script>
+<script type="text/x-pepgrid-template" id="customer-usage-detail-template">
+    <section class="customer-usage-detail" aria-label="Monthly token usage">
+        <header class="customer-usage-header">
+            <div class="customer-detail-heading-primary">
+                <span class="customer-usage-kicker"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-gauge"></use></svg> TOKEN ACTIVITY</span>
+                <h3 class="customer-usage-title"></h3>
+            </div>
+            <button type="button" class="customer-email-collapse customer-usage-close" aria-label="Close usage chart" title="Close usage chart">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" /></svg>
+            </button>
+        </header>
+        <dl class="customer-usage-summary">
+            <div class="customer-usage-stat customer-usage-stat-left"><dt>Monthly allowance</dt><dd data-usage-total></dd><span>Total tokens</span></div>
+            <div class="customer-usage-stat customer-usage-stat-used customer-usage-stat-left"><dt>Consumed</dt><dd data-usage-used></dd><span>Tokens used this month</span></div>
+            <div class="customer-usage-stat customer-usage-stat-left"><dt>Available balance</dt><dd data-usage-left></dd><span>Tokens remaining</span></div>
+        </dl>
+        <div class="customer-usage-chart-frame">
+            <div class="customer-usage-chart-heading">
+                <h4>Daily token usage</h4>
+                <div class="customer-usage-legend"><span>Tokens used</span><span>Upcoming days</span></div>
+            </div>
+            <div class="customer-usage-chart"></div>
+            <p class="customer-usage-empty" hidden>No tokens used yet. Daily activity will appear here as requests arrive.</p>
+        </div>
+    </section>
 </script>
 <script type="text/x-pepgrid-template" id="customer-key-status-template">
     <span class="dashboard-grid-status badge bg-{{StatusBadgeClass}}">

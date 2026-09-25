@@ -177,6 +177,8 @@ namespace autodealer.dev.Services {
                     .OrderByDescending(x => x.CreatedUtc)
                     .Select(x => new AdminApiKeyViewModel {
                         ApiKeyId = x.ApiKeyId,
+                        SubscriptionId = x.SubscriptionId,
+                        TotalTokens = x.Subscription.Plan.MonthlyRequestQuota,
                         Name = x.Name,
                         KeyPrefix = x.KeyPrefix,
                         Scopes = x.Scopes,
@@ -186,6 +188,27 @@ namespace autodealer.dev.Services {
                         ExpiresUtc = x.ExpiresUtc,
                         RevokedUtc = x.RevokedUtc
                     }).ToList();
+
+                // Match the UTC calendar-month quota enforced by ApiAccessService.
+                var now = DateTime.UtcNow;
+                var monthStart = new DateTime(now.Year, now.Month, 1);
+                var monthEnd = monthStart.AddMonths(1);
+                var dailyUsage = context.ApiUsageDailies
+                    .Where(x => x.ClientId == clientId && x.UsageDate >= monthStart && x.UsageDate < monthEnd)
+                    .Select(x => new { x.SubscriptionId, x.UsageDate, x.RequestCount })
+                    .ToList()
+                    .ToLookup(x => x.SubscriptionId);
+                foreach (var key in apiKeys) {
+                    var days = dailyUsage[key.SubscriptionId].ToDictionary(x => x.UsageDate.Day, x => (long)x.RequestCount);
+                    key.UsedTokens = days.Values.Sum();
+                    key.UsageMonth = monthStart.ToString("MMMM yyyy");
+                    key.DailyUsage = Enumerable.Range(1, DateTime.DaysInMonth(now.Year, now.Month))
+                        .Select(day => new AdminDailyUsageViewModel {
+                            Day = day,
+                            Tokens = days.ContainsKey(day) ? days[day] : 0L,
+                            IsFuture = day > now.Day
+                        }).ToList();
+                }
 
                 var subscriptions = context.Subscriptions
                     .Where(x => x.ClientId == clientId)

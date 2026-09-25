@@ -1091,6 +1091,87 @@
             });
         }
 
+        function expandApiUsage(detail, gridElement) {
+            var toggle = detail.event.target.closest('.customer-usage-toggle');
+            if (!toggle) return;
+            detail.event.preventDefault();
+            detail.event.stopPropagation();
+            var wasOpen = toggle.getAttribute('aria-expanded') === 'true';
+            var existing = gridElement.querySelector('.customer-usage-detail-row');
+            if (existing) existing.parentNode.removeChild(existing);
+            gridElement.querySelectorAll('.customer-usage-toggle').forEach(function (button) {
+                button.setAttribute('aria-expanded', 'false');
+            });
+            if (wasOpen) return;
+
+            var item = detail.dataItem;
+            var row = document.createElement('tr');
+            row.className = 'customer-usage-detail-row';
+            var cell = document.createElement('td');
+            cell.colSpan = detail.rowElement.children.length;
+            cell.innerHTML = templateHtml('customer-usage-detail-template');
+            row.appendChild(cell);
+            detail.rowElement.parentNode.insertBefore(row, detail.rowElement.nextSibling);
+            toggle.setAttribute('aria-expanded', 'true');
+            row.querySelector('.customer-usage-title').textContent = item.UsageMonth;
+            row.querySelector('[data-usage-total]').textContent = item.TotalTokensDisplay;
+            row.querySelector('[data-usage-used]').textContent = item.UsedTokensDisplay;
+            row.querySelector('[data-usage-left]').textContent = item.RemainingTokensDisplay;
+            row.querySelector('.customer-usage-empty').hidden = item.UsedTokens !== 0;
+            row.querySelector('.customer-usage-close').addEventListener('click', function () {
+                row.parentNode.removeChild(row);
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.focus();
+            });
+            row.addEventListener('dblclick', function (event) { event.stopPropagation(); });
+            renderUsageChart(row.querySelector('.customer-usage-chart'), item);
+        }
+
+        function renderUsageChart(container, item) {
+            var days = item.DailyUsage || [];
+            if (!days.length) {
+                container.textContent = 'Daily usage is unavailable.';
+                return;
+            }
+            var svgNamespace = 'http://www.w3.org/2000/svg';
+            function element(name, attributes, textContent) {
+                var node = document.createElementNS(svgNamespace, name);
+                Object.keys(attributes || {}).forEach(function (key) { node.setAttribute(key, attributes[key]); });
+                if (textContent !== undefined) node.textContent = textContent;
+                return node;
+            }
+            var svg = element('svg', { viewBox: '0 0 960 280', role: 'img', 'aria-label': 'Daily token usage for ' + item.UsageMonth });
+            svg.appendChild(element('desc', {}, days.map(function (day) {
+                return 'Day ' + day.Day + ': ' + (day.IsFuture ? 'upcoming' : day.Tokens.toLocaleString() + ' tokens');
+            }).join('. ')));
+            var peak = Math.max.apply(null, days.map(function (day) { return day.Tokens; }));
+            var step = Math.max(1, Math.ceil(peak / 4));
+            var max = step * 4;
+            var left = 85, top = 20, height = 210, width = 860;
+            for (var tick = 0; tick <= 4; tick++) {
+                var y = top + height - tick * height / 4;
+                svg.appendChild(element('line', { x1: left, x2: left + width, y1: y, y2: y, 'class': 'usage-chart-gridline' }));
+                svg.appendChild(element('text', { x: left - 10, y: y + 4, 'text-anchor': 'end' }, (tick * step).toLocaleString()));
+            }
+            var slot = width / days.length;
+            days.forEach(function (day, index) {
+                var x = left + index * slot;
+                var barHeight = day.Tokens / max * height;
+                var bar = element('rect', {
+                    x: x + slot * 0.15, y: top + height - Math.max(barHeight, 2),
+                    width: slot * 0.7, height: Math.max(barHeight, 2), rx: 2,
+                    'class': day.IsFuture ? 'usage-chart-future' : 'usage-chart-bar'
+                });
+                bar.appendChild(element('title', {}, item.UsageMonth + ', day ' + day.Day + ': ' +
+                    (day.IsFuture ? 'upcoming' : day.Tokens.toLocaleString() + ' tokens')));
+                svg.appendChild(bar);
+                svg.appendChild(element('text', { x: x + slot / 2, y: 250, 'text-anchor': 'middle' }, day.Day));
+            });
+            svg.appendChild(element('text', { x: left, y: 12 }, 'Tokens'));
+            svg.appendChild(element('text', { x: left + width / 2, y: 274, 'text-anchor': 'middle' }, 'Day of month'));
+            container.appendChild(svg);
+        }
+
         function expandCustomerAccount(detail, kind) {
             var isApiKeys = kind === 'api';
             var toggle = detail.event.target.closest(isApiKeys ? '.customer-api-toggle' : '.customer-subscription-toggle');
@@ -1180,20 +1261,29 @@
                             data: response.ApiKeys || [], height: null, pageable: false, pageSize: 100,
                             resizable: true, autozoomable: true, showSearch: false, exportToExcel: false, exportToPdf: false,
                             defaultSort: [{ field: 'CreatedSort', dir: 'desc' }],
+                            onCellClick: function (apiDetail) {
+                                if (apiDetail.field === 'Usage') expandApiUsage(apiDetail, apiGridElement);
+                            },
                             onCellDblClick: function (apiDetail) {
+                                if (apiDetail.field === 'Usage') {
+                                    apiDetail.event.stopPropagation();
+                                    return;
+                                }
                                 openSubgridEditor('api', apiDetail.dataItem, apiGridElement, detail.dataItem.ClientId, detailUrl, separator);
                             },
                             onRowDblClick: function (apiDetail) {
+                                if (apiDetail.event.target.closest('.customer-usage-toggle')) return;
                                 openSubgridEditor('api', apiDetail.dataItem, apiGridElement, detail.dataItem.ClientId, detailUrl, separator);
                             },
                             columns: [
                                 { field: 'ApiKeyId', title: 'ID', width: '7%' },
-                                { field: 'Name', title: 'Name', width: '16%' },
-                                { field: 'KeyPrefix', title: 'Key prefix', width: '15%' },
-                                { field: 'Scopes', title: 'Scopes', width: '14%' },
-                                { field: 'Status', title: 'Status', width: '11%', template: '#customer-key-status-template' },
-                                { field: 'Created', title: 'Created', width: '18%' },
-                                { field: 'LastUsed', title: 'Last used', width: '19%' }
+                                { field: 'Name', title: 'Name', width: '19%' },
+                                { field: 'KeyPrefix', title: 'Key prefix', width: '14%' },
+                                { field: 'Scopes', title: 'Scopes', width: '16%' },
+                                { field: 'Status', title: 'Status', width: '12%', template: '#customer-key-status-template' },
+                                { field: 'Created', title: 'Created', width: '12%' },
+                                { field: 'LastUsed', title: 'Last used', width: '12%' },
+                                { field: 'Usage', title: 'Usage', width: '8%', sortable: false, filterable: false, template: '#customer-key-usage-template' }
                             ]
                         });
                     } else {
