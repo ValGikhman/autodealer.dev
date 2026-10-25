@@ -20,6 +20,8 @@ namespace autodealer.dev.Models {
     }
 
     public sealed class AdminDashboardViewModel {
+        public string CustomerFilter { get; set; }
+        public string CustomerFilterTitle { get; set; }
         public int TotalCustomers { get; set; }
         public int ActiveCustomers { get; set; }
         public int TrialingSubscriptions { get; set; }
@@ -29,6 +31,7 @@ namespace autodealer.dev.Models {
     }
 
     public sealed class AdminCustomerViewModel {
+        public string Status { get; set; }
         public long ClientId { get; set; }
         public string ClientNumber { get; set; }
         public string BusinessName { get; set; }

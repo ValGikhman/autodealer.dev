@@ -158,6 +158,10 @@
     DeleteButtonText = "Yes, delete everything"
 })
 
+<script type="text/x-pepgrid-template" id="customer-selection-template">
+    <input type="checkbox" class="customer-row-select" data-client-id="{{ClientId}}" aria-label="Select customer {{ClientId}}" />
+</script>
+
 <div class="modal fade dashboard-record-modal dashboard-opportunity-edit-modal" id="opportunity-edit-modal" tabindex="-1" aria-labelledby="opportunity-edit-title" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <form class="modal-content" id="opportunity-edit-form">

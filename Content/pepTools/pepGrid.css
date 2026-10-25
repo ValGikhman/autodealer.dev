@@ -1116,3 +1116,30 @@ body.pg-col-resizing {
   padding: 0.06rem 0.42rem;
   vertical-align: middle;
 }
+.pg-select-toggle-cb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  border: 1px solid var(--control-silver-border, #85858e);
+  border-radius: 6px;
+  color: #f4f7fa;
+  background: linear-gradient(180deg, var(--control-silver-top, #92999f), var(--control-silver-bottom, #626970));
+  box-shadow: inset 0 1px rgb(255 255 255 / 20%);
+  cursor: pointer;
+  transition: filter .15s ease;
+}
+.pg-select-toggle-cb svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pg-select-toggle-cb:hover:not(:disabled) { filter: brightness(1.15); }
+.pg-select-toggle-cb:focus-visible { outline: 2px solid #8ecaff; outline-offset: 2px; }
+.pg-select-toggle-cb:disabled { opacity: .45; cursor: not-allowed; }

@@ -55,19 +55,28 @@ namespace autodealer.dev.Services {
             return userMatches && FixedTimeEquals(candidateHash, expectedHash);
         }
 
-        public AdminDashboardViewModel GetDashboard() {
+        public AdminDashboardViewModel GetDashboard(string filter = "active") {
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new InvalidOperationException("The AutoDealer.dev database connection is not configured.");
 
             using (var context = new AutoDealerDataContext(connectionString)) {
-                var clients = context.Clients
-                    .Where(x => x.Status == "active")
+                filter = (filter ?? "active").Trim().ToLowerInvariant();
+                IQueryable<Client> query = context.Clients;
+                switch (filter) {
+                    case "all": break;
+                    case "trialing": query = query.Where(x => x.Subscriptions.Any(s => s.Status == "trialing")); break;
+                    case "api-keys": query = query.Where(x => x.ApiKeys.Any(k => k.Status == "active")); break;
+                    default: filter = "active"; query = query.Where(x => x.Status == "active"); break;
+                }
+                // Keep the selected IDs as a SQL subquery, avoiding SQL's parameter limit for large directories.
+                var selectedIds = query.Select(x => x.ClientId);
+                var clients = query
                     .OrderByDescending(x => x.CreatedUtc)
                     .ToList();
                 var clientIds = clients.Select(x => x.ClientId).ToList();
 
                 var subscriptions = context.Subscriptions
-                    .Where(x => clientIds.Contains(x.ClientId))
+                    .Where(x => selectedIds.Contains(x.ClientId))
                     .Select(x => new {
                         x.ClientId,
                         x.Status,
@@ -78,18 +87,18 @@ namespace autodealer.dev.Services {
                     .GroupBy(x => x.ClientId)
                     .ToDictionary(x => x.Key, x => x.OrderByDescending(y => y.CurrentPeriodEndUtc).First());
                 var subscriptionCounts = context.Subscriptions
-                    .Where(x => clientIds.Contains(x.ClientId))
+                    .Where(x => selectedIds.Contains(x.ClientId))
                     .GroupBy(x => x.ClientId)
                     .Select(x => new { ClientId = x.Key, Count = x.Count() })
                     .ToDictionary(x => x.ClientId, x => x.Count);
 
                 var keyCounts = context.ApiKeys
-                    .Where(x => clientIds.Contains(x.ClientId) && x.Status == "active")
+                    .Where(x => selectedIds.Contains(x.ClientId) && x.Status == "active")
                     .GroupBy(x => x.ClientId)
                     .Select(x => new { ClientId = x.Key, Count = x.Count() })
                     .ToDictionary(x => x.ClientId, x => x.Count);
                 var allKeyCounts = context.ApiKeys
-                    .Where(x => clientIds.Contains(x.ClientId))
+                    .Where(x => selectedIds.Contains(x.ClientId))
                     .GroupBy(x => x.ClientId)
                     .Select(x => new { ClientId = x.Key, Count = x.Count() })
                     .ToDictionary(x => x.ClientId, x => x.Count);
@@ -102,6 +111,7 @@ namespace autodealer.dev.Services {
                         : null;
                     customerRows.Add(new AdminCustomerViewModel {
                         ClientId = client.ClientId,
+                        Status = client.Status,
                         ClientNumber = client.ClientNumber,
                         BusinessName = client.BusinessName,
                         ContactName = client.FirstName + " " + client.LastName,
@@ -120,8 +130,11 @@ namespace autodealer.dev.Services {
                 }
 
                 return new AdminDashboardViewModel {
+                    CustomerFilter = filter,
+                    CustomerFilterTitle = filter == "all" ? "All customers" : filter == "trialing"
+                        ? "Customers with trial subscriptions" : filter == "api-keys" ? "Customers with active API keys" : "Active customers",
                     TotalCustomers = context.Clients.Count(),
-                    ActiveCustomers = customerRows.Count,
+                    ActiveCustomers = context.Clients.Count(x => x.Status == "active"),
                     TrialingSubscriptions = context.Subscriptions.Count(x => x.Status == "trialing"),
                     ActiveApiKeys = context.ApiKeys.Count(x => x.Status == "active"),
                     Customers = customerRows,
@@ -346,6 +359,35 @@ namespace autodealer.dev.Services {
                     catch {
                         try { transaction.Rollback(); }
                         catch { }
+                        throw;
+                    }
+                }
+            }
+        }
+
+        public int DeleteClients(long[] clientIds) {
+            if (clientIds == null || clientIds.Length == 0 || clientIds.Length > 1000 || clientIds.Any(x => x <= 0))
+                throw new ArgumentException("Select between 1 and 1,000 valid customers.");
+            var ids = clientIds.Distinct().ToArray();
+            EnsureDatabaseConfigured();
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                context.CommandTimeout = 120;
+                context.Connection.Open();
+                using (var transaction = context.Connection.BeginTransaction(IsolationLevel.Serializable)) {
+                    context.Transaction = transaction;
+                    try {
+                        if (context.Clients.Count(x => ids.Contains(x.ClientId)) != ids.Length)
+                            throw new KeyNotFoundException("A selected customer no longer exists. Refresh the grid and select again.");
+                        var placeholders = string.Join(",", Enumerable.Range(0, ids.Length).Select(i => "{" + i + "}"));
+                        var parameters = ids.Cast<object>().ToArray();
+                        // Email history and verification records cascade from Clients, as in DeleteClient.
+                        foreach (var table in new[] { "ApiUsageLog", "ApiUsageDaily", "ApiKeys", "PaymentProfiles", "ClientCredentials", "Subscriptions", "Clients" })
+                            context.ExecuteCommand("DELETE FROM dbo." + table + " WHERE ClientId IN (" + placeholders + ")", parameters);
+                        transaction.Commit();
+                        return ids.Length;
+                    }
+                    catch {
+                        transaction.Rollback();
                         throw;
                     }
                 }

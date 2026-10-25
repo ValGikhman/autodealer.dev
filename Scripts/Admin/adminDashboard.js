@@ -1319,22 +1319,123 @@
 
         var $customerGrid = $('#customer-grid');
         if ($customerGrid.length) {
+            var allowBulkDelete = $customerGrid.attr('data-allow-bulk-delete') === 'true';
+            var bulkButton = document.getElementById('delete-selected-customers');
+            var bulkModalElement = document.getElementById('delete-customers-modal');
+            var bulkModal = bulkModalElement ? window.bootstrap.Modal.getOrCreateInstance(bulkModalElement) : null;
+            var bulkForm = document.getElementById('delete-customers-form');
+            var bulkConfirm = document.getElementById('delete-customers-confirm');
+            var bulkSubmit = document.getElementById('delete-customers-submit');
+            var bulkError = document.getElementById('delete-customers-error');
+            var bulkIds = [];
+            var bulkDeleting = false;
+
+            function selectedCustomerIds() {
+                return Array.prototype.map.call($customerGrid[0].querySelectorAll('.customer-row-select:checked'), function (checkbox) {
+                    return Number(checkbox.getAttribute('data-client-id'));
+                });
+            }
+            function updateBulkSelection() {
+                if (!allowBulkDelete) return;
+                var count = selectedCustomerIds().length;
+                var total = $customerGrid[0].querySelectorAll('.customer-row-select').length;
+                var header = $customerGrid[0].querySelector('.pg-select-toggle-cb');
+                if (header) {
+                    header.disabled = total === 0;
+                    header.setAttribute('aria-label', 'Invert selection for customers in the current grid results');
+                    header.title = 'Invert row selection';
+                }
+                var selectionLabel = 'Delete selected (' + count + ')';
+                if (bulkButton.querySelector('span').textContent !== selectionLabel) {
+                    setButtonLabel(bulkButton, selectionLabel);
+                }
+                bulkButton.disabled = count === 0 || count > 1000 || bulkDeleting;
+                bulkButton.title = count > 1000 ? 'Select at most 1,000 customers per batch.' : '';
+            }
+            $('#customer-filter').on('change', function () {
+                window.location.assign($(this).data('url') + '?filter=' + encodeURIComponent(this.value));
+            });
+            if (allowBulkDelete) {
+                $customerGrid.on('click', '.pg-select-toggle-cb', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    $customerGrid.find('.customer-row-select').each(function () {
+                        this.checked = !this.checked;
+                    });
+                    updateBulkSelection();
+                }).on('change', '.customer-row-select', updateBulkSelection);
+                // Grid searches/sorts replace rows: derive selection from current checkboxes,
+                // so a hidden or removed row can never remain selected for deletion.
+                new MutationObserver(updateBulkSelection).observe($customerGrid[0], { childList: true, subtree: true });
+                bulkButton.addEventListener('click', function () {
+                    bulkIds = selectedCustomerIds();
+                    if (!bulkIds.length || bulkIds.length > 1000) return;
+                    bulkForm.reset();
+                    bulkSubmit.disabled = true;
+                    bulkError.hidden = true;
+                    text('delete-customers-name', bulkIds.length + ' selected customers');
+                    text('delete-customers-detail', 'Only the checked accounts in this selection will be deleted.');
+                    bulkModal.show();
+                });
+                bulkConfirm.addEventListener('change', function () { bulkSubmit.disabled = !bulkConfirm.checked || bulkDeleting; });
+                bulkForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    if (bulkDeleting || !bulkConfirm.checked || !bulkIds.length || !bulkForm.checkValidity()) return;
+                    bulkDeleting = true;
+                    bulkConfirm.disabled = true;
+                    bulkSubmit.disabled = true;
+                    bulkSubmit.textContent = 'Deleting...';
+                    bulkError.hidden = true;
+                    $.ajax({
+                        url: $customerGrid.data('bulk-delete-url'), method: 'POST', dataType: 'json', traditional: true,
+                        data: {
+                            __RequestVerificationToken: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value,
+                            clientIds: bulkIds, confirmDelete: true
+                        }
+                    }).done(function () {
+                        // Reload counts and the grid using the same Total Customers filter.
+                        window.location.reload();
+                    }).fail(function (xhr) {
+                        bulkError.textContent = (xhr.responseJSON || {}).Message || 'Deletion failed. Refresh the grid before retrying.';
+                        bulkError.hidden = false;
+                    }).always(function () {
+                        bulkDeleting = false;
+                        bulkConfirm.disabled = false;
+                        bulkSubmit.disabled = !bulkConfirm.checked;
+                        bulkSubmit.textContent = 'Delete selected customers';
+                        updateBulkSelection();
+                    });
+                });
+                $(bulkModalElement).on('hide.bs.modal', function (event) {
+                    if (bulkDeleting) event.preventDefault();
+                });
+            }
             function ensureNewCustomerToolbarButton() {
                 var customerSearchBar = $customerGrid[0].querySelector('.pg-search-bar');
-                if (!customerSearchBar || customerSearchBar.querySelector('.admin-new-customer')) {
-                    return;
+                if (!customerSearchBar) return;
+                var newCustomerButton = customerSearchBar.querySelector('.admin-new-customer');
+                if (!newCustomerButton) {
+                    newCustomerButton = document.createElement('button');
+                    newCustomerButton.type = 'button';
+                    newCustomerButton.className = 'admin-new-customer admin-create-button';
+                    setCreateButtonContent(newCustomerButton, '#icon-user-add', 'New customer');
+                    newCustomerButton.addEventListener('click', function () {
+                        openSubgridEditor('client-new', {}, document.getElementById('customer-grid'), null, null, null);
+                    });
+                    var searchInputGroup = customerSearchBar.querySelector('.pg-search-input-group');
+                    customerSearchBar.insertBefore(newCustomerButton, searchInputGroup || customerSearchBar.firstChild);
                 }
-
-                var newCustomerButton = document.createElement('button');
-                newCustomerButton.type = 'button';
-                newCustomerButton.className = 'admin-new-customer admin-create-button';
-                setCreateButtonContent(newCustomerButton, '#icon-user-add', 'New customer');
-                newCustomerButton.addEventListener('click', function () {
-                    openSubgridEditor('client-new', {}, document.getElementById('customer-grid'), null, null, null);
-                });
-
-                var searchInputGroup = customerSearchBar.querySelector('.pg-search-input-group');
-                customerSearchBar.insertBefore(newCustomerButton, searchInputGroup || customerSearchBar.firstChild);
+                var customerActions = customerSearchBar.querySelector('.admin-customer-toolbar-actions');
+                if (!customerActions) {
+                    customerActions = document.createElement('div');
+                    customerActions.className = 'admin-customer-toolbar-actions';
+                    customerSearchBar.insertBefore(customerActions, newCustomerButton);
+                }
+                if (newCustomerButton.parentNode !== customerActions) customerActions.appendChild(newCustomerButton);
+                if (bulkButton) {
+                    if (newCustomerButton.nextElementSibling !== bulkButton) newCustomerButton.insertAdjacentElement('afterend', bulkButton);
+                    bulkButton.hidden = false;
+                }
             }
 
             $customerGrid.pepGrid({
@@ -1344,6 +1445,7 @@
                 onDataBound: function () {
                     expandedCustomerDetail = null;
                     ensureNewCustomerToolbarButton();
+                    updateBulkSelection();
                 },
                 onCellClick: function (detail) {
                     if (detail.field === 'Delete') {
@@ -1360,14 +1462,17 @@
                     if (detail.field === 'SubscriptionCount') expandCustomerAccount(detail, 'subscription');
                 },
                 onCellDblClick: function (detail) {
-                    if (detail.field !== 'EmailCount' && detail.field !== 'ApiKeyCount' && detail.field !== 'SubscriptionCount')
+                    if (detail.field !== 'Selection' && detail.field !== 'Delete' && detail.field !== 'EmailCount' && detail.field !== 'ApiKeyCount' && detail.field !== 'SubscriptionCount')
                         openSubgridEditor('client', detail.dataItem, document.getElementById('customer-grid'), detail.dataItem.ClientId, null, null);
                 },
                 onRowDblClick: function (detail) {
                     openSubgridEditor('client', detail.dataItem, document.getElementById('customer-grid'), detail.dataItem.ClientId, null, null);
                 },
                 columns: [
+                    { field: 'Selection', title: '', width: '44px', hidden: !allowBulkDelete, sortable: false, filterable: false, searchable: false, template: '#customer-selection-template' },
                     { field: 'BusinessName', title: 'Customer', width: '18%' },
+                    { field: 'Status', title: 'Account status', width: '100px' },
+                    { field: 'ActiveApiKeyCount', title: 'Active keys', width: '90px', hidden: $('#customer-filter').val() !== 'api-keys' },
                     { field: 'ClientNumber', title: 'Client number', width: '12%' },
                     { field: 'ContactName', title: 'Contact', width: '12%' },
                     { field: 'Email', title: 'Email', width: '20%' },
