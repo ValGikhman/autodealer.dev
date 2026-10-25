@@ -70,8 +70,8 @@ namespace autodealer.dev.Controllers {
 
         [AdminAuthorize]
         [HttpGet]
-        public ActionResult Customers() {
-            return View(adminService.GetDashboard());
+        public ActionResult Customers(string filter) {
+            return View(adminService.GetDashboard(filter));
         }
 
         [AdminAuthorize]
@@ -227,9 +227,10 @@ namespace autodealer.dev.Controllers {
 
         [AdminAuthorize]
         [HttpGet]
-        public ActionResult CustomerGridData() {
-            var rows = adminService.GetDashboard().Customers.Select(customer => new {
+        public ActionResult CustomerGridData(string filter) {
+            var rows = adminService.GetDashboard(filter).Customers.Select(customer => new {
                 customer.ClientId,
+                customer.Status,
                 customer.BusinessName,
                 customer.ClientNumber,
                 customer.ContactName,
@@ -262,6 +263,15 @@ namespace autodealer.dev.Controllers {
                 key.KeyPrefix,
                 key.Scopes,
                 key.Status,
+                key.TotalTokens,
+                key.UsedTokens,
+                key.RemainingTokens,
+                key.UsageMonth,
+                key.DailyUsage,
+                Usage = key.UsedTokens.ToString("N0") + " / " + key.TotalTokens.ToString("N0"),
+                TotalTokensDisplay = key.TotalTokens.ToString("N0"),
+                UsedTokensDisplay = key.UsedTokens.ToString("N0"),
+                RemainingTokensDisplay = key.RemainingTokens.ToString("N0"),
                 StatusBadgeClass = ApiKeyStatusBadgeClass(key.Status),
                 Created = key.CreatedUtc.ToString("MMM d, yyyy HH:mm 'UTC'"),
                 CreatedSort = key.CreatedUtc.ToString("o"),
@@ -536,6 +546,33 @@ namespace autodealer.dev.Controllers {
                                 : "The customer could not be deleted because the database operation failed " +
                                     "(SQL " + ex.Number + "). No records were removed.";
                 return Json(new { Ok = false, Message = message });
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteClients(long[] clientIds, bool confirmDelete = false) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            if (!confirmDelete || !ModelState.IsValid) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = "Confirm deletion and select valid customer IDs." });
+            }
+            try {
+                var deleted = adminService.DeleteClients(clientIds);
+                return Json(new { Ok = true, DeletedCount = deleted, Message = deleted + " customers and their related records were permanently deleted." });
+            }
+            catch (Exception ex) when (ex is ArgumentException || ex is KeyNotFoundException) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (SqlException ex) {
+                Trace.TraceError("Bulk customer deletion failed (SQL {0}).", ex.Number);
+                Response.StatusCode = 503;
+                return Json(new { Ok = false, Message = ex.Number == 229
+                    ? "The application database user needs the deletion permissions from Database/005_AdminClientDeletionPermissions.sql."
+                    : "Bulk deletion could not be completed. Refresh the grid and check the selected accounts before retrying." });
             }
         }
 

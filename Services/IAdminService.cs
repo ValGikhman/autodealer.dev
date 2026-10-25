@@ -3,13 +3,14 @@ using autodealer.dev.Models;
 namespace autodealer.dev.Services {
     public interface IAdminService {
         bool Authenticate(string userId, string password);
-        AdminDashboardViewModel GetDashboard();
+        AdminDashboardViewModel GetDashboard(string filter = "active");
         System.Collections.Generic.IReadOnlyList<AdminClientEmailViewModel> GetClientEmails(long clientId);
         AdminCustomerAccountDetailViewModel GetClientAccountDetails(long clientId);
         AdminClientCreateViewModel GetNewClientDefaults();
         AdminClientEditViewModel GetClientForEdit(long clientId);
         AdminClientEditViewModel UpdateClient(AdminClientEditViewModel model);
         string DeleteClient(long clientId);
+        int DeleteClients(long[] clientIds);
         string DeleteDemoRequest(System.Guid requestId);
         AdminDemoRequestEditViewModel GetNewDemoRequestDefaults();
         AdminDemoRequestEditViewModel GetDemoRequestForEdit(System.Guid requestId);

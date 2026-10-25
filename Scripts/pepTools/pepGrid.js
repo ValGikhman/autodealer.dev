@@ -1079,7 +1079,10 @@
 
                 if (col.field === 'Selection') {
                     th.className = 'pg-col-cb';
-                    th.innerHTML = '<input type="checkbox" class="pg-select-all-cb" title="Select all" />';
+                    th.innerHTML = '<button type="button" class="pg-select-toggle-cb" title="Invert row selection" aria-label="Invert row selection">'
+                        + '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+                        + '<path d="M4 7h15m-4-4 4 4-4 4M20 17H5m4-4-4 4 4 4" />'
+                        + '</svg></button>';
                 } else {
                     const canSort   = col.sortable   !== false;
                     const canFilter = col.filterable !== false;

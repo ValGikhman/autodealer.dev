@@ -20,6 +20,8 @@ namespace autodealer.dev.Models {
     }
 
     public sealed class AdminDashboardViewModel {
+        public string CustomerFilter { get; set; }
+        public string CustomerFilterTitle { get; set; }
         public int TotalCustomers { get; set; }
         public int ActiveCustomers { get; set; }
         public int TrialingSubscriptions { get; set; }
@@ -29,6 +31,7 @@ namespace autodealer.dev.Models {
     }
 
     public sealed class AdminCustomerViewModel {
+        public string Status { get; set; }
         public long ClientId { get; set; }
         public string ClientNumber { get; set; }
         public string BusinessName { get; set; }
@@ -51,6 +54,12 @@ namespace autodealer.dev.Models {
 
     public sealed class AdminApiKeyViewModel {
         public long ApiKeyId { get; set; }
+        public long SubscriptionId { get; set; }
+        public int TotalTokens { get; set; }
+        public long UsedTokens { get; set; }
+        public long RemainingTokens { get { return Math.Max(0L, TotalTokens - UsedTokens); } }
+        public string UsageMonth { get; set; }
+        public IReadOnlyList<AdminDailyUsageViewModel> DailyUsage { get; set; }
         public string Name { get; set; }
         public string KeyPrefix { get; set; }
         public string Scopes { get; set; }
@@ -59,6 +68,12 @@ namespace autodealer.dev.Models {
         public DateTime? LastUsedUtc { get; set; }
         public DateTime? ExpiresUtc { get; set; }
         public DateTime? RevokedUtc { get; set; }
+    }
+
+    public sealed class AdminDailyUsageViewModel {
+        public int Day { get; set; }
+        public long Tokens { get; set; }
+        public bool IsFuture { get; set; }
     }
 
     public sealed class AdminSubscriptionViewModel {

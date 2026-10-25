@@ -1,0 +1,200 @@
+Security review — AutoDealer.dev — October 23, 2026
+
+Scope and limits
+Reviewed the local MVC/Web API application, account and admin services, database
+schema, configuration, JavaScript templates, packages.config, and the referenced
+../Services/VinDecoderService.cs. No production requests, database connections,
+account creation, credential use, or changes to application behavior were made.
+These are source findings, not proof of the incident's entry point. Deployed
+binaries, IIS/proxy configuration, logs, and database evidence remain unverified.
+
+Likely explanation for the 700 accounts and tokens
+AccountController.Register accepts anonymous registrations with CSRF protection
+but no application rate limit, bot challenge, invitation, or approval gate.
+ClientAccountService.Create creates a pending customer and a 14-day trial for
+any active selected plan. VerifyEmail activates that customer and issues a
+primary key. A bot with disposable mailboxes or a catch-all domain can repeat
+this legitimate flow. Names and company names have no identity verification.
+CSRF tokens are obtainable by the bot visiting the registration page.
+This matches OWASP API6 business-flow abuse:
+https://api-security.owasp.org/editions/2023/en/0xa6-unrestricted-access-to-sensitive-business-flows/
+
+Important distinction: this checkout does NOT issue a primary key at initial
+registration. Each token should have an email-verification trail. If the 700
+customers have no verification trail, investigate an older deployment, admin
+activity, or direct database access. Do not assume this source equals production.
+CreatedByAdmin identifies which account-creation flow was used, not the person
+or session responsible. The current application has no durable actor/IP audit
+for account creation or admin key issuance.
+
+Prioritized findings
+
+1. HIGH: Unrestricted signup and free trial multiplication
+Evidence: Controllers/AccountController.cs:32; Services/ClientAccountService.cs:27,
+86,128,215. Unique email addresses are the principal duplication restriction.
+Impact: account/token spam, multiplied VIN allowances, CPU/database/SMTP cost.
+Fix: immediately gate signup with server-enforced approval or invitations;
+add a server-validated bot challenge, persistent multi-dimensional throttling,
+global issuance budgets, and alerts. Apply checks before password hashing and
+email delivery. Email ownership alone does not establish a legitimate customer.
+Use verified business identity/payment policy for valuable trial access.
+
+2. HIGH: Stored HTML attribute injection in admin grids
+Evidence: Scripts/pepTools/pepGrid.js:1605-1627 inserts template values verbatim;
+1379 assigns the result to innerHTML. Views/Admin/_AdminRecordModal.cshtml:470,
+480,490 interpolate BusinessName inside quoted aria-label attributes; line 425
+does the same for key Name. adminDashboard.js:1377,1430-1431 uses those templates.
+The plain-text sanitizer removes angle brackets but retains quotation marks.
+A customer-controlled company name containing a quote can leave the attribute
+and introduce an event-handler attribute. It does not require a script tag.
+Public demo requests provide another route to the same unsafe admin templates.
+Impact: JavaScript execution in an administrator's session when the affected
+element/event is reached; authenticated admin actions and CSRF token access.
+HttpOnly cookies and CSRF tokens do not prevent actions performed by such code.
+Fix: HTML-encode every ordinary template substitution, including both quote
+characters, or construct elements and set textContent/setAttribute. Any trusted
+HTML support must be explicit and separate. Test customer and opportunity grids.
+Source-traced; no payload was submitted to production or executed in a browser.
+https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+
+3. HIGH: TLS certificate validation disabled in shared VIN service
+Evidence: ../Services/VinDecoderService.cs:25-26 adds a process-wide certificate
+callback, whose ValidateServerCertificate method always returns true.
+Impact: an attacker with network interception capability can impersonate the
+upstream endpoint, obtain the posted DataOne credentials, or alter responses.
+The global callback can affect other outbound HTTPS calls in this process.
+Repeated registrations of the callback also accumulate on each decode request.
+Fix: remove the callback and use platform certificate validation. Restart the
+application after deployment to clear callbacks already registered in memory.
+https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca5359
+
+4. HIGH, conditional exposure: Secret-bearing configuration is Git tracked
+Evidence: git ls-files includes Web.config despite /Web.config in .gitignore.
+The working file has configured database connection strings, SMTP password,
+DataOne secrets, Stripe webhook secret, and admin password hash/salt settings.
+Secret values deliberately omitted from this report. Configured values have
+not been validated for currency. Repository tracking is confirmed; public
+repository access or actual theft is NOT established.
+Impact: repository/history disclosure can expose credentials and permit offline
+admin password guessing. .gitignore does not untrack an existing tracked file.
+Fix: rotate real credentials that may have been exposed, review repository access
+and history, remove secrets from tracking/history with coordinated cleanup, and
+deploy secrets through protected external configuration. Do not delete the local
+runtime configuration as an incident response shortcut.
+
+5. HIGH: API security defaults to disabled
+Evidence: App_Start/WebApiConfig.cs:10-11 installs ApiKeyHandler only when
+ApiSecurity:Enabled is explicitly true. Missing, false, or mistyped settings
+leave DecoderController accessible without key, subscription, or quota checks.
+The local setting is present; the deployed value must be checked independently.
+Fix: always install authentication; reject invalid security configuration during
+startup. Any development bypass must be isolated from production deployment.
+
+6. HIGH: Public demo bypasses usage controls
+Evidence: Views/Solutions/VinDecoder.cshtml:1 exposes the shared demo credential
+to public page code; Models/ApiKeyHandler.cs:28-30 exempts it from normal key
+authentication. Models/DemoQuotaService.cs:83-88 keys quotas by untrusted
+X-Forwarded-For AND User-Agent. Changing User-Agent alone gives another bucket,
+even when a trusted proxy rewrites forwarding headers. Take at line 30 permits
+unlimited repeats of a VIN already counted, but DecoderController.cs:58,105
+still invokes the upstream decoder for each allowed repeat.
+Counters are process-local and reset on restart or differ across instances.
+Impact: upstream bill abuse, worker exhaustion, and memory consumption from
+unbounded identities. A monthly customer quota also provides no short-term
+request/concurrency protection for ordinary paid/trial API keys.
+Fix: enforce persistent request and concurrency limits, trusted proxy address
+handling, global cost budgets, and cached demo results; count actual requests
+separately from unique VINs. Consider a fixed cached public demonstration.
+https://api-security.owasp.org/editions/2023/en/0xa4-unrestricted-resource-consumption/
+
+7. HIGH: Administrator login has no throttling, lockout, or MFA
+Evidence: Controllers/AdminController.cs:44; Services/AdminService.cs:20-60.
+Every attempt computes a password hash and returns a result without recording
+failure counts or limiting attempts. Customer login has a five-failure lockout,
+but it does not protect the separate administrator login.
+Fix: persistent login throttling, monitored failures, MFA/identity-provider
+authentication, and a restricted admin entry point. Provide a way to revoke
+existing admin sessions; current role tickets can persist for up to 30 days.
+https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+
+8. MEDIUM: Bearer credentials are duplicated in retrievable email history
+Evidence: SmtpCredentialEmailService.SendCredentials includes the full API key;
+SmtpMailSender.cs records the rendered email through ClientEmailHistoryRecorder.
+That recorder stores the entire body in ClientEmailHistory.HtmlBody, including
+verification links and credential emails. AdminController.CustomerEmailGridData
+returns those bodies. API key SecretHash does not protect these plaintext copies.
+Fix: redact credentials and verification links before history persistence, avoid
+emailing full API credentials, use a secure one-time display, and handle existing
+history copies and backups under a deliberate retention/rotation policy.
+
+9. MEDIUM: API credentials accepted in query strings
+Evidence: Models/DemoQuotaService.cs:73; Models/ApiKeyHandler.cs:34.
+Impact: tokens may enter IIS/proxy logs, browser history, monitoring, and copied
+URLs. Fix: Authorization header only; redact legacy access_token values from
+logging and review prior logs before deciding which tokens need rotation.
+https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html
+
+10. MEDIUM: Detailed runtime errors enabled in checked-out deployment config
+Evidence: Web.config:65 debug=true and :72 customErrors=Off; project includes
+this configuration as content. Actual IIS error behavior was not tested.
+Impact: unhandled exceptions may disclose paths, stack traces, and system details.
+Fix: release debug=false and generic remote errors with protected server logging.
+
+11. MEDIUM: Verification retries can mint and revoke more keys
+Evidence: Services/ClientAccountService.cs:176-235,287. Expiry is enforced only
+before UsedUtc is set; CredentialsSentUtc is saved after email delivery in a
+separate transaction. Delivery failure leaves a reusable link that revokes old
+primary keys and creates replacements; concurrent requests can overlap delivery.
+A status-save failure similarly leaves a reusable link after successful delivery.
+Impact: token churn, email floods, and previously delivered credentials becoming
+invalid. This does not by itself create 700 distinct customers.
+Fix: consume confirmation once, separate bounded delivery retries from credential
+generation, use an outbox/serialized delivery state, and bound retry lifetime.
+
+12. LOW: Plan maximum key count not enforced during additional issuance
+Evidence: Services/ApiKeyIssuanceService.Issue checks active client/subscription
+but never compares active key count to Plan.MaxApiKeys. The controller route is
+admin-protected; no anonymous issuance route was found here.
+Fix: enforce the maximum inside the same issuance transaction.
+
+Dependency research
+Queried the official NuGet vulnerability base/update index on review date:
+https://api.nuget.org/v3/vulnerabilities/index.json
+Matched packages.config names and examined affected version ranges. Returned
+advisories for jQuery, jQuery.Validation, Newtonsoft.Json, and Bootstrap affect
+older versions than the declared 3.7.1, 1.21.0, 13.0.3, and 5.3.8 respectively.
+No declared version was identified as affected in that feed. This is not a clean
+bill of health: referenced projects/transitive assemblies, the actual bin folder,
+and installed Windows/IIS/.NET patch levels were not comprehensively audited.
+Do not apply ASP.NET Core advisories to this .NET Framework MVC application
+without checking product/package applicability.
+
+Incident response priorities
+1. Preserve a database backup, IIS/proxy/WAF logs, deployed binaries/configuration,
+   SMTP logs, and relevant repository/deployment history before removing evidence.
+2. Gate anonymous signup and restrict the admin entry point. Review suspicious
+   customer values without opening the vulnerable admin grid until encoding is
+   fixed. Use read-only SQL or a viewer that treats values as plain text.
+3. Identify the suspicious customer IDs, suspend those accounts and revoke their
+   keys after review. These are recommended actions, not actions taken here.
+4. Correlate registration and verification timestamps with IIS logs. Distinguish
+   POST /account/register, GET /account/verify-email, POST /admin/newclient,
+   POST /admin/issueapikey, and admin login activity. A login POST status alone
+   does not establish successful authentication; use session/subsequent activity.
+5. Use SecurityIncidentReadOnly.sql on a backup/read replica where possible. It
+   contains only SELECT queries and returns no passwords, hashes, tokens, or email
+   bodies. Set the actual incident UTC time interval first. CreatedByAdmin=false
+   plus UsedUtc and a Primary key supports public-signup verification; it is not
+   sufficient by itself to prove who performed it or rule out direct DB changes.
+6. Compare deployed revision and historical signup code. Active customers without
+   verification records need investigation; legacy customers may legitimately
+   predate email verification. Review database login/audit evidence where available.
+7. Fix template encoding, TLS validation, fail-open authentication, and signup/demo
+   controls; rotate potentially exposed secrets and invalidate suspect sessions.
+
+Positive controls observed
+Admin data/mutation actions inspected have AdminAuthorize; mutation actions have
+anti-forgery validation. Keys use cryptographic random secrets with hashed API
+storage, password hashing uses salted PBKDF2-SHA256, subscription expiry and
+monthly API quota are checked, and Stripe webhooks verify signatures/timestamps.
+These controls reduce some attack paths but do not resolve the findings above.

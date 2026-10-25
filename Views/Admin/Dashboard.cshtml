@@ -23,6 +23,7 @@
     </div>
     <div class="dashboard-grid admin-metrics metrics-design-three">
         <article>
+            <a class="metric-card-link" href="@Url.Action("Customers", "Admin", new { filter = "all" })" aria-label="Show all customers"></a>
             <span class="color-icon metric-icon" aria-hidden="true">
                 <svg>
                     <use href="#icon-users">
@@ -34,6 +35,7 @@
             <small>All registered accounts</small>
         </article>
         <article>
+            <a class="metric-card-link" href="@Url.Action("Customers", "Admin", new { filter = "active" })" aria-label="Show active customers"></a>
             <span class="color-icon metric-icon" aria-hidden="true">
                 <svg>
                     <use href="#icon-check">
@@ -52,6 +54,7 @@
                 </svg>
             </span>
             <span>TRIALING</span>
+            <a class="metric-card-link" href="@Url.Action("Customers", "Admin", new { filter = "trialing" })" aria-label="Show customers with trial subscriptions"></a>
             <strong>@Model.TrialingSubscriptions</strong>
             <small>Subscriptions in trial</small>
         </article>
@@ -63,6 +66,7 @@
                 </svg>
             </span>
             <span>ACTIVE API KEYS</span>
+            <a class="metric-card-link" href="@Url.Action("Customers", "Admin", new { filter = "api-keys" })" aria-label="Show customers with active API keys"></a>
             <strong>@Model.ActiveApiKeys</strong>
             <small>Credentials currently enabled</small>
         </article>

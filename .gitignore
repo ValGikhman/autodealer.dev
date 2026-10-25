@@ -364,3 +364,6 @@ MigrationBackup/
 /Web.config
 
 /bin/*.*
+
+# Local cleanup script contains database credentials.
+/Scripts/Run-UnverifiedCleanup.local.ps1
