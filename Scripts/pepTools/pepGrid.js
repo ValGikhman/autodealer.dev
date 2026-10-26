@@ -1102,7 +1102,7 @@
                     const innerClass = (!canFilter && !canSort) ? 'pg-th-inner pg-th-plain' : 'pg-th-inner';
                     th.innerHTML = '<div class="' + innerClass + '">'
                         + filterHtml
-                        + '<span class="pg-th-label">' + (col.title || col.field) + '</span>'
+                        + '<span class="pg-th-label">' + (col.title == null ? col.field : col.title) + '</span>'
                         + sortHtml
                         + '</div>';
 

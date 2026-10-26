@@ -1561,15 +1561,15 @@
                 columns: [
                     { field: 'Selection', title: '', width: '44px', hidden: !allowBulkDelete, sortable: false, filterable: false, searchable: false, template: '#customer-selection-template' },
                     { field: 'BusinessName', title: 'Customer', width: '18%' },
-                    { field: 'Status', title: 'Account status', width: '100px' },
+                    { field: 'Status', title: 'Status', width: '140px' },
                     { field: 'ActiveApiKeyCount', title: 'Active keys', width: '90px', hidden: $('#customer-filter').val() !== 'api-keys' },
-                    { field: 'ClientNumber', title: 'Client number', width: '12%' },
+                    { field: 'ClientNumber', title: 'Client #', width: '12%' },
                     { field: 'ContactName', title: 'Contact', width: '12%' },
                     { field: 'Email', title: 'Email', width: '20%' },
                     { field: 'ApiKeyCount', title: 'API keys', width: '9%', sortable: false, filterable: false, template: '#customer-api-toggle-template' },
                     { field: 'SubscriptionCount', title: 'Subscription', width: '12%', sortable: false, filterable: false, template: '#customer-subscription-toggle-template' },
-                    { field: 'EmailCount', title: 'Mail', width: '8%', sortable: false, filterable: false, template: '#customer-email-toggle-template' },
-                    { field: 'Delete', title: '', width: '9%', sortable: false, filterable: false, template: '#customer-delete-action-template' }
+                    { field: 'EmailCount', title: '', width: '65px', sortable: false, filterable: false, template: '#customer-email-toggle-template' },
+                    { field: 'Delete', title: '', width: '65px', sortable: false, filterable: false, template: '#customer-delete-action-template' }
                 ]
             });
         }
@@ -1622,7 +1622,7 @@
                     { field: 'Phone', title: 'Phone', width: '12%' },
                     { field: 'Inventory', title: 'Inventory', width: '10%' },
                     { field: 'Status', title: 'Status', width: '10%', template: '#demo-status-template' },
-                    { field: 'Reply', title: 'Reply', width: '10%', sortable: false, filterable: false, template: '#opportunity-reply-action-template' },
+                    { field: 'Reply', title: '', width: '10%', sortable: false, filterable: false, template: '#opportunity-reply-action-template' },
                     { field: 'Delete', title: '', width: '10%', sortable: false, filterable: false, template: '#opportunity-delete-action-template' }
                 ]
             });

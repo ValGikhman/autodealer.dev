@@ -2917,6 +2917,27 @@ body.admin-delete-confirmation-open .modal-backdrop.show:last-of-type {
   outline: 2px solid #f8b4ba;
   outline-offset: 3px;
 }
+/* Keep dashboard column headings and values readable at every grid width. */
+.admin-dashboard-page .pg-grid-table > tbody > tr > td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  line-height: 1.4;
+}
+.admin-dashboard-page .pg-grid-table .pg-th-label {
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+  text-overflow: clip;
+  line-height: 1.4;
+}
+.admin-dashboard-page .pg-grid-table .pg-th-inner {
+  grid-template-columns: var(--pg-th-icon-size) minmax(0, 1fr) var(--pg-th-icon-size);
+}
+.admin-dashboard-page .pg-grid-table .pg-th-inner.pg-th-plain {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .registration-source-panel {
   margin-top: 16px;
   padding: 14px 16px;
