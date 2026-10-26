@@ -1,0 +1,89 @@
+REGISTRATION PROTECTION
+
+What changes
+Public account registration requires Cloudflare Turnstile before any customer,
+credentials, subscription, or verification email is created. Failed checks retain
+only the existing registration audit (outcome rejected). Admin customer creation
+is unchanged. Successful registrations still create pending customers; email
+confirmation is still required for activation and API-key issuance.
+The form displays a managed security widget and its button now says
+"Create account and verify email". No new database tables or procedures.
+
+1. Create CAPTCHA keys
+Sign in to https://dash.cloudflare.com/ and open Turnstile -> Add widget.
+Choose Managed mode and add autodealer.dev (and www.autodealer.dev if used).
+Your site can stay on direct IIS; moving DNS behind Cloudflare is not required.
+Copy the site key and secret key. Keep the secret private.
+
+2. Configure IIS BEFORE deploying this build
+Add these keys inside the website Web.config appSettings section on the server:
+  <add key="Turnstile:SiteKey" value="YOUR_SITE_KEY" />
+  <add key="Turnstile:SecretKey" value="YOUR_SECRET_KEY" />
+  <add key="Turnstile:Hostnames" value="autodealer.dev,www.autodealer.dev" />
+Do not commit the secret. Environment variables override these appSettings:
+AUTODEALER_TURNSTILE_SITEKEY, AUTODEALER_TURNSTILE_SECRETKEY,
+AUTODEALER_TURNSTILE_HOSTNAMES. Restart the app pool after changing environment
+variables. Preserve settings during deployment.
+Without configuration public registration fails closed. There is no debug bypass.
+IIS needs outbound HTTPS to challenges.cloudflare.com. The browser must load
+scripts and frames from https://challenges.cloudflare.com; allow this domain in
+your CSP script-src and frame-src if you have a CSP at IIS or another layer.
+Server verification checks success, action=register, and the configured hostname.
+The client cannot bypass this by omitting the widget or posting directly.
+
+Local testing: use a separate Turnstile widget allowing your development hostname.
+Configure local keys and hostname separately; do not deploy provider test keys to
+production. Missing, failed, expired, or reused challenges must create no customer.
+Provider tokens are single-use and expire after five minutes; reload/retry the
+form after an error. A fresh widget renders when the server returns the form.
+
+3. Install/update cleanup separately on LOCAL and PRODUCTION
+Back up the intended database. Run Database/010_UnverifiedAccountCleanup.sql in
+that database to update the existing procedure (it does not delete anything).
+This changes the default grace period to 48 hours. The runner also explicitly
+passes 48, so an older procedure default cannot shorten the grace period.
+Run migration 011 if registration auditing has not already been installed.
+Cleanup deletes up to 500 pending accounts per run, at least 48 hours old, whose
+email is unverified and which have no used or unexpired verification token.
+It skips accounts with payment profiles or active/provider-backed subscriptions.
+Verified accounts and registration-source audit history are retained.
+Existing operator schedules that explicitly pass GraceHours=24 must be updated.
+
+4. Preview and schedule (SQL Server Express supported)
+Use Scripts/Run-UnverifiedCleanup.ps1. It contains no database credentials.
+Prefer Windows authentication and a dedicated maintenance identity. Give its
+database user EXECUTE on dbo.CleanupUnverifiedAccounts; do not give the website
+login cleanup permission. Example connection string (replace server/database):
+Server=.\MSSQLSERVER2022;Database=AUTODEALER.DEV;Integrated Security=True;
+
+In PowerShell, set the connection for this session:
+$env:AUTODEALER_CLEANUP_CONNECTION = 'YOUR_CONNECTION_STRING'
+
+Preview (prints eligible customers, deletes nothing, pauses):
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Run-UnverifiedCleanup.ps1 -Pause
+
+Run one deletion batch and pause:
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Run-UnverifiedCleanup.ps1 -Execute -Pause
+
+For unattended runs, configure AUTODEALER_CLEANUP_CONNECTION for the scheduled
+task account (or use a machine environment variable with Windows authentication).
+Open Task Scheduler -> Create Task, choose the maintenance Windows account,
+run whether logged on or not, and create a daily trigger repeating every
+15 minutes indefinitely. Action: powershell.exe
+Arguments (replace with the actual deployed absolute path):
+-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "C:\AutoDealer\Scripts\Run-UnverifiedCleanup.ps1" -Execute
+Do not use -Pause in the scheduled task. Set "Do not start a new instance".
+Do not leave an older duplicate cleanup task enabled. Confirm task Last Run
+Result is 0 and review dbo.UnverifiedAccountCleanupLog. Failure exits with code 1.
+The script is not automatically scheduled or pointed at production by deployment.
+
+5. Verify after deployment
+Submit a valid registration and confirm it remains pending until verification.
+Confirm a missing/invalid CAPTCHA creates no client, subscription, or email.
+Confirm admin creation works and the existing registration audit is populated.
+Preview cleanup before enabling -Execute and confirm only intended accounts
+appear. Keep database backups; automatic deletion is permanent.
+
+References
+https://developers.cloudflare.com/turnstile/get-started/
+https://developers.cloudflare.com/turnstile/get-started/server-side-validation/

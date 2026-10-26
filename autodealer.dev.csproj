@@ -186,6 +186,7 @@
     <Compile Include="Data\StripeWebhookEventRecord.cs" />
     <Compile Include="Services\ClientAccountService.cs" />
     <Compile Include="Services\RegistrationAuditService.cs" />
+    <Compile Include="Services\RegistrationCaptchaService.cs" />
     <Compile Include="Data\ClientRegistrationRecords.cs" />
     <Compile Include="Services\ClientEmailHistoryRecorder.cs" />
     <Compile Include="Services\ContactInquiryService.cs" />
@@ -320,6 +321,8 @@
     <None Include="Docs\VinDecoderApi.md" />
     <None Include="Docs\PlatformSetup.md" />
     <None Include="Docs\RegistrationAuditSetup.txt" />
+    <None Include="Docs\RegistrationProtectionSetup.txt" />
+    <None Include="Scripts\Run-UnverifiedCleanup.ps1" />
     <None Include="Database\011_ClientRegistrationAudit.sql" />
     <None Include="Data\autodealer_dev.dbml">
       <Generator>MSLinqToSQLGenerator</Generator>
