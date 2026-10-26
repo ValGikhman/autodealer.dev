@@ -22,6 +22,7 @@ namespace autodealer.dev.Controllers {
         public ActionResult Register(string plan) {
             if (User.IsInRole("Admin")) return RedirectToAction("Dashboard", "Admin");
             if (Request.IsAuthenticated) return RedirectToAction("Dashboard");
+            RegistrationAuditService.EnsureVisitor(System.Web.HttpContext.Current);
             var model = new AccountRegistrationViewModel {
                 PlanCode = (plan ?? string.Empty).Trim().ToUpperInvariant()
             };
@@ -32,13 +33,41 @@ namespace autodealer.dev.Controllers {
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Register(AccountRegistrationViewModel model) {
+            model = model ?? new AccountRegistrationViewModel();
+            var audit = new RegistrationAuditService();
+            Guid auditId;
+            try { auditId = audit.Begin(System.Web.HttpContext.Current, model == null ? null : model.PlanCode, false); }
+            catch (RegistrationBlockedException ex) {
+                Response.StatusCode = 403;
+                Response.TrySkipIisCustomErrors = true;
+                ModelState.AddModelError("", ex.Message);
+                model.Password = null;
+                model.ConfirmPassword = null;
+                planService.PopulatePlanOptions(model);
+                return View(model);
+            }
+            catch (Exception ex) when (ex is SqlException || ex is InvalidOperationException) {
+                Response.StatusCode = 503;
+                Response.TrySkipIisCustomErrors = true;
+                ModelState.AddModelError("", "Registration security is temporarily unavailable. Please try again later.");
+                model.Password = null;
+                model.ConfirmPassword = null;
+                planService.PopulatePlanOptions(model);
+                return View(model);
+            }
             if (!ModelState.IsValid) {
+                audit.Reject(auditId);
                 planService.PopulatePlanOptions(model);
                 return View(model);
             }
             try {
                 TempData["CreatedAccount"] = accountService.Create(model);
                 return RedirectToAction("Success");
+            }
+            catch (RegistrationBlockedException ex) {
+                Response.StatusCode = 403;
+                Response.TrySkipIisCustomErrors = true;
+                ModelState.AddModelError("", ex.Message);
             }
             catch (SqlException ex) when (ex.Number == 2601 || ex.Number == 2627) {
                 ModelState.AddModelError("Email", "An account already exists for this email address.");

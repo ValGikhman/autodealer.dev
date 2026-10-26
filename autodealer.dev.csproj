@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -185,6 +185,8 @@
     <Compile Include="Data\ClientEmailVerificationRecord.cs" />
     <Compile Include="Data\StripeWebhookEventRecord.cs" />
     <Compile Include="Services\ClientAccountService.cs" />
+    <Compile Include="Services\RegistrationAuditService.cs" />
+    <Compile Include="Data\ClientRegistrationRecords.cs" />
     <Compile Include="Services\ClientEmailHistoryRecorder.cs" />
     <Compile Include="Services\ContactInquiryService.cs" />
     <Compile Include="Services\AutoDealerConnectionString.cs" />
@@ -317,6 +319,8 @@
     <None Include="packages.config" />
     <None Include="Docs\VinDecoderApi.md" />
     <None Include="Docs\PlatformSetup.md" />
+    <None Include="Docs\RegistrationAuditSetup.txt" />
+    <None Include="Database\011_ClientRegistrationAudit.sql" />
     <None Include="Data\autodealer_dev.dbml">
       <Generator>MSLinqToSQLGenerator</Generator>
       <LastGenOutput>autodealer_dev.designer.cs</LastGenOutput>

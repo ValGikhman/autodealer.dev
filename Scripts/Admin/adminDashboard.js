@@ -20,6 +20,81 @@
         var subgridEditCancel = document.getElementById('dashboard-subgrid-edit-cancel');
         var deleteClientOpen = document.getElementById('dashboard-client-delete-open');
         var clientEditFields = document.getElementById('client-edit-fields');
+        var registrationPanel = document.getElementById('registration-source-panel');
+        var registrationAudit = null;
+        var registrationClientId = null;
+        var registrationSequence = 0;
+        var registrationBlockBusy = false;
+        var registrationButton = document.getElementById('registration-block-button');
+        var registrationConfirm = document.getElementById('registration-block-confirm');
+
+        function loadRegistrationSource(clientId) {
+            var sequence = ++registrationSequence;
+            registrationClientId = clientId;
+            registrationAudit = null;
+            registrationButton.disabled = true;
+            registrationButton.hidden = true;
+            registrationConfirm.checked = false;
+            document.getElementById('registration-block-confirm-label').hidden = true;
+            document.getElementById('registration-source-details').replaceChildren();
+            text('registration-source-status', 'Loading registration history...');
+            $.getJSON(registrationPanel.dataset.sourceUrl, { clientId: clientId }).done(function (response) {
+                if (sequence !== registrationSequence) return;
+                var audit = response.Audit;
+                registrationAudit = audit;
+                if (!audit) {
+                    text('registration-source-status', 'No source was recorded. Accounts created before this update cannot be traced from these records.');
+                    return;
+                }
+                text('registration-source-status', audit.BlockedUntilUtc ? 'IP blocked until ' + audit.BlockedUntilUtc : 'No active registration IP block.');
+                var fields = [
+                    ['Submitted', audit.RecordedUtc], ['Source', audit.Source], ['Source IP', audit.SourceIp],
+                    ['Connection IP', audit.PeerIp], ['Browser', audit.UserAgent], ['Language', audit.AcceptLanguage],
+                    ['Browser reference', audit.VisitorReference], ['Country', audit.CountryCode || 'Not determined'],
+                    ['Path', audit.RequestPath], ['Plan', audit.PlanCode], ['Authenticated identity', audit.Actor],
+                    ['Forwarded IP claims (untrusted)', audit.ForwardedFor], ['IP attempts in last 7 days', audit.RecentAttempts],
+                    ['Request ID', audit.AuditId]
+                ];
+                var details = document.getElementById('registration-source-details');
+                fields.forEach(function (field) {
+                    var term = document.createElement('dt');
+                    var value = document.createElement('dd');
+                    term.textContent = field[0];
+                    value.textContent = field[1] == null || field[1] === '' ? 'Not recorded' : String(field[1]);
+                    details.append(term, value);
+                });
+                registrationButton.hidden = !audit.CanBlock;
+                document.getElementById('registration-block-confirm-label').hidden = !audit.CanBlock;
+                registrationButton.disabled = true;
+                setButtonLabel(registrationButton, audit.BlockedUntilUtc ? 'Unblock registration IP' : 'Block IP for 24 hours');
+            }).fail(function (xhr) {
+                if (sequence === registrationSequence) text('registration-source-status', (xhr.responseJSON || {}).Message || 'Registration history could not be loaded.');
+            });
+        }
+        registrationConfirm.addEventListener('change', function () {
+            registrationButton.disabled = !registrationConfirm.checked || registrationBlockBusy;
+        });
+        registrationButton.addEventListener('click', function () {
+            if (!registrationAudit || !registrationAudit.CanBlock || !registrationConfirm.checked || registrationBlockBusy) return;
+            registrationBlockBusy = true;
+            registrationButton.disabled = true;
+            var clientId = registrationClientId;
+            var sequence = registrationSequence;
+            $.ajax({
+                url: registrationPanel.dataset.blockUrl, method: 'POST', dataType: 'json',
+                data: {
+                    auditId: registrationAudit.AuditId, block: !registrationAudit.BlockedUntilUtc, confirmed: true,
+                    __RequestVerificationToken: document.querySelector('.dashboard-antiforgery input[name="__RequestVerificationToken"]').value
+                }
+            }).done(function () {
+                if (sequence === registrationSequence) loadRegistrationSource(clientId);
+            }).fail(function (xhr) {
+                if (sequence === registrationSequence) text('registration-source-status', (xhr.responseJSON || {}).Message || 'The IP block could not be changed.');
+            }).always(function () {
+                registrationBlockBusy = false;
+                registrationButton.disabled = !registrationConfirm.checked;
+            });
+        });
         var clientCreateFields = document.getElementById('client-create-fields');
         var clientCreateResult = document.getElementById('dashboard-client-create-result');
         var apiKeyEditFields = document.getElementById('api-key-edit-fields');
@@ -379,6 +454,16 @@
 
             pendingSubgridEdit = null;
             resetRecordModalPanels();
+            registrationPanel.hidden = kind !== 'client';
+            ++registrationSequence;
+            registrationAudit = null;
+            registrationClientId = null;
+            registrationButton.hidden = true;
+            registrationButton.disabled = true;
+            registrationConfirm.checked = false;
+            document.getElementById('registration-block-confirm-label').hidden = true;
+            document.getElementById('registration-source-details').replaceChildren();
+            text('registration-source-status', 'Loading registration history...');
             modalElement.classList.add('dashboard-subgrid-edit-modal');
             if (isNewClient) modalElement.classList.add('dashboard-new-client-modal');
             if (isSubscription) modalElement.classList.add('dashboard-subscription-modal');
@@ -449,6 +534,7 @@
                     notifyInput(document.getElementById('create-client-confirm-password'));
                     document.getElementById('create-client-business').focus();
                 } else if (isClient) {
+                    loadRegistrationSource(recordId);
                     document.getElementById('edit-client-number').value = response.ClientNumber || '';
                     document.getElementById('edit-client-created').value = response.CreatedUtc || '';
                     document.getElementById('edit-client-business').value = response.BusinessName || '';

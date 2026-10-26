@@ -44,6 +44,21 @@
             </div>
         </div>
 
+        <section class="registration-source-panel" id="registration-source-panel" hidden
+                 data-source-url="@Url.Action("RegistrationSource", "Admin")"
+                 data-block-url="@Url.Action("SetRegistrationBlock", "Admin")">
+            <h3>Registration source</h3>
+            <p id="registration-source-status" role="status">Loading registration history...</p>
+            <dl id="registration-source-details"></dl>
+            <label class="registration-block-confirm" id="registration-block-confirm-label" hidden>
+                <input type="checkbox" id="registration-block-confirm" />
+                I understand that people sharing this IP will also be affected.
+            </label>
+            <button type="button" class="admin-create-button admin-bulk-delete" id="registration-block-button" hidden disabled>
+                <span>Block IP for 24 hours</span>
+            </button>
+        </section>
+
         @Html.Partial("_WorkspaceFields", new autodealer.dev.Models.AccountRegistrationViewModel(), new ViewDataDictionary { { "WorkspaceAdminMode", true } })
 
         <div class="dashboard-subgrid-edit-fields" id="api-key-edit-fields">

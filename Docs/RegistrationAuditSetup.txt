@@ -1,0 +1,176 @@
+Client registration audit and temporary IP blocks
+October 26, 2026
+
+Deployment status
+Implemented locally; nothing has been installed in production. No production
+accounts were created/deleted and no real IP address was blocked during testing.
+
+Your hosting setup
+You confirmed that traffic reaches IIS directly. No Cloudflare account, API key,
+proxy settings, or geolocation subscription is required for this implementation.
+The source IP is the actual IIS connection address (Request.UserHostAddress).
+X-Forwarded-For is retained as a normalized, explicitly UNTRUSTED claim; it never
+overrides that address. If you later put a proxy/CDN in front of IIS, update the
+trusted client-IP handling before using these controls. Otherwise you might
+block the proxy's shared address. Do not simply trust incoming forwarded headers.
+
+What you must do before publishing
+1. Back up the application database and retain your IIS logs/incident evidence.
+2. In SSMS, connect to the application's actual SQL instance and select its
+   database. From your earlier result this is:
+       WIN-59C8FS25N9O\MSSQLSERVER2022 / AUTODEALER.DEV
+3. Open Database/011_ClientRegistrationAudit.sql.
+   Near the bottom, set @ApplicationLogin to the login used by the WEBSITE'S
+   production connection string. The default is AUTODEALER. This may differ from
+   the GTX login used by your separate cleanup PowerShell script.
+4. Execute that SQL file using a DBA account. It creates two tables/indexes and
+   grants SELECT, INSERT, and UPDATE on them to the web user. There are no custom
+   stored procedures. It does not delete customers or
+   create an initial block. It is safe to rerun. If the login is not mapped in
+   the database and no database user with that name exists, the permissions step
+   raises an error. It accepts an existing database username as a fallback for
+   restored development databases whose server-login mapping is unavailable.
+   On PC-67C5JX3, the configured development connection uses Windows authentication;
+   your dbo user already has access. This migration does not create/remap logins.
+5. Publish the rebuilt web application DLL, updated admin JavaScript/CSS, and
+   updated admin editor view together. Apply the SQL BEFORE publishing: if audit
+   storage is unavailable, public account creation fails closed rather than
+   silently creating untraceable customers. No SQL Server Agent job is needed.
+6. Use HTTPS, and recycle the IIS application pool after deployment. Purge stale
+   dashboard script/CSS caches if needed. Test with a reviewed registration first.
+   Check that its source appears under Majordome > Customers > customer editor.
+   Existing email verification, trial activation and API-key behavior remain.
+7. Watch for newly created customers without a corresponding created audit row.
+   If that happens after deployment, check that all web instances were updated
+   and investigate other applications or direct database writes. This code
+   instruments this application's creation service, not arbitrary SQL inserts.
+
+Using it in Majordome
+ - Choose Total Customers to include unverified/pending accounts.
+ - Open a customer for editing (double-click its row).
+ - The Registration source section shows timestamp, source/connection IP,
+   browser and language, browser reference, path, plan, operator identity if
+   admin-created, request ID, and recent attempts from the same IP.
+ - For a PUBLIC registration, tick the confirmation about shared IPs, then click
+   Block IP for 24 hours. The source comes from the stored audit record, not an
+   editable browser IP field. Repeating this action renews the 24-hour expiry.
+ - New public registrations from that address are rejected with HTTP 403, with
+   no customer or verification email created. Blocked attempts are still logged.
+ - To undo a mistake, open that customer's source panel, tick the confirmation,
+   and click Unblock registration IP. Expired blocks cease applying automatically.
+ - Admin-origin/system records are displayed but cannot be used to block an IP
+   through this button. Admin account creation is not blocked by a public-IP ban.
+ - A block affects new public ACCOUNT CREATION only. It does not suspend existing
+   customers, revoke API keys, block sign-in/API requests, or block all site visits.
+   Use existing suspension/revocation controls for an abusive existing account.
+
+What is captured and when
+The audit covers public registration POSTs that reach the action after CSRF
+validation, including invalid forms, blocked attempts, creation failures, and
+successful accounts. The common ClientAccountService also audits valid account
+creation from the admin form or another service caller. Non-browser creation is
+marked system, with missing browser/IP fields rather than invented metadata.
+Customer creation and its successful audit linkage commit in the SAME transaction.
+If linkage fails or a block is added during processing, creation rolls back.
+
+GET /account/register?plan=... establishes a visitor cookie but is not inserted as
+an audit-table visit. Use IIS logs for page views and requests rejected before
+the MVC action, including invalid anti-forgery tokens. PlanCode records the plan
+submitted for creation, not arbitrary URL query contents. X-Registration-Id on
+audited POST responses can be logged as an IIS custom response-header field.
+
+The AutoDealer.Visitor cookie contains a random, signed/encrypted identifier with
+a 30-day expiry. It is Secure, HttpOnly, SameSite=Lax, and is NOT an authentication
+session cookie. Only its SHA-256 digest is stored; the UI shows a short reference.
+Browsers can clear/refuse cookies, and addresses can be shared or changed. Treat
+these as correlation evidence, not proof that two requests belong to one person.
+Multiple IIS instances should use a stable, securely configured shared machine
+key if you need visitor-cookie continuity. Never expose that key or commit it.
+
+No passwords, auth/session cookies, API keys, email-verification tokens, payment
+tokens, form bodies, or full query strings are recorded in the audit. Browser
+metadata is bounded and rendered as text in the admin panel. It remains untrusted.
+There is no automatic country/IP reputation lookup and no third-party data upload.
+Country shows Not determined. An IP geolocation provider could add an approximate
+country later; this patch does not guess one from browser language or headers.
+A normal website cannot recover a VPN user's original IP, private gateway, MAC
+address, or legal identity. The recorded address can be a VPN/NAT exit address.
+
+What survives cleanup
+dbo.ClientRegistrationAudit deliberately has no ClientId foreign key. The existing
+unverified cleanup procedure and administrative deletion do NOT remove its rows.
+IP blocks also persist independently. Older customers have no historical trace;
+their source panel explicitly says that no source was recorded. Correlate old
+CreatedUtc values against retained IIS logs; this patch cannot reconstruct IPs.
+
+Table overview
+ - dbo.ClientRegistrationAudit: submissions, outcomes, linked client IDs, and
+   operator block/unblock actions. ClientId may refer to a deleted account.
+   Outcomes: started (incomplete/in progress), created, rejected, or blocked.
+ - dbo.ClientRegistrationIpBlocks: exact IPv4/IPv6 address, expiry, last operator.
+   Manual block/unblock events are separately appended to the audit table.
+   Blocks are temporary and apply to exact addresses, not entire ISP subnets.
+
+Maintenance queries (DBA/maintenance access only)
+Recent submissions:
+ SELECT TOP(200) RecordedUtc,AuditId,ClientId,Source,Outcome,SourceIp,PeerIp,
+   UserAgent,VisitorHash,RequestPath,PlanCode,Actor
+ FROM dbo.ClientRegistrationAudit WHERE EventType='submission'
+ ORDER BY RecordedUtc DESC;
+
+Most active sources:
+ SELECT SourceIp,COUNT(*) AS Attempts,
+   SUM(CASE WHEN Outcome='blocked' THEN 1 ELSE 0 END) AS Blocked,
+   MIN(RecordedUtc) AS FirstSeenUtc,MAX(RecordedUtc) AS LastSeenUtc
+ FROM dbo.ClientRegistrationAudit WHERE EventType='submission'
+ GROUP BY SourceIp ORDER BY Attempts DESC;
+
+Active blocks:
+ SELECT * FROM dbo.ClientRegistrationIpBlocks
+ WHERE BlockedUntilUtc>SYSUTCDATETIME();
+
+For an account already deleted, the retained audit ID and SourceIp still identify its source.
+Use the authenticated admin panel before deleting an account. For an emergency unblock after deletion, a DBA can expire the exact SourceIp row in dbo.ClientRegistrationIpBlocks and record that maintenance action.
+
+IIS logging
+In IIS Manager > Sites > your site > Logging, use W3C and enable Date, Time,
+Client IP, Method, URI Stem, HTTP Status and User Agent. The Logging screen shows
+the directory. Review whether URI Query should be disabled/redacted: legacy API
+access_token URLs and email verification URLs can contain secrets.
+On IIS 8.5+, optionally add custom response-header X-Registration-Id as
+RegistrationId to correlate POSTs precisely with the audit. Do not log Cookies,
+Authorization, passwords, or request bodies. Never expose logs over HTTP.
+
+Operational limits
+There is no new automatic bot/name/country ban, rate-limit service, or CAPTCHA.
+Manual IP blocking stops the recorded source, not distributed or rotating-IP bots.
+Shared-office/mobile/VPN IPs may belong to legitimate customers too. Check the
+evidence and be prepared to unblock. For high-volume traffic, add IIS/firewall/WAF
+limits to protect storage/CPU before requests reach the application.
+
+Restrict audit access to admins/maintenance staff. The application uses LINQ-to-SQL
+GetTable<T> mappings, matching the existing email-verification record pattern.
+Grant SELECT/INSERT/UPDATE on these two tables to its database user; retention
+DELETE belongs to maintenance.
+The web application still needs its existing client-creation table permissions.
+An application SQL login can access these tables, so this is an operational
+audit, not a tamper-proof replacement for independent server/database logs.
+
+Review disk growth and choose retention (for example 30 days, except preserved
+incident evidence). Delete older audit rows in bounded batches by RecordedUtc,
+using a maintenance account, not the website login. Keep records needed for an
+active investigation/block. Update the site's privacy information to describe
+security IP/browser logging and the non-authentication visitor cookie.
+
+Verification performed locally
+Release build and Razor compilation; isolated LocalDB checks for account linkage,
+cookie correlation, forged forwarding headers, blocks/unblocks/expiry, unaffected
+other addresses and admin creation, rollback during a late block/missing audit,
+and survival of actual unverified-account cleanup. No real email or production
+database was used. Run a staging registration and block/unblock check after setup.
+
+References
+https://learn.microsoft.com/en-us/iis/configuration/system.applicationhost/sites/site/logfile/customfields/
+https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html
+
+If you installed the earlier stored-procedure draft: the LINQ version does not call those procedures. After publishing the LINQ build, the DBA may remove BeginClientRegistration, CompleteClientRegistration, RejectClientRegistration, GetClientRegistrationAudit, and SetClientRegistrationBlock. Keep the two tables and recorded evidence.

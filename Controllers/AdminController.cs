@@ -468,6 +468,46 @@ namespace autodealer.dev.Controllers {
 
         [AdminAuthorize]
         [HttpGet]
+        public ActionResult RegistrationSource(long clientId) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            try { return Json(new { Audit = new RegistrationAuditService().GetForClient(clientId) }, JsonRequestBehavior.AllowGet); }
+            catch (ArgumentException ex) {
+                Response.StatusCode = 400;
+                return Json(new { Message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+            catch (SqlException) {
+                Response.StatusCode = 503;
+                return Json(new { Message = "Registration history is unavailable. Check that migration 011 and its permissions are installed." }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SetRegistrationBlock(Guid auditId, bool block, bool confirmed = false) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+            if (!confirmed || auditId == Guid.Empty || !ModelState.IsValid) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = "Confirm the registration IP block change." });
+            }
+            try {
+                new RegistrationAuditService().SetBlock(auditId, block, User.Identity.Name, Request.UserHostAddress);
+                return Json(new { Ok = true });
+            }
+            catch (ArgumentException ex) {
+                Response.StatusCode = 400;
+                return Json(new { Ok = false, Message = ex.Message });
+            }
+            catch (SqlException) {
+                Response.StatusCode = 503;
+                return Json(new { Ok = false, Message = "The IP block could not be changed. Please verify the database migration and permissions." });
+            }
+        }
+
+        [AdminAuthorize]
+        [HttpGet]
         public ActionResult EditClient(long id) {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
             Response.Cache.SetNoStore();
