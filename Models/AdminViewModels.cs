@@ -3,6 +3,25 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace autodealer.dev.Models {
+    public sealed class ClientRegistrationAuditViewModel {
+        public Guid AuditId { get; set; }
+        public string RecordedUtc { get; set; }
+        public string Source { get; set; }
+        public string SourceIp { get; set; }
+        public string PeerIp { get; set; }
+        public string ForwardedFor { get; set; }
+        public bool TrustedProxy { get; set; }
+        public string UserAgent { get; set; }
+        public string AcceptLanguage { get; set; }
+        public string VisitorReference { get; set; }
+        public string CountryCode { get; set; }
+        public string RequestPath { get; set; }
+        public string PlanCode { get; set; }
+        public string Actor { get; set; }
+        public string BlockedUntilUtc { get; set; }
+        public long RecentAttempts { get; set; }
+        public bool CanBlock { get { return Source == "public" && !string.IsNullOrEmpty(SourceIp); } }
+    }
     public sealed class AdminLoginViewModel {
         [Required, StringLength(100)]
         [Display(Name = "User ID")]

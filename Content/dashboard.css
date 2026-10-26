@@ -2917,3 +2917,10 @@ body.admin-delete-confirmation-open .modal-backdrop.show:last-of-type {
   outline: 2px solid #f8b4ba;
   outline-offset: 3px;
 }
+.registration-source-panel { margin-top: 20px; padding: 16px; border: 1px solid #85858e; border-radius: 7px; }
+.registration-source-panel h3 { margin: 0 0 10px; font-size: 15px; }
+.registration-source-panel dl { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(0, 3fr); gap: 6px 16px; font-size: 12px; }
+.registration-source-panel dt { font-weight: 700; }
+.registration-source-panel dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.registration-block-confirm { display: flex; align-items: center; gap: 8px; margin: 12px 0; font-size: 12px; }
+.registration-source-panel[hidden], .registration-block-confirm[hidden], #registration-block-button[hidden] { display: none !important; }

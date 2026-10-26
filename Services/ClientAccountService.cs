@@ -24,6 +24,17 @@ namespace autodealer.dev.Services {
         }
 
         public AccountCreatedViewModel Create(AccountRegistrationViewModel model, string requestedClientNumber, bool emailTemporaryPassword) {
+            var audit = new RegistrationAuditService(connectionString);
+            var id = audit.Begin(System.Web.HttpContext.Current, model == null ? null : model.PlanCode, emailTemporaryPassword);
+            try { return CreateAccount(model, requestedClientNumber, emailTemporaryPassword, audit, id); }
+            catch (Exception ex) {
+                audit.Reject(id, ex is RegistrationBlockedException);
+                throw;
+            }
+        }
+
+        private AccountCreatedViewModel CreateAccount(AccountRegistrationViewModel model, string requestedClientNumber,
+            bool emailTemporaryPassword, RegistrationAuditService audit, Guid auditId) {
             if (string.IsNullOrWhiteSpace(connectionString))
                 throw new InvalidOperationException("The AutoDealer.dev database connection is not configured.");
 
@@ -111,6 +122,7 @@ namespace autodealer.dev.Services {
                             CreatedUtc = now
                         });
                         context.SubmitChanges();
+                        audit.Complete(auditId, clientId, context);
                         transaction.Commit();
                     }
                     catch {
