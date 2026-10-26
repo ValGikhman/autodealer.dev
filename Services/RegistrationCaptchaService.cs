@@ -12,8 +12,10 @@ namespace autodealer.dev.Services {
         public static string SiteKey { get { return Setting("SiteKey"); } }
 
         private static string Setting(string name) {
-            return (Environment.GetEnvironmentVariable("AUTODEALER_TURNSTILE_" + name.ToUpperInvariant())
-                ?? ConfigurationManager.AppSettings["Turnstile:" + name] ?? string.Empty).Trim();
+            var environmentValue = Environment.GetEnvironmentVariable("AUTODEALER_TURNSTILE_" + name.ToUpperInvariant());
+            return (string.IsNullOrWhiteSpace(environmentValue)
+                ? ConfigurationManager.AppSettings["Turnstile:" + name] ?? string.Empty
+                : environmentValue).Trim();
         }
 
         // Called at the shared account-creation boundary, never trusted from a posted boolean.

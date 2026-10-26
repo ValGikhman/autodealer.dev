@@ -46,7 +46,7 @@ button {
 }
 
 .shell {
-  width: min(1180px, calc(100% - 48px));
+  width: min(1357px, calc(100% - 48px));
   margin: auto;
 }
 
