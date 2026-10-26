@@ -57,11 +57,15 @@
                 ];
                 var details = document.getElementById('registration-source-details');
                 fields.forEach(function (field) {
+                    var item = document.createElement('div');
+                    item.className = 'registration-source-item';
+                    if (field[0] === 'Browser' || field[0] === 'Forwarded IP claims (untrusted)') item.classList.add('registration-source-item-wide');
                     var term = document.createElement('dt');
                     var value = document.createElement('dd');
                     term.textContent = field[0];
                     value.textContent = field[1] == null || field[1] === '' ? 'Not recorded' : String(field[1]);
-                    details.append(term, value);
+                    item.append(term, value);
+                    details.append(item);
                 });
                 registrationButton.hidden = !audit.CanBlock;
                 document.getElementById('registration-block-confirm-label').hidden = !audit.CanBlock;

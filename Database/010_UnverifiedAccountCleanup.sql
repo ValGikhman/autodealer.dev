@@ -24,7 +24,7 @@ IF OBJECT_ID(N'dbo.CleanupUnverifiedAccounts', N'P') IS NULL
 GO
 ALTER PROCEDURE dbo.CleanupUnverifiedAccounts
     @DryRun bit = 1,
-    @GraceHours int = 24,
+    @GraceHours int = 48,
     @BatchSize int = 500
 AS
 BEGIN

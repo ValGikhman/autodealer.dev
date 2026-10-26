@@ -34,6 +34,11 @@
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
                 @Html.Partial("_WorkspaceFields", Model)
+                if (!string.IsNullOrEmpty(autodealer.dev.Services.RegistrationCaptchaService.SiteKey)) {
+                    <div class="cf-turnstile" data-sitekey="@autodealer.dev.Services.RegistrationCaptchaService.SiteKey" data-action="register" data-theme="auto"></div>
+                } else {
+                    <p role="alert">Registration verification is temporarily unavailable. Please contact our team.</p>
+                }
                 <div class="dashboard-style-form-footer">
                     <small class="form-secure">
                         Protected by TLS &middot; Credentials are issued after email verification
@@ -42,7 +47,7 @@
                         <svg class="account-create-icon" aria-hidden="true">
                             <use href="#icon-user-add"></use>
                         </svg>
-                        <span>Create account and issue key</span>
+                        <span>Create account and verify email</span>
                     </button>
                 </div>
             }
@@ -51,5 +56,6 @@
 </section>
 
 @section scripts {
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     @Scripts.Render("~/bundles/account-validation")
 }

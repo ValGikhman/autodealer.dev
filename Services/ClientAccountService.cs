@@ -26,7 +26,11 @@ namespace autodealer.dev.Services {
         public AccountCreatedViewModel Create(AccountRegistrationViewModel model, string requestedClientNumber, bool emailTemporaryPassword) {
             var audit = new RegistrationAuditService(connectionString);
             var id = audit.Begin(System.Web.HttpContext.Current, model == null ? null : model.PlanCode, emailTemporaryPassword);
-            try { return CreateAccount(model, requestedClientNumber, emailTemporaryPassword, audit, id); }
+            try {
+                if (!emailTemporaryPassword && System.Web.HttpContext.Current != null)
+                    RegistrationCaptchaService.Validate(System.Web.HttpContext.Current);
+                return CreateAccount(model, requestedClientNumber, emailTemporaryPassword, audit, id);
+            }
             catch (Exception ex) {
                 audit.Reject(id, ex is RegistrationBlockedException);
                 throw;

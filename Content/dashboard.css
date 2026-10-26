@@ -2917,10 +2917,121 @@ body.admin-delete-confirmation-open .modal-backdrop.show:last-of-type {
   outline: 2px solid #f8b4ba;
   outline-offset: 3px;
 }
-.registration-source-panel { margin-top: 20px; padding: 16px; border: 1px solid #85858e; border-radius: 7px; }
-.registration-source-panel h3 { margin: 0 0 10px; font-size: 15px; }
-.registration-source-panel dl { display: grid; grid-template-columns: minmax(110px, 1fr) minmax(0, 3fr); gap: 6px 16px; font-size: 12px; }
-.registration-source-panel dt { font-weight: 700; }
-.registration-source-panel dd { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
-.registration-block-confirm { display: flex; align-items: center; gap: 8px; margin: 12px 0; font-size: 12px; }
+.registration-source-panel {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--pg-color-border, #737a82);
+  border-radius: 12px;
+  background: var(--pg-color-bg-muted, #50575f);
+  color: var(--pg-color-text, #edf0f2);
+  font-family: var(--sans);
+}
+.registration-source-panel summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--pg-color-text, #edf0f2);
+  font: 700 13px/1.4 var(--sans);
+  list-style: none;
+  cursor: pointer;
+}
+.registration-source-panel summary::-webkit-details-marker { display: none; }
+.registration-source-panel summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  margin-right: 3px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+}
+.registration-source-panel[open] summary::after { transform: rotate(225deg); }
+.registration-source-panel summary:focus-visible {
+  outline: 2px solid #d4d8dc;
+  outline-offset: 5px;
+  border-radius: 3px;
+}
+.registration-source-panel[open] summary { margin-bottom: 8px; }
+.registration-source-panel summary svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  stroke: var(--pg-color-text-muted, #c1c7cd);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.registration-source-panel #registration-source-status {
+  margin: 0;
+  color: var(--pg-color-text-muted, #c1c7cd);
+  font: 11px/1.5 var(--sans);
+}
+.registration-source-panel dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 20px;
+  margin: 10px 0 0;
+}
+.registration-source-panel dl:empty { display: none; }
+.registration-source-item {
+  display: grid;
+  grid-template-columns: minmax(0, 105px) minmax(0, 1fr);
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 0;
+  border-top: 1px solid var(--pg-color-border-inner, #697078);
+}
+.registration-source-item-wide { grid-column: 1 / -1; }
+.registration-source-panel dt {
+  color: var(--pg-color-text-muted, #c1c7cd);
+  font: 500 10px/1.5 var(--sans);
+}
+.registration-source-panel dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--pg-color-text, #edf0f2);
+  font: 11px/1.5 var(--sans);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.registration-source-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-top: 10px;
+}
+.registration-source-actions:has(> [hidden]:first-child):has(> [hidden]:last-child) { display: none; }
+.registration-source-panel .registration-block-confirm {
+  display: flex;
+  align-items: flex-start;
+  flex: 1 1 230px;
+  gap: 7px;
+  margin: 0;
+  color: var(--pg-color-text-muted, #c1c7cd);
+  font: 11px/1.5 var(--sans);
+  cursor: pointer;
+}
+.registration-block-confirm input {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  margin: 1px 0 0;
+  accent-color: #b83946;
+}
+.admin-dashboard-page .registration-source-panel #registration-block-button {
+  min-height: 32px;
+  padding: 6px 11px;
+  border-radius: 7px;
+  font-size: 11px;
+}
+@media (max-width: 575px) {
+  .registration-source-panel { padding: 12px; }
+  .registration-source-panel dl { grid-template-columns: minmax(0, 1fr); }
+  .registration-source-item { grid-template-columns: minmax(0, 100px) minmax(0, 1fr); }
+}
 .registration-source-panel[hidden], .registration-block-confirm[hidden], #registration-block-button[hidden] { display: none !important; }
