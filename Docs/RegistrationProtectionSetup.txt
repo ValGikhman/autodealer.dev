@@ -7,7 +7,7 @@ only the existing registration audit (outcome rejected). Admin customer creation
 is unchanged. Successful registrations still create pending customers; email
 confirmation is still required for activation and API-key issuance.
 The form displays a managed security widget and its button now says
-"Create account and verify email". No new database tables or procedures.
+"Create account". No new database tables or procedures.
 
 1. Create CAPTCHA keys
 Sign in to https://dash.cloudflare.com/ and open Turnstile -> Add widget.

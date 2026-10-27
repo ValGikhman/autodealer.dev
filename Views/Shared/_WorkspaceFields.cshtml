@@ -1,6 +1,7 @@
 @model autodealer.dev.Models.AccountRegistrationViewModel
 @{
     var adminMode = ViewData["WorkspaceAdminMode"] is bool && (bool)ViewData["WorkspaceAdminMode"];
+    var showRegistrationCaptcha = !adminMode && ViewData["ShowRegistrationCaptcha"] is bool && (bool)ViewData["ShowRegistrationCaptcha"];
     var businessId = adminMode ? "create-client-business" : "BusinessName";
     var firstNameId = adminMode ? "create-client-first-name" : "FirstName";
     var lastNameId = adminMode ? "create-client-last-name" : "LastName";
@@ -113,18 +114,28 @@
         @Html.ValidationMessageFor(m => m.PlanCode)
     </div>
     <input id="create-client-number" type="hidden" />
+    @if (!showRegistrationCaptcha) {
     <label class="check-field legal-consent-field accent-check-field workspace-field-wide">
         @Html.CheckBoxFor(m => m.AcceptTerms)
         <span>
-            I agree to the
+            <span>I agree to the
             <a href="@Url.Action("Legal", "Home")#service-terms"
                data-legal-modal
                data-legal-section="service-terms">service terms</a>
             and
             <a href="@Url.Action("Legal", "Home")#privacy-policy"
                data-legal-modal
-               data-legal-section="privacy-policy">privacy policy</a>.
+               data-legal-section="privacy-policy">privacy policy</a>.</span>
         </span>
     </label>
     @Html.ValidationMessageFor(m => m.AcceptTerms)
+    }
+    @if (showRegistrationCaptcha) {
+        if (!string.IsNullOrEmpty(autodealer.dev.Services.RegistrationCaptchaService.SiteKey)) {
+            <div class="cf-turnstile" data-sitekey="@autodealer.dev.Services.RegistrationCaptchaService.SiteKey" data-action="register" data-theme="dark" data-size="normal"></div>
+        } else {
+            <p role="alert">Registration verification is temporarily unavailable. Please contact our team.</p>
+        }
+    }
+
 </div>
