@@ -3,6 +3,7 @@
     ViewBag.Title = "Create your account";
     ViewBag.BodyClass = "account-page";
     ViewBag.IncludeValidation = true;
+    ViewData["ShowRegistrationCaptcha"] = true;
 }
 <section class="site-hero page-hero">
     <div class="shell site-hero-shell">
@@ -34,20 +35,28 @@
                 @Html.AntiForgeryToken()
                 @Html.ValidationSummary(true, "", new { @class = "validation-summary" })
                 @Html.Partial("_WorkspaceFields", Model)
-                if (!string.IsNullOrEmpty(autodealer.dev.Services.RegistrationCaptchaService.SiteKey)) {
-                    <div class="cf-turnstile" data-sitekey="@autodealer.dev.Services.RegistrationCaptchaService.SiteKey" data-action="register" data-theme="auto"></div>
-                } else {
-                    <p role="alert">Registration verification is temporarily unavailable. Please contact our team.</p>
-                }
                 <div class="dashboard-style-form-footer">
-                    <small class="form-secure">
-                        Protected by TLS &middot; Credentials are issued after email verification
-                    </small>
+                    <div class="registration-footer-consent">
+    <label class="check-field legal-consent-field accent-check-field workspace-field-wide text-dark">
+        @Html.CheckBoxFor(m => m.AcceptTerms)
+        <span>
+            <span>I agree to the
+            <a href="@Url.Action("Legal", "Home")#service-terms"
+               data-legal-modal
+               data-legal-section="service-terms">service terms</a>
+            and
+            <a href="@Url.Action("Legal", "Home")#privacy-policy"
+               data-legal-modal
+               data-legal-section="privacy-policy">privacy policy</a>.</span>
+        </span>
+    </label>
+    @Html.ValidationMessageFor(m => m.AcceptTerms)
+                    </div>
                     <button class="button button-primary submit-button vin-run-api-button" type="submit">
                         <svg class="account-create-icon" aria-hidden="true">
                             <use href="#icon-user-add"></use>
                         </svg>
-                        <span>Create account and verify email</span>
+                        <span>Create account</span>
                     </button>
                 </div>
             }

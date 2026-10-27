@@ -8464,6 +8464,23 @@ input.availability-invalid {
   height: 19px;
 }
 
+.dashboard-style-form-footer .registration-footer-consent {
+  min-width: 0;
+}
+
+.account-content-section .dashboard-style-form-footer .legal-consent-field {
+  margin: 0;
+  color: #212529;
+}
+
+.account-content-section .dashboard-style-form-footer .legal-consent-field a {
+  color: #212529;
+}
+
+.account-content-section .dashboard-style-form-footer .legal-consent-field > span {
+  white-space: normal;
+}
+
 .dashboard-style-form-footer {
   display: flex;
   align-items: center;
@@ -8493,7 +8510,7 @@ input.availability-invalid {
   gap: 8px;
   width: auto;
   min-height: 36px;
-  margin: 0;
+  margin: 0 0 0 auto;
   padding: 0 15px;
   border: 1px solid #85858e;
   border-radius: 7px;
@@ -8777,6 +8794,21 @@ body .dashboard-style-form .dashboard-style-form-footer .submit-button {
   );
   font-weight: 700;
   letter-spacing: 0.035em;
+}
+
+body.account-page .dashboard-style-form .dashboard-style-form-footer .button.button-primary.submit-button {
+  align-self: center;
+  width: auto;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+@media (max-width: 760px) {
+  body.account-page .dashboard-style-form-footer:has(.registration-footer-consent) {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
 }
 
 /* Match both Dealer Website hero actions to the light-silver Get an API key control. */
