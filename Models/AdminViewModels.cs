@@ -59,6 +59,7 @@ namespace autodealer.dev.Models {
         public string PlanName { get; set; }
         public string SubscriptionStatus { get; set; }
         public DateTime? PeriodEndUtc { get; set; }
+        public long? SubscriptionId { get; set; }
         public int ActiveApiKeyCount { get; set; }
         public int ApiKeyCount { get; set; }
         public int SubscriptionCount { get; set; }
@@ -81,6 +82,7 @@ namespace autodealer.dev.Models {
         public IReadOnlyList<AdminDailyUsageViewModel> DailyUsage { get; set; }
         public string Name { get; set; }
         public string KeyPrefix { get; set; }
+        public string FullApiKey { get; set; }
         public string Scopes { get; set; }
         public string Status { get; set; }
         public DateTime CreatedUtc { get; set; }
@@ -192,6 +194,7 @@ namespace autodealer.dev.Models {
         public long SubscriptionId { get; set; }
         public DateTime? ExpiresUtc { get; set; }
         public string KeyPrefix { get; set; }
+        public string FullApiKey { get; set; }
         public IReadOnlyList<AdminEditOptionViewModel> SubscriptionOptions { get; set; }
     }
 

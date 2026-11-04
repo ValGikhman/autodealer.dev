@@ -43,6 +43,8 @@ namespace autodealer.dev.Models {
                 return Error(HttpStatusCode.ServiceUnavailable, "security_unavailable", "API authentication is temporarily unavailable.");
             }
             if (access.ResultCode != "ok") {
+                if (access.ResultCode == "subscription_expired") return Error(HttpStatusCode.Forbidden, access.ResultCode, "Your subscription has expired. Update its period end date or renew it before using the API.");
+                if (access.ResultCode == "subscription_inactive") return Error(HttpStatusCode.Forbidden, access.ResultCode, "Your subscription is inactive. Activate it before using the API.");
                 if (access.ResultCode == "quota_exceeded") return Error((HttpStatusCode)429, access.ResultCode, "The monthly API quota has been reached.");
                 if (access.ResultCode == "scope_denied") return Error(HttpStatusCode.Forbidden, access.ResultCode, "This key does not have access to the endpoint.");
                 return Error(HttpStatusCode.Unauthorized, "invalid_api_key", "The API key is invalid or inactive.");

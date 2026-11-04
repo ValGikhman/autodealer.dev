@@ -237,13 +237,15 @@ namespace autodealer.dev.Controllers {
                 customer.Email,
                 customer.PlanName,
                 customer.SubscriptionStatus,
+                customer.SubscriptionId,
+                SubscriptionEndState = !customer.PeriodEndUtc.HasValue ? "No subscription" : customer.PeriodEndUtc.Value <= DateTime.UtcNow ? "Expired" : customer.SubscriptionStatus,
                 SubscriptionBadgeClass = SubscriptionBadgeClass(customer.SubscriptionStatus),
                 customer.ActiveApiKeyCount,
                 customer.ApiKeyCount,
                 customer.SubscriptionCount,
                 customer.EmailCount,
                 PeriodEnd = customer.PeriodEndUtc.HasValue
-                    ? customer.PeriodEndUtc.Value.ToString("MMM d, yyyy")
+                    ? customer.PeriodEndUtc.Value.ToString("MMM d, yyyy HH:mm")
                     : "N/A",
                 Created = customer.CreatedUtc.ToString("MMM d, yyyy"),
                 CreatedSort = customer.CreatedUtc.ToString("o"),
@@ -256,11 +258,14 @@ namespace autodealer.dev.Controllers {
         [AdminAuthorize]
         [HttpGet]
         public ActionResult CustomerAccountDetailData(long clientId) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
             var details = adminService.GetClientAccountDetails(clientId);
             var apiKeys = details.ApiKeys.Select(key => new {
                 key.ApiKeyId,
                 key.Name,
                 key.KeyPrefix,
+                key.FullApiKey,
                 key.Scopes,
                 key.Status,
                 key.TotalTokens,
@@ -755,6 +760,7 @@ namespace autodealer.dev.Controllers {
                 model.ClientId,
                 model.Name,
                 model.KeyPrefix,
+                model.FullApiKey,
                 model.Scopes,
                 model.Status,
                 model.SubscriptionId,

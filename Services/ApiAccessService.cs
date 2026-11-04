@@ -29,6 +29,15 @@ namespace autodealer.dev.Services {
                             return Result("invalid_api_key");
                         }
 
+                        if (apiKey.Subscription.Status != "trialing" && apiKey.Subscription.Status != "active") {
+                            transaction.Commit();
+                            return Result("subscription_inactive");
+                        }
+                        if (apiKey.Subscription.CurrentPeriodEndUtc <= now) {
+                            transaction.Commit();
+                            return Result("subscription_expired");
+                        }
+
                         if (!HasScope(apiKey.Scopes, request.RequiredScope)) {
                             transaction.Commit();
                             return Result("scope_denied", apiKey);
@@ -145,9 +154,7 @@ namespace autodealer.dev.Services {
                    FixedTimeEquals(apiKey.SecretHash.ToArray(), secretHash) &&
                    apiKey.Status == "active" &&
                    (!apiKey.ExpiresUtc.HasValue || apiKey.ExpiresUtc.Value > now) &&
-                   apiKey.Client.Status == "active" &&
-                   (apiKey.Subscription.Status == "trialing" || apiKey.Subscription.Status == "active") &&
-                   apiKey.Subscription.CurrentPeriodEndUtc > now;
+                   apiKey.Client.Status == "active";
         }
 
         private static bool HasScope(string scopes, string requiredScope) {

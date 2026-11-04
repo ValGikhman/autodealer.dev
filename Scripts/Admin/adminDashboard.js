@@ -551,7 +551,7 @@
                     notifyInput(document.getElementById('edit-client-email'));
                     document.getElementById('edit-client-business').focus();
                 } else if (isApiKey) {
-                    document.getElementById('edit-api-key-prefix').value = response.KeyPrefix || '';
+                    document.getElementById('edit-api-key-prefix').value = response.FullApiKey || 'Secret unavailable — issue a new API key';
                     document.getElementById('edit-api-key-name').value = response.Name || '';
                     document.getElementById('edit-api-key-expires').value = response.ExpiresUtc || '';
                     setSelectOptions(document.getElementById('edit-api-key-status'), response.StatusOptions, response.Status);
@@ -930,7 +930,7 @@
             }).done(function (response) {
                 keyIssueModal.hide();
                 context.issueResult.classList.remove('is-error');
-                context.issueResult.querySelector('span').textContent = response.Message + ' This full key is shown once:';
+                context.issueResult.querySelector('span').textContent = response.Message + ' Copy the full API key:';
                 context.issueResult.querySelector('code').textContent = response.ApiKey;
                 var resultCopyButton = context.issueResult.querySelector('.customer-api-copy');
                 resultCopyButton.classList.remove('copied');
@@ -1368,7 +1368,7 @@
                             columns: [
                                 { field: 'ApiKeyId', title: 'ID', width: '7%' },
                                 { field: 'Name', title: 'Name', width: '19%' },
-                                { field: 'KeyPrefix', title: 'Key prefix', width: '14%' },
+                                { field: 'FullApiKey', title: 'API key', width: '28%', template: '#customer-full-api-key-template' },
                                 { field: 'Scopes', title: 'Scopes', width: '16%' },
                                 { field: 'Status', title: 'Status', width: '12%', template: '#customer-key-status-template' },
                                 { field: 'Created', title: 'Created', width: '12%' },
@@ -1532,6 +1532,7 @@
                 url: $customerGrid.data('url'), schema: { data: responseData }, height: null, pageable: false, pageSize: 100,
                 resizable: true, autozoomable: true, exportToExcel: false, exportToPdf: false,
                 defaultSort: [{ field: 'CreatedSort', dir: 'desc' }],
+                rowClass: function (item) { return item.SubscriptionEndState === 'Expired' ? 'subscription-expired-row' : ''; },
                 onDataBound: function () {
                     expandedCustomerDetail = null;
                     ensureNewCustomerToolbarButton();

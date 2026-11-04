@@ -129,6 +129,8 @@
 
         /** Fires after data is fetched and rendered. ({ data, total }) */
         onDataBound: null,
+        /** Optional CSS class or function(dataItem) returning a CSS class for each data row. */
+        rowClass: null,
 
         /** Fires when a row is clicked. ({ dataItem, rowElement, event }) */
         onRowClick: null,
@@ -1356,6 +1358,8 @@
                     pageData.forEach(function (item, idx) {
                         const tr = document.createElement('tr');
                         tr.className = (self._opts.alternateRows && idx % 2 !== 0) ? 'pg-row-odd' : 'pg-row-even';
+                        const customRowClass = typeof self._opts.rowClass === 'function' ? self._opts.rowClass(item) : self._opts.rowClass;
+                        if (customRowClass) tr.className += ' ' + customRowClass;
 
                         tr.addEventListener('click', function (e) {
                             self._handleRowClick(tr, item, e);
@@ -1738,6 +1742,8 @@
                     group._children.forEach(function (item, idx) {
                         const tr = document.createElement('tr');
                         tr.className = (self._opts.alternateRows && idx % 2 !== 0) ? 'pg-row-odd' : 'pg-row-even';
+                        const customRowClass = typeof self._opts.rowClass === 'function' ? self._opts.rowClass(item) : self._opts.rowClass;
+                        if (customRowClass) tr.className += ' ' + customRowClass;
 
                         tr.addEventListener('click',       function (e) { self._handleRowClick(tr, item, e); });
                         tr.addEventListener('dblclick',    function (e) { self._trigger('rowDblClick',    { dataItem: item, rowElement: tr, event: e }); });

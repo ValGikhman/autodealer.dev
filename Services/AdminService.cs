@@ -81,6 +81,7 @@ namespace autodealer.dev.Services {
                         x.ClientId,
                         x.Status,
                         x.CurrentPeriodEndUtc,
+                        x.SubscriptionId,
                         PlanName = x.Plan.DisplayName
                     })
                     .ToList()
@@ -118,6 +119,7 @@ namespace autodealer.dev.Services {
                         Email = client.Email,
                         PlanName = subscription == null ? "No plan" : subscription.PlanName,
                         SubscriptionStatus = subscription == null ? "unavailable" : subscription.Status,
+                        SubscriptionId = subscription == null ? (long?)null : subscription.SubscriptionId,
                         PeriodEndUtc = subscription == null ? (DateTime?)null : subscription.CurrentPeriodEndUtc,
                         ActiveApiKeyCount = keyCounts.ContainsKey(client.ClientId) ? keyCounts[client.ClientId] : 0,
                         ApiKeyCount = allKeyCounts.ContainsKey(client.ClientId) ? allKeyCounts[client.ClientId] : 0,
@@ -194,6 +196,7 @@ namespace autodealer.dev.Services {
                         TotalTokens = x.Subscription.Plan.MonthlyRequestQuota,
                         Name = x.Name,
                         KeyPrefix = x.KeyPrefix,
+                        FullApiKey = x.ProtectedCredential,
                         Scopes = x.Scopes,
                         Status = x.Status,
                         CreatedUtc = x.CreatedUtc,
@@ -211,7 +214,16 @@ namespace autodealer.dev.Services {
                     .Select(x => new { x.SubscriptionId, x.UsageDate, x.RequestCount })
                     .ToList()
                     .ToLookup(x => x.SubscriptionId);
+                var legacyKeys = apiKeys.Where(x => string.IsNullOrWhiteSpace(x.FullApiKey)).Select(x => x.ApiKeyId).ToList();
+                var legacyRecords = legacyKeys.Count == 0 ? new Dictionary<long, ApiKey>() : context.ApiKeys
+                    .Where(x => x.ClientId == clientId && legacyKeys.Contains(x.ApiKeyId)).ToDictionary(x => x.ApiKeyId);
+                var credentialEmails = legacyKeys.Count == 0 ? new List<string>() : GetClientEmails(clientId).Select(x => x.HtmlBody).ToList();
                 foreach (var key in apiKeys) {
+                    key.FullApiKey = ApiCredentialProtection.Reveal(key.FullApiKey);
+                    ApiKey legacy;
+                    if (key.FullApiKey == null && legacyRecords.TryGetValue(key.ApiKeyId, out legacy))
+                        key.FullApiKey = ApiCredentialProtection.RecoverFromEmails(legacy.KeyId, legacy.SecretHash.ToArray(), credentialEmails);
+                    key.FullApiKey = key.FullApiKey ?? "Secret unavailable — issue a new API key";
                     var days = dailyUsage[key.SubscriptionId].ToDictionary(x => x.UsageDate.Day, x => (long)x.RequestCount);
                     key.UsedTokens = days.Values.Sum();
                     key.UsageMonth = monthStart.ToString("MMMM yyyy");
@@ -646,7 +658,7 @@ namespace autodealer.dev.Services {
             }
         }
 
-        private static AdminApiKeyEditViewModel MapApiKeyEdit(AutoDealerDataContext context, ApiKey apiKey) {
+        private AdminApiKeyEditViewModel MapApiKeyEdit(AutoDealerDataContext context, ApiKey apiKey) {
             var subscriptions = context.Subscriptions
                 .Where(x => x.ClientId == apiKey.ClientId)
                 .OrderByDescending(x => x.CurrentPeriodEndUtc)
@@ -665,6 +677,9 @@ namespace autodealer.dev.Services {
                 SubscriptionId = apiKey.SubscriptionId,
                 ExpiresUtc = apiKey.ExpiresUtc,
                 KeyPrefix = apiKey.KeyPrefix,
+                FullApiKey = ApiCredentialProtection.Reveal(apiKey.ProtectedCredential)
+                    ?? ApiCredentialProtection.RecoverFromEmails(apiKey.KeyId, apiKey.SecretHash.ToArray(),
+                        GetClientEmails(apiKey.ClientId).Select(x => x.HtmlBody)),
                 SubscriptionOptions = subscriptions
             };
         }

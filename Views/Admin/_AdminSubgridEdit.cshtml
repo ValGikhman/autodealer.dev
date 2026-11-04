@@ -65,8 +65,8 @@
 
         <div class="dashboard-subgrid-edit-fields" id="api-key-edit-fields">
             <div class="dashboard-edit-field dashboard-edit-field-readonly">
-                <label for="edit-api-key-prefix">Key prefix</label>
-                <input id="edit-api-key-prefix" type="text" readonly />
+                <label for="edit-api-key-prefix">Full API key</label>
+                <input id="edit-api-key-prefix" type="text" readonly autocomplete="off" onclick="this.select()" /><small>Click to select and copy. Older keys require replacement because their secrets were not retained.</small>
             </div>
             <div class="dashboard-edit-field">
                 <label for="edit-api-key-name">Name</label>
@@ -111,9 +111,9 @@
                 <input id="edit-subscription-start" name="CurrentPeriodStartUtc" type="datetime-local" required />
             </div>
             <div class="dashboard-edit-field">
-                <label for="edit-subscription-end">Period ends <span>UTC</span>
+                <label for="edit-subscription-end">Subscription expires <span>UTC</span>
                 </label>
-                <input id="edit-subscription-end" name="CurrentPeriodEndUtc" type="datetime-local" required />
+                <input id="edit-subscription-end" name="CurrentPeriodEndUtc" type="datetime-local" required /><small>API access stops at this date, even when the subscription status is Active.</small>
             </div>
             <div class="dashboard-edit-field">
                 <label for="edit-subscription-cancel">Cancel at period end</label>

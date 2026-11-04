@@ -172,12 +172,12 @@
     <Compile Include="Services\AcquisitionReportDocument.cs" />
     <Compile Include="Services\AcquisitionMarketPrice.cs" />
     <Compile Include="Services\AcquisitionUnderwriting.cs" />
-    <Compile Include="Models\AcquisitionComparableRequest.cs" />
     <Compile Include="Models\AccountRegistrationViewModel.cs" />
     <Compile Include="Models\ContactInquiryViewModel.cs" />
     <Compile Include="Models\AdminViewModels.cs" />
     <Compile Include="Models\PasswordPolicy.cs" />
     <Compile Include="Models\ApiKeyHandler.cs" />
+    <Compile Include="Models\AcquisitionComparableRequest.cs" />
     <Compile Include="Models\DataOneCredentials.cs" />
     <Compile Include="Models\DemoQuotaService.cs" />
     <Compile Include="Models\PricingViewModels.cs" />
@@ -200,6 +200,8 @@
     <Compile Include="Services\AutoDealerConnectionString.cs" />
     <Compile Include="Services\ApiAccessService.cs" />
     <Compile Include="Services\ApiKeyIssuanceService.cs" />
+    <Compile Include="Services\ApiCredentialProtection.cs" />
+    <Compile Include="Data\ApiKeyCredential.cs" />
     <Compile Include="Services\AdminService.cs" />
     <Compile Include="Services\IApiAccessService.cs" />
     <Compile Include="Services\IApiKeyIssuanceService.cs" />
@@ -326,6 +328,8 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Docs\VinDecoderApi.md" />
+    <None Include="Database\012_ApiKeyProtectedCredential.sql" />
+    <None Include="Docs\AdminApiCredentials.md" />
     <None Include="Docs\AcquisitionApi.md" />
     <None Include="Tests\AcquisitionUnderwritingRegression.cs" />
     <None Include="Scripts\Test-AcquisitionUnderwriting.ps1" />
