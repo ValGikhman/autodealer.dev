@@ -3056,3 +3056,10 @@ body.admin-delete-confirmation-open .modal-backdrop.show:last-of-type {
   .registration-source-item { grid-template-columns: minmax(0, 100px) minmax(0, 1fr); }
 }
 .registration-source-panel[hidden], .registration-block-confirm[hidden], #registration-block-button[hidden] { display: none !important; }
+/* Expired subscription rows retain their background and use red foreground text. */
+#customer-grid .pg-grid-table tbody tr.subscription-expired-row > td,
+#customer-grid .pg-grid-table tbody tr.subscription-expired-row > td a,
+#customer-grid .pg-grid-table tbody tr.subscription-expired-row > td button,
+#customer-grid .pg-grid-table tbody tr.subscription-expired-row > td .badge {
+    color: #b42318 !important;
+}

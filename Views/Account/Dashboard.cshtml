@@ -61,6 +61,13 @@
             <strong>@(Model.CurrentPeriodEndUtc.HasValue ? Model.CurrentPeriodEndUtc.Value.ToString("MMM d") : "N/A")</strong>
             <small>@(Model.PaymentRequired ? "Your subscription access is paused" : Model.CurrentPeriodEndUtc.HasValue ? Model.CurrentPeriodEndUtc.Value.ToString("yyyy 'at' HH:mm 'UTC'") : "No active billing period")</small>@if (Model.PaymentRequired) { if (!string.IsNullOrWhiteSpace(Model.PaymentUrl)) { <button class="payment-information-button" type="button" data-payment-url="@Model.PaymentUrl" onclick="window.location.assign(this.getAttribute('data-payment-url'))">Add payment info</button> } else { <button class="payment-information-button" type="button" disabled title="Payment link coming soon">Add payment info</button> } }</article>
     </div>
+    <section class="account-research" aria-labelledby="account-research-heading">
+        <div class="section-heading"><span class="eyebrow">VEHICLE INTELLIGENCE</span><h2 id="account-research-heading">Research tools</h2></div>
+        <div class="dashboard-grid account-research-grid">
+            <article><span>VEHICLE PRICING</span><strong>Price Research</strong><small>Compare listings, check local demand, and calculate an auction bid.</small><a class="button button-primary" href="@Url.RouteUrl("ClientPriceResearch")">Open Price Research &rarr;</a></article>
+            <article><span>VEHICLE SPECIFICATIONS</span><strong>VIN Decoder</strong><small>Look up a vehicle's trim, equipment, and specifications by VIN.</small><a class="button button-primary" href="@Url.RouteUrl("ClientVinDecoder")">Open VIN Decoder &rarr;</a></article>
+        </div>
+    </section>
     <div class="dashboard-footer">
         <div>
             <span>ACCOUNT EMAIL</span>

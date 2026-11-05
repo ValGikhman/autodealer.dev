@@ -237,13 +237,15 @@ namespace autodealer.dev.Controllers {
                 customer.Email,
                 customer.PlanName,
                 customer.SubscriptionStatus,
+                customer.SubscriptionId,
+                SubscriptionEndState = !customer.PeriodEndUtc.HasValue ? "No subscription" : customer.PeriodEndUtc.Value <= DateTime.UtcNow ? "Expired" : customer.SubscriptionStatus,
                 SubscriptionBadgeClass = SubscriptionBadgeClass(customer.SubscriptionStatus),
                 customer.ActiveApiKeyCount,
                 customer.ApiKeyCount,
                 customer.SubscriptionCount,
                 customer.EmailCount,
                 PeriodEnd = customer.PeriodEndUtc.HasValue
-                    ? customer.PeriodEndUtc.Value.ToString("MMM d, yyyy")
+                    ? customer.PeriodEndUtc.Value.ToString("MMM d, yyyy HH:mm")
                     : "N/A",
                 Created = customer.CreatedUtc.ToString("MMM d, yyyy"),
                 CreatedSort = customer.CreatedUtc.ToString("o"),
@@ -256,22 +258,26 @@ namespace autodealer.dev.Controllers {
         [AdminAuthorize]
         [HttpGet]
         public ActionResult CustomerAccountDetailData(long clientId) {
+            Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
             var details = adminService.GetClientAccountDetails(clientId);
             var apiKeys = details.ApiKeys.Select(key => new {
                 key.ApiKeyId,
                 key.Name,
                 key.KeyPrefix,
+                key.FullApiKey,
                 key.Scopes,
                 key.Status,
                 key.TotalTokens,
+                key.IsQuotaUnlimited,
                 key.UsedTokens,
                 key.RemainingTokens,
                 key.UsageMonth,
                 key.DailyUsage,
-                Usage = key.UsedTokens.ToString("N0") + " / " + key.TotalTokens.ToString("N0"),
-                TotalTokensDisplay = key.TotalTokens.ToString("N0"),
+                Usage = key.UsedTokens.ToString("N0") + " / " + (key.IsQuotaUnlimited ? "Unlimited" : key.TotalTokens.ToString("N0")),
+                TotalTokensDisplay = key.IsQuotaUnlimited ? "Unlimited" : key.TotalTokens.ToString("N0"),
                 UsedTokensDisplay = key.UsedTokens.ToString("N0"),
-                RemainingTokensDisplay = key.RemainingTokens.ToString("N0"),
+                RemainingTokensDisplay = key.IsQuotaUnlimited ? "Unlimited" : key.RemainingTokens.ToString("N0"),
                 StatusBadgeClass = ApiKeyStatusBadgeClass(key.Status),
                 Created = key.CreatedUtc.ToString("MMM d, yyyy HH:mm 'UTC'"),
                 CreatedSort = key.CreatedUtc.ToString("o"),
@@ -755,7 +761,9 @@ namespace autodealer.dev.Controllers {
                 model.ClientId,
                 model.Name,
                 model.KeyPrefix,
+                model.FullApiKey,
                 model.Scopes,
+                model.IsQuotaUnlimited,
                 model.Status,
                 model.SubscriptionId,
                 ExpiresUtc = ToDateTimeLocal(model.ExpiresUtc),

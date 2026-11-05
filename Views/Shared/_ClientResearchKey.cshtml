@@ -1,0 +1,13 @@
+@model System.Collections.Generic.IList<autodealer.dev.Services.ClientResearchKeyOption>
+@if (Model.Count > 0) {
+    <div class="pr-access">
+        <label for="client-research-key">API KEY</label>
+        <select id="client-research-key" required>
+            @foreach (var key in Model) {
+                <option value="@key.Id">@key.Name (@key.Prefix)</option>
+            }
+        </select>
+    </div>
+} else {
+    <p class="pr-error" role="status">An active API key with VIN access and a current subscription is required to use this tool.</p>
+}

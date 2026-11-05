@@ -233,6 +233,7 @@ namespace autodealer.dev.Services {
                                 Subscription = subscription,
                                 KeyId = keyId,
                                 SecretHash = Sha256(secret),
+                                ProtectedCredential = ApiCredentialProtection.Protect(fullKey),
                                 KeyPrefix = keyId.Substring(0, Math.Min(20, keyId.Length)),
                                 Name = "Primary key",
                                 Scopes = "vin:read",

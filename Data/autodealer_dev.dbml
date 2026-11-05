@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Database Name="AUTODEALER.DEV" EntityNamespace="autodealer.dev.Data" ContextNamespace="autodealer.dev.Data" Class="AutoDealerDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
   <Table Name="dbo.ApiKeys" Member="ApiKeys">
     <Type Name="ApiKey">
@@ -7,6 +7,7 @@
       <Column Name="SubscriptionId" Type="System.Int64" DbType="BigInt NOT NULL" CanBeNull="false" />
       <Column Name="KeyId" Type="System.String" DbType="VarChar(64) NOT NULL" CanBeNull="false" />
       <Column Name="SecretHash" Type="System.Data.Linq.Binary" DbType="Binary(32) NOT NULL" CanBeNull="false" />
+      <Column Name="ProtectedCredential" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" UpdateCheck="Never" />
       <Column Name="KeyPrefix" Type="System.String" DbType="VarChar(20) NOT NULL" CanBeNull="false" />
       <Column Name="Name" Type="System.String" DbType="NVarChar(80) NOT NULL" CanBeNull="false" />
       <Column Name="Scopes" Type="System.String" DbType="VarChar(500) NOT NULL" CanBeNull="false" />

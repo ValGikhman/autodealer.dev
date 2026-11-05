@@ -59,6 +59,7 @@ namespace autodealer.dev.Models {
         public string PlanName { get; set; }
         public string SubscriptionStatus { get; set; }
         public DateTime? PeriodEndUtc { get; set; }
+        public long? SubscriptionId { get; set; }
         public int ActiveApiKeyCount { get; set; }
         public int ApiKeyCount { get; set; }
         public int SubscriptionCount { get; set; }
@@ -75,12 +76,14 @@ namespace autodealer.dev.Models {
         public long ApiKeyId { get; set; }
         public long SubscriptionId { get; set; }
         public int TotalTokens { get; set; }
+        public bool IsQuotaUnlimited { get; set; }
         public long UsedTokens { get; set; }
         public long RemainingTokens { get { return Math.Max(0L, TotalTokens - UsedTokens); } }
         public string UsageMonth { get; set; }
         public IReadOnlyList<AdminDailyUsageViewModel> DailyUsage { get; set; }
         public string Name { get; set; }
         public string KeyPrefix { get; set; }
+        public string FullApiKey { get; set; }
         public string Scopes { get; set; }
         public string Status { get; set; }
         public DateTime CreatedUtc { get; set; }
@@ -179,6 +182,7 @@ namespace autodealer.dev.Models {
     public sealed class AdminApiKeyEditViewModel {
         public long ApiKeyId { get; set; }
         public long ClientId { get; set; }
+        public bool IsQuotaUnlimited { get; set; }
 
         [Required, StringLength(80)]
         public string Name { get; set; }
@@ -192,6 +196,7 @@ namespace autodealer.dev.Models {
         public long SubscriptionId { get; set; }
         public DateTime? ExpiresUtc { get; set; }
         public string KeyPrefix { get; set; }
+        public string FullApiKey { get; set; }
         public IReadOnlyList<AdminEditOptionViewModel> SubscriptionOptions { get; set; }
     }
 
