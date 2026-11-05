@@ -15,6 +15,11 @@ namespace autodealer.dev {
             routes.MapRoute("Sitemap", "sitemap.xml", new { controller = "Seo", action = "Sitemap" });
             routes.MapRoute("StripeWebhook", "stripe/webhook", new { controller = "StripeWebhook", action = "Index" });
             routes.MapRoute("Home", "", new { controller = "Home", action = "Index" });
+            routes.MapRoute("PriceResearchBid", "majordome/priceResearch/bid", new { controller = "PriceResearch", action = "Bid" });
+            routes.MapRoute("PriceResearch", "majordome/priceResearch", new { controller = "PriceResearch", action = "Index" });
+            routes.MapRoute("NeoVin", "majordome/vinDecoder", new { controller = "NeoVin", action = "Index" });
+            routes.MapRoute("LegacyPriceResearch", "priceResearch", new { controller = "PriceResearch", action = "Index" });
+            routes.MapRoute("LegacyNeoVin", "vinDecoder", new { controller = "NeoVin", action = "Index" });
             routes.MapRoute("About", "about", new { controller = "Home", action = "About" });
             routes.MapRoute("Contact", "contact", new { controller = "Home", action = "Contact" });
             routes.MapRoute("DocsVinHtml", "documentation/vin-html", new { controller = "Documentation", action = "VinHtml" });
@@ -23,6 +28,9 @@ namespace autodealer.dev {
             routes.MapRoute("GetApiKey", "account/register", new { controller = "Account", action = "Register" });
             routes.MapRoute("VerifyAccountEmail", "account/verify-email", new { controller = "Account", action = "VerifyEmail" });
             routes.MapRoute("Admin", "majordome/{action}", new { controller = "Admin", action = "Login" });
+            routes.MapRoute("ClientPriceResearchBid", "account/priceResearch/bid", new { controller = "ClientResearch", action = "Bid" });
+            routes.MapRoute("ClientPriceResearch", "account/priceResearch", new { controller = "ClientResearch", action = "PriceResearch" });
+            routes.MapRoute("ClientVinDecoder", "account/vinDecoder", new { controller = "ClientResearch", action = "VinDecoder" });
             routes.MapRoute("Account", "account/{action}", new { controller = "Account", action = "Register" });
             routes.MapRoute("Documentation", "documentation/{action}", new { controller = "Documentation", action = "Index" });
             routes.MapRoute("DealerDemo", "request-a-dealer-demo", new { controller = "Solutions", action = "RequestDemo" });

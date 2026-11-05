@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -12,15 +13,23 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using HttpAntiForgeryException = System.Web.Mvc.HttpAntiForgeryException;
 
 namespace autodealer.dev.Models {
     public sealed class ApiKeyHandler : DelegatingHandler {
         private readonly IApiAccessService accessService;
+        private readonly Func<HttpRequestMessage, string> defaultKeyResolver;
+        private readonly Func<HttpRequestMessage, string> clientSessionResolver;
 
         public ApiKeyHandler() : this(new ApiAccessService()) { }
 
-        public ApiKeyHandler(IApiAccessService accessService) {
+        public ApiKeyHandler(IApiAccessService accessService) : this(accessService, ResearchDefaultApiKey.Resolve) { }
+
+        public ApiKeyHandler(IApiAccessService accessService, Func<HttpRequestMessage, string> defaultKeyResolver) : this(accessService,defaultKeyResolver,ClientResearchSession.Verify) { }
+        public ApiKeyHandler(IApiAccessService accessService, Func<HttpRequestMessage, string> defaultKeyResolver, Func<HttpRequestMessage, string> clientSessionResolver) {
             this.accessService = accessService ?? throw new ArgumentNullException("accessService");
+            this.defaultKeyResolver = defaultKeyResolver ?? throw new ArgumentNullException("defaultKeyResolver");
+            this.clientSessionResolver=clientSessionResolver ?? throw new ArgumentNullException("clientSessionResolver");
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
@@ -29,20 +38,48 @@ namespace autodealer.dev.Models {
                 DemoApiAccess.IsDemoRequest(request))
                 return await base.SendAsync(request, cancellationToken);
 
-            string bearerToken;
-            if (!DemoApiAccess.TryGetBearerToken(request, out bearerToken))
-                return Error(HttpStatusCode.Unauthorized, "missing_api_key", "Send your API key as Authorization: Bearer <key> or in the access_token query parameter.");
-
-            var parts = bearerToken.Split(new[] { '.' }, 2);
-            if (parts.Length != 2 || !parts[0].StartsWith("ad_", StringComparison.Ordinal))
-                return Error(HttpStatusCode.Unauthorized, "invalid_api_key", "The API key is invalid.");
+            string bearerToken=null, clientEmail=null;
+            var clientWorkspace=request.Headers.Contains(ClientResearchSession.WorkspaceHeader);
+            if(clientWorkspace) {
+                try { clientEmail=clientSessionResolver(request); }
+                catch(HttpAntiForgeryException) { return Error(HttpStatusCode.Forbidden,"invalid_request_verification","The request could not be verified. Refresh the page and try again."); }
+                if(clientEmail==null) return Error(HttpStatusCode.Unauthorized,"client_sign_in_required","Sign in to your client account to use this tool.");
+            } else if (!DemoApiAccess.TryGetBearerToken(request, out bearerToken)) {
+                if (!ResearchDefaultApiKey.HasExplicitCredentials(request)) {
+                    try { bearerToken = defaultKeyResolver(request); }
+                    catch (HttpAntiForgeryException) {
+                        return Error(HttpStatusCode.Forbidden, "invalid_request_verification", "The request could not be verified. Refresh the page and try again.");
+                    }
+                }
+                if (string.IsNullOrWhiteSpace(bearerToken))
+                    return Error(HttpStatusCode.Unauthorized, "missing_api_key", "Send your API key as Authorization: Bearer <key> or in the access_token query parameter.");
+            }
 
             ApiAccessResult access;
-            try { access = Authenticate(parts[0], Hash(parts[1]), RequiredScope(request), request); }
+            try {
+                if(clientWorkspace) {
+                    var clientAccess=accessService as IClientResearchAccessService;
+                    if(clientAccess==null) return Error(HttpStatusCode.ServiceUnavailable,"security_unavailable","Account research is temporarily unavailable.");
+                    var accountRequest = AccessRequest(null, null, RequiredScope(request), request);
+                    if (request.Headers.TryGetValues(ClientResearchSession.KeySelectionHeader, out var values)) {
+                        var selections = values.Take(2).ToArray();
+                        if (selections.Length != 1 || !long.TryParse(selections[0], NumberStyles.None, CultureInfo.InvariantCulture, out var selectedId) || selectedId <= 0)
+                            return Error(HttpStatusCode.BadRequest, "invalid_key_selection", "Select an API key from your account.");
+                        accountRequest.ClientApiKeyId = selectedId;
+                    }
+                    access = clientAccess.BeginClientResearch(accountRequest, clientEmail);
+                } else {
+                    var parts=bearerToken.Split(new[] { '.' },2);
+                    if(parts.Length!=2 || !parts[0].StartsWith("ad_",StringComparison.Ordinal)) return Error(HttpStatusCode.Unauthorized,"invalid_api_key","The API key is invalid.");
+                    access=accessService.BeginRequest(AccessRequest(parts[0],Hash(parts[1]),RequiredScope(request),request));
+                }
+            }
             catch (Exception ex) when (ex is SqlException || ex is InvalidOperationException) {
                 return Error(HttpStatusCode.ServiceUnavailable, "security_unavailable", "API authentication is temporarily unavailable.");
             }
             if (access.ResultCode != "ok") {
+                if (access.ResultCode == "client_key_unavailable") return Error(HttpStatusCode.Forbidden, access.ResultCode, "The selected API key is unavailable. Refresh the page and choose an active key.");
+                if (access.ResultCode == "client_research_denied") return Error(HttpStatusCode.Forbidden,access.ResultCode,"This account needs an active VIN API key and subscription to use research tools.");
                 if (access.ResultCode == "subscription_expired") return Error(HttpStatusCode.Forbidden, access.ResultCode, "Your subscription has expired. Update its period end date or renew it before using the API.");
                 if (access.ResultCode == "subscription_inactive") return Error(HttpStatusCode.Forbidden, access.ResultCode, "Your subscription is inactive. Activate it before using the API.");
                 if (access.ResultCode == "quota_exceeded") return Error((HttpStatusCode)429, access.ResultCode, "The monthly API quota has been reached.");
@@ -64,13 +101,13 @@ namespace autodealer.dev.Models {
             }
             Complete(access.RequestId, (int)response.StatusCode, timer.ElapsedMilliseconds);
             response.Headers.TryAddWithoutValidation("X-Request-Id", access.RequestId.ToString());
-            response.Headers.TryAddWithoutValidation("X-RateLimit-Limit", access.MonthlyQuota.ToString());
-            response.Headers.TryAddWithoutValidation("X-RateLimit-Remaining", Math.Max(0, access.MonthlyQuota - access.MonthlyUsage).ToString());
+            response.Headers.TryAddWithoutValidation("X-RateLimit-Limit", access.IsQuotaUnlimited ? "unlimited" : access.MonthlyQuota.ToString());
+            response.Headers.TryAddWithoutValidation("X-RateLimit-Remaining", access.IsQuotaUnlimited ? "unlimited" : Math.Max(0, access.MonthlyQuota - access.MonthlyUsage).ToString());
             return response;
         }
 
-        private ApiAccessResult Authenticate(string keyId, byte[] secretHash, string requiredScope, HttpRequestMessage request) {
-            return accessService.BeginRequest(new ApiAccessRequest {
+        private static ApiAccessRequest AccessRequest(string keyId, byte[] secretHash, string requiredScope, HttpRequestMessage request) {
+            return new ApiAccessRequest {
                 KeyId = keyId,
                 SecretHash = secretHash,
                 RequiredScope = requiredScope,
@@ -78,7 +115,7 @@ namespace autodealer.dev.Models {
                 HttpMethod = request.Method.Method,
                 IpAddress = ClientIp(),
                 UserAgent = string.Join(" ", request.Headers.UserAgent.Select(x => x.ToString())).SubstringSafe(300)
-            });
+            };
         }
 
         private void Complete(Guid requestId, int statusCode, long durationMs) {

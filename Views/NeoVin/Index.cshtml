@@ -1,0 +1,58 @@
+@{
+    ViewBag.Title = "MarketCheck VIN decoder";
+    ViewBag.Description = "Decode vehicle specifications with MarketCheck NeoVIN.";
+    ViewBag.BodyClass = "price-research-page neovin-page";
+    var defaultApiKeyEnabled = (bool?)ViewBag.ResearchDefaultApiKeyEnabled ?? false;
+    var clientResearch = (bool?)ViewBag.ClientResearch ?? false;
+    var clientKeys = (System.Collections.Generic.IList<autodealer.dev.Services.ClientResearchKeyOption>)ViewBag.ClientResearchKeys ?? new autodealer.dev.Services.ClientResearchKeyOption[0];
+    var styleVersion = System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Content/priceResearch.css")).Ticks;
+    var scriptVersion = System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Scripts/neoVin.js")).Ticks;
+    var credentialsVersion = System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Scripts/researchCredentials.js")).Ticks;
+}
+@section head {
+    <link rel="stylesheet" href="@(Url.Content("~/Content/priceResearch.css") + "?v=" + styleVersion)" />
+}
+<section class="site-hero page-hero dashboard-hero admin-hero">
+    <div class="shell site-hero-shell">
+        <div class="hero-copy">
+            <span class="eyebrow">VEHICLE INTELLIGENCE</span>
+            <h1 id="nv-heading">VIN decoder.</h1>
+            <p>Decode complete vehicle specifications with MarketCheck NeoVIN.</p>
+        </div>
+    </div>
+</section>
+<section class="pr-workspace shell" id="neo-vin" aria-labelledby="nv-heading" data-api-url="@Url.Content("~/api/service/neovin")" data-default-api-key-enabled="@(defaultApiKeyEnabled ? "true" : "false")" data-client-research="@(clientResearch ? "true" : "false")">
+    @if (clientResearch) { <a class="pr-back-link" href="@Url.Action("Dashboard", "Account")">&larr; My account</a> }
+    <div class="pr-layout">
+        <aside class="pr-input-panel">
+            <form id="neo-vin-form" class="pr-form" autocomplete="off" data-research-credentials="true" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-protonpass-ignore="true" data-form-type="other">
+                @Html.AntiForgeryToken()
+                <label for="nv-vin">VIN NUMBER</label>
+                <input id="nv-vin" name="NeoVinVehicleVin" type="text" maxlength="17" minlength="17" pattern="[A-HJ-NPR-Z0-9]{17}" placeholder="Enter a 17-character VIN" autocomplete="off" spellcheck="false" required readonly data-research-credential="vin" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-protonpass-ignore="true" data-form-type="other" />
+                @if (clientResearch) {
+                    @Html.Partial("_ClientResearchKey", clientKeys)
+                } else {
+                <div class="pr-access">
+                    <label for="nv-api-key">AUTODEALER API KEY@(defaultApiKeyEnabled ? " (OPTIONAL OVERRIDE)" : "")</label>
+                    <input id="nv-api-key" name="NeoVinAccessToken" type="password" placeholder="@(defaultApiKeyEnabled ? "Use configured account key" : "Your AutoDealer.dev account key")" autocomplete="new-password" spellcheck="false" required="@(!defaultApiKeyEnabled)" readonly data-research-credential="api-key" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-protonpass-ignore="true" data-form-type="other" />
+                </div>
+                }
+                <button type="submit" id="nv-submit" class="pr-submit" disabled="@(clientResearch && clientKeys.Count == 0)"><span>Decode VIN</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+            </form>
+        </aside>
+        <section class="pr-results-panel" aria-label="VIN decoding results" aria-busy="false">
+            <div class="pr-results-toolbar"><div><h2 id="nv-vehicle-title">Vehicle details</h2></div></div>
+            <div id="nv-status" class="pr-status" role="status" aria-live="polite"><span class="pr-status-dot" aria-hidden="true"></span><span id="nv-status-text">Ready to decode</span></div>
+            <div id="nv-progress" class="pr-progress" hidden aria-hidden="true"><i></i></div>
+            <div id="nv-error" class="pr-error" role="alert" hidden></div>
+            <div id="nv-empty" class="pr-empty"><div class="pr-empty-icon" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><rect x="12" y="16" width="56" height="48" rx="7" stroke="currentColor" stroke-width="1.5" /><path d="M23 30h34M23 40h12m8 0h14M23 50h20" stroke="currentColor" stroke-width="3" stroke-linecap="round" /></svg></div><span class="pr-eyebrow">FROM VIN TO VEHICLE DETAILS</span><h3>Every specification, organized.</h3><p>Decode a VIN to explore its identity, equipment, dimensions and technical details. Expand a section to see the complete specification details.</p><div class="pr-report-features"><span>Complete specifications</span><span>Expandable sections</span></div></div>
+            <div id="nv-results" hidden>
+                <section class="nv-specifications" aria-labelledby="nv-spec-heading"><header><h3 id="nv-spec-heading">Decoded specifications</h3><p>Expand a section to view its details. All returned specification fields are included.</p></header><div id="nv-spec-sections" class="nv-spec-sections"></div></section>
+            </div>
+        </section>
+    </div>
+</section>
+@section scripts {
+    <script src="@(Url.Content("~/Scripts/researchCredentials.js") + "?v=" + credentialsVersion)"></script>
+    <script src="@(Url.Content("~/Scripts/neoVin.js") + "?v=" + scriptVersion)"></script>
+}

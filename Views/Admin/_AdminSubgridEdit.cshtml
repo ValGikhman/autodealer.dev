@@ -82,6 +82,14 @@
                 <select id="edit-api-key-scope" name="Scopes" required>
                 </select>
             </div>
+            <div class="dashboard-edit-field">
+                <label for="edit-api-key-unlimited">Monthly request quota</label>
+                <select id="edit-api-key-unlimited" name="IsQuotaUnlimited">
+                    <option value="false">Use plan quota</option>
+                    <option value="true">Unlimited</option>
+                </select>
+                <small>Overrides this key's AutoDealer.dev quota. Usage remains tracked.</small>
+            </div>
             <div class="dashboard-edit-field dashboard-edit-field-wide">
                 <label for="edit-api-key-subscription">Subscription</label>
                 <select id="edit-api-key-subscription" name="SubscriptionId" required>

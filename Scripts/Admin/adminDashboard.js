@@ -553,6 +553,7 @@
                 } else if (isApiKey) {
                     document.getElementById('edit-api-key-prefix').value = response.FullApiKey || 'Secret unavailable — issue a new API key';
                     document.getElementById('edit-api-key-name').value = response.Name || '';
+                    document.getElementById('edit-api-key-unlimited').value = response.IsQuotaUnlimited ? 'true' : 'false';
                     document.getElementById('edit-api-key-expires').value = response.ExpiresUtc || '';
                     setSelectOptions(document.getElementById('edit-api-key-status'), response.StatusOptions, response.Status);
                     setSelectOptions(document.getElementById('edit-api-key-scope'), response.ScopeOptions, response.Scopes);

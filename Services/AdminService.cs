@@ -194,6 +194,7 @@ namespace autodealer.dev.Services {
                         ApiKeyId = x.ApiKeyId,
                         SubscriptionId = x.SubscriptionId,
                         TotalTokens = x.Subscription.Plan.MonthlyRequestQuota,
+                        IsQuotaUnlimited = x.IsQuotaUnlimited,
                         Name = x.Name,
                         KeyPrefix = x.KeyPrefix,
                         FullApiKey = x.ProtectedCredential,
@@ -552,6 +553,7 @@ namespace autodealer.dev.Services {
                 var now = DateTime.UtcNow;
                 apiKey.Name = name;
                 apiKey.Scopes = scopes;
+                apiKey.IsQuotaUnlimited = model.IsQuotaUnlimited;
                 apiKey.Status = status;
                 apiKey.SubscriptionId = model.SubscriptionId;
                 apiKey.ExpiresUtc = model.ExpiresUtc.HasValue
@@ -673,6 +675,7 @@ namespace autodealer.dev.Services {
                 ClientId = apiKey.ClientId,
                 Name = apiKey.Name,
                 Scopes = apiKey.Scopes,
+                IsQuotaUnlimited = apiKey.IsQuotaUnlimited,
                 Status = apiKey.Status,
                 SubscriptionId = apiKey.SubscriptionId,
                 ExpiresUtc = apiKey.ExpiresUtc,

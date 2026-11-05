@@ -1,0 +1,142 @@
+@{
+    ViewBag.Title = "Price research";
+    ViewBag.Description = "Research a vehicle's asking-price market using mileage, location, and comparable listings.";
+    ViewBag.BodyClass = "price-research-page";
+    var defaultApiKeyEnabled = (bool?)ViewBag.ResearchDefaultApiKeyEnabled ?? false;
+    var clientResearch = (bool?)ViewBag.ClientResearch ?? false;
+    var clientKeys = (System.Collections.Generic.IList<autodealer.dev.Services.ClientResearchKeyOption>)ViewBag.ClientResearchKeys ?? new autodealer.dev.Services.ClientResearchKeyOption[0];
+    var priceCssVersion = System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Content/priceResearch.css")).Ticks;
+    var gridCssVersion = System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Content/pepTools/pepGrid.css")).Ticks;
+    var gridJsVersion = System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Scripts/pepTools/pepGrid.js")).Ticks;
+    var priceJsVersion = System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Scripts/priceResearch.js")).Ticks;
+    var auctionJsVersion = System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Scripts/auctionBid.js")).Ticks;
+    var demandJsVersion = System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Scripts/researchDemand.js")).Ticks;
+    var credentialsVersion = System.IO.File.GetLastWriteTimeUtc(Server.MapPath("~/Scripts/researchCredentials.js")).Ticks;
+}
+@section head {
+    <link rel="stylesheet" href="@(Url.Content("~/Content/pepTools/pepGrid.css") + "?v=" + gridCssVersion)" />
+    <link rel="stylesheet" href="@(Url.Content("~/Content/priceResearch.css") + "?v=" + priceCssVersion)" />
+}
+
+<section class="site-hero page-hero dashboard-hero admin-hero">
+    <div class="shell site-hero-shell">
+        <div class="hero-copy">
+            <span class="eyebrow">VEHICLE INTELLIGENCE</span>
+            <h1 id="price-research-heading">Price research.</h1>
+            <p>A clearer view of your vehicle's market.</p>
+        </div>
+    </div>
+</section>
+
+<section class="pr-workspace shell" id="price-research" aria-labelledby="price-research-heading" data-api-url="@Url.Content("~/api/service/price-research")" data-default-api-key-enabled="@(defaultApiKeyEnabled ? "true" : "false")" data-client-research="@(clientResearch ? "true" : "false")">
+    @if (clientResearch) { <a class="pr-back-link" href="@Url.Action("Dashboard", "Account")">&larr; My account</a> }
+    <div class="pr-layout">
+        <aside class="pr-input-panel">
+            <form id="price-research-form" class="pr-form" autocomplete="off" data-research-credentials="true" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-protonpass-ignore="true" data-form-type="other">
+                @Html.AntiForgeryToken()
+                <label for="pr-vin">VIN NUMBER</label>
+                <input id="pr-vin" name="PriceResearchVehicleVin" type="text" maxlength="17" minlength="17" pattern="[A-HJ-NPR-Z0-9]{17}" placeholder="Enter a 17-character VIN" autocomplete="off" spellcheck="false" required readonly data-research-credential="vin" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-protonpass-ignore="true" data-form-type="other" />
+
+                <label for="pr-miles">ODOMETER</label>
+                <div class="pr-unit-input"><input id="pr-miles" name="Miles" type="number" min="0" max="2000000" step="1" placeholder="e.g. 73929" inputmode="numeric" required /><span aria-hidden="true">miles</span></div>
+
+                <div class="pr-field-pair">
+                    <div><label for="pr-zip">ZIP CODE</label><input id="pr-zip" name="Zip" type="text" value="45040" pattern="[0-9]{5}" maxlength="5" inputmode="numeric" autocomplete="postal-code" required /></div>
+                    <div><label for="pr-radius">RADIUS</label><div class="pr-unit-input"><input id="pr-radius" name="Radius" type="number" value="100" min="1" max="500" step="1" inputmode="numeric" required /><span aria-hidden="true">mi</span></div></div>
+                </div>
+
+                @if (clientResearch) {
+                    @Html.Partial("_ClientResearchKey", clientKeys)
+                } else {
+                <div class="pr-access">
+                    <label for="pr-api-key">AUTODEALER API KEY@(defaultApiKeyEnabled ? " (OPTIONAL OVERRIDE)" : "")</label>
+                    <input id="pr-api-key" name="PriceResearchAccessToken" type="password" placeholder="@(defaultApiKeyEnabled ? "Use configured account key" : "Your AutoDealer.dev account key")" autocomplete="new-password" spellcheck="false" required="@(!defaultApiKeyEnabled)" readonly data-research-credential="api-key" data-1p-ignore="true" data-lpignore="true" data-bwignore="true" data-protonpass-ignore="true" data-form-type="other" />
+                </div>
+                }
+                <button type="submit" id="pr-submit" class="pr-submit" disabled="@(clientResearch && clientKeys.Count == 0)"><span>Research price</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></button>
+            </form>
+        </aside>
+
+        <section class="pr-results-panel" aria-label="Price research results" aria-busy="false">
+            <div id="pr-progress" class="pr-progress" role="progressbar" aria-label="Researching vehicle prices" hidden><i></i></div>
+            <div id="pr-error" class="pr-error" role="alert" hidden></div>
+            <div id="pr-empty" class="pr-empty">
+                <div class="pr-empty-icon" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><rect x="15" y="12" width="50" height="56" rx="8" stroke="currentColor" stroke-width="1.5" /><path d="M26 53V42m14 11V32m14 21V23M25 59h31" stroke="currentColor" stroke-width="3" stroke-linecap="round" /><circle cx="58" cy="17" r="9" fill="currentColor" opacity=".12" /></svg></div>
+                <span class="pr-eyebrow">FROM VIN TO MARKET CONTEXT</span>
+                <h3>Know where your vehicle stands.</h3>
+                <p>Enter a VIN and mileage to see its predicted price, comparable vehicles, asking prices, and dealer listings.</p>
+                <div class="pr-report-features"><span>Price prediction</span><span>Comparable listings</span></div>
+            </div>
+            <div id="pr-results" class="research-results" hidden>
+                <div class="research-summary"><h3 id="pr-vehicle-title">Vehicle price research</h3><p id="pr-request-summary"></p></div>
+                <div class="research-metrics" aria-label="Price research summary">
+                    <div class="research-metric"><span>MarketCheck estimate</span><strong id="pr-prediction">—</strong></div>
+                    <div class="research-metric"><span>Current within radius</span><strong id="pr-current-count">0</strong></div>
+                    <div class="research-metric"><span>Current asking-price mean</span><strong id="pr-local-mean">—</strong></div>
+                    <div class="research-metric"><span>Recent within radius</span><strong id="pr-recent-count">0</strong></div>
+                </div>
+                <section id="pr-auction" class="pr-auction" aria-labelledby="pr-auction-heading" data-bid-url="@Url.RouteUrl(clientResearch ? "ClientPriceResearchBid" : "PriceResearchBid")" aria-busy="false" hidden>
+                    <header class="pr-auction-heading"><div><span class="pr-eyebrow">AUCTION BUDGET</span><h3 id="pr-auction-heading">Maximum hammer bid</h3></div><strong id="pr-bid-maximum">—</strong></header>
+                    <form id="pr-auction-form" class="pr-auction-form" autocomplete="off">
+                        @Html.AntiForgeryToken()
+                        <div class="pr-bid-inputs">
+                            <div><label for="pr-bid-resale">Expected resale price</label><div class="pr-bid-money"><span aria-hidden="true">$</span><input id="pr-bid-resale" name="ExpectedSellingPriceUsd" type="number" min="0.01" max="2000000" step="0.01" inputmode="decimal" required aria-describedby="pr-bid-assumption" /></div></div>
+                            <div><label for="pr-bid-current">Current hammer bid <small>(optional)</small></label><div class="pr-bid-money"><span aria-hidden="true">$</span><input id="pr-bid-current" name="CurrentHammerBidUsd" type="number" min="0" max="2000000" step="0.01" inputmode="decimal" placeholder="Enter the live auction bid" /></div></div>
+                        </div>
+                    </form>
+                    <p id="pr-bid-assumption" class="pr-bid-assumption">Resale starts from the MarketCheck estimate. Edit this assumption to match your expected selling price.</p>
+                    <p id="pr-bid-status" class="pr-bid-status" role="status" aria-live="polite"></p>
+                    <p id="pr-bid-error" class="pr-bid-error" role="alert" hidden></p>
+                    <div id="pr-bid-costs" class="pr-bid-costs" hidden><span>Auction fee <strong id="pr-bid-fee">—</strong></span><span>Transport <strong id="pr-bid-transport">—</strong></span><span>Minimum profit <strong id="pr-bid-target">—</strong></span></div>
+                    <div id="pr-bid-at-maximum" class="pr-bid-metrics" hidden>
+                        <div><span>Total investment at maximum bid</span><strong id="pr-bid-max-investment">—</strong></div>
+                        <div><span>Profit at maximum bid</span><strong id="pr-bid-max-profit">—</strong></div>
+                        <div><span>Break-even hammer bid</span><strong id="pr-bid-break-even">—</strong></div>
+                    </div>
+                    <div id="pr-bid-at-current" class="pr-bid-current" hidden>
+                        <h4>At your current bid</h4><p id="pr-bid-current-verdict"></p>
+                        <div class="pr-bid-metrics"><div><span>Total investment</span><strong id="pr-bid-current-investment">—</strong></div><div><span>Estimated profit</span><strong id="pr-bid-current-profit">—</strong></div></div>
+                    </div>
+                    <p id="pr-bid-scope" class="pr-bid-scope">Auction fee and transport only. Profit is before other expenses.</p>
+                </section>
+                <section id="pr-demand" class="pr-demand" aria-labelledby="pr-demand-heading">
+                    <header><h3 id="pr-demand-heading">Local market demand</h3><small id="pr-demand-time"></small></header>
+                    <div class="pr-bid-metrics">
+                        <div><span>Market days supply</span><strong id="pr-demand-days">—</strong></div>
+                        <div><span>Similar vehicles available</span><strong id="pr-demand-active">—</strong></div>
+                        <div><span>Sales activity · past 45 days</span><strong id="pr-demand-sales">—</strong></div>
+                    </div>
+                    <p id="pr-demand-message" role="status"></p>
+                    <p class="pr-demand-note">Exact-build matches in your selected ZIP and radius. Sales activity is inferred from listings leaving the market. Market days supply describes the area's inventory, not how many days your particular car will take to sell.</p>
+                </section>
+                <p id="pr-radius-note" class="research-grid-note"></p>
+                <section class="pr-grid-section" aria-labelledby="pr-comparables-heading">
+                    <header>
+                        <div><h3 id="pr-comparables-heading">Comparables within radius</h3><small id="pr-comparables-caption" aria-live="polite"></small></div>
+                        <fieldset id="pr-comparables-switch" class="pr-comparables-switch">
+                            <legend>Show</legend>
+                            <div class="pr-comparables-options">
+                                <label><input id="pr-comparables-current" type="radio" name="ComparablePeriod" value="current" checked /><span>Current</span></label>
+                                <label><input id="pr-comparables-recent" type="radio" name="ComparablePeriod" value="recent" /><span>Recent</span></label>
+                            </div>
+                        </fieldset>
+                    </header>
+                    <p id="pr-comparables-description" class="pr-comparables-description" aria-live="polite"></p>
+                    <div id="pr-comparables-grid" class="research-grid" aria-label="Current comparable vehicle listings"></div>
+                </section>
+            </div>
+        </section>
+    </div>
+</section>
+
+@section scripts {
+    <script src="@(Url.Content("~/Scripts/researchCredentials.js") + "?v=" + credentialsVersion)"></script>
+    <script src="@(Url.Content("~/Scripts/pepTools/pepGrid.js") + "?v=" + gridJsVersion)"></script>
+    <script src="@(Url.Content("~/Scripts/auctionBid.js") + "?v=" + auctionJsVersion)"></script>
+    <script src="@(Url.Content("~/Scripts/researchDemand.js") + "?v=" + demandJsVersion)"></script>
+    <script type="text/x-pepgrid-template" id="pr-price-template"><span class="pr-numeric-value">{{PriceDisplay}}</span></script>
+    <script type="text/x-pepgrid-template" id="pr-mileage-template"><span class="pr-numeric-value">{{MileageDisplay}}</span></script>
+    <script type="text/x-pepgrid-template" id="pr-distance-template"><span class="pr-numeric-value">{{DistanceDisplay}}</span></script>
+    <script type="text/x-pepgrid-template" id="pr-dom-template"><span class="pr-numeric-value">{{DaysDisplay}}</span></script>
+    <script src="@(Url.Content("~/Scripts/priceResearch.js") + "?v=" + priceJsVersion)"></script>
+}

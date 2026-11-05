@@ -6,8 +6,13 @@ namespace autodealer.dev.Services {
         void CompleteRequest(Guid requestId, int statusCode, long durationMs);
     }
 
+    public interface IClientResearchAccessService {
+        ApiAccessResult BeginClientResearch(ApiAccessRequest request, string verifiedEmail);
+    }
+
     public sealed class ApiAccessRequest {
         public string KeyId { get; set; }
+        public long? ClientApiKeyId { get; set; }
         public byte[] SecretHash { get; set; }
         public string RequiredScope { get; set; }
         public string Endpoint { get; set; }
@@ -16,12 +21,19 @@ namespace autodealer.dev.Services {
         public string UserAgent { get; set; }
     }
 
+    public sealed class ClientResearchKeyOption {
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public string Prefix { get; set; }
+    }
+
     public sealed class ApiAccessResult {
         public string ResultCode { get; set; }
         public Guid RequestId { get; set; }
         public string ClientNumber { get; set; }
         public string Scopes { get; set; }
         public int MonthlyQuota { get; set; }
+        public bool IsQuotaUnlimited { get; set; }
         public int MonthlyUsage { get; set; }
     }
 }

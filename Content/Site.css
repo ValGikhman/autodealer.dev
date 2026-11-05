@@ -3415,6 +3415,10 @@ body:not(.home-page):not(.account-page) main {
   list-style: none;
 }
 
+.account-research { margin:32px 0; }
+.dashboard-section .account-research-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.account-research-grid article .button { align-self:flex-start; margin-top:16px; }
+@media(max-width:600px) { .dashboard-section .account-research-grid { grid-template-columns:minmax(0,1fr); } }
 .dashboard-page main {
   background: #151719;
 }

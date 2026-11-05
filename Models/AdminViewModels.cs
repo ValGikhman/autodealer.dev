@@ -76,6 +76,7 @@ namespace autodealer.dev.Models {
         public long ApiKeyId { get; set; }
         public long SubscriptionId { get; set; }
         public int TotalTokens { get; set; }
+        public bool IsQuotaUnlimited { get; set; }
         public long UsedTokens { get; set; }
         public long RemainingTokens { get { return Math.Max(0L, TotalTokens - UsedTokens); } }
         public string UsageMonth { get; set; }
@@ -181,6 +182,7 @@ namespace autodealer.dev.Models {
     public sealed class AdminApiKeyEditViewModel {
         public long ApiKeyId { get; set; }
         public long ClientId { get; set; }
+        public bool IsQuotaUnlimited { get; set; }
 
         [Required, StringLength(80)]
         public string Name { get; set; }

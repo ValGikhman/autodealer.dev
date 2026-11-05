@@ -1,10 +1,11 @@
 using autodealer.dev.Data;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
 namespace autodealer.dev.Services {
-    public sealed class ApiAccessService : IApiAccessService {
+    public sealed class ApiAccessService : IApiAccessService, IClientResearchAccessService {
         private readonly string connectionString;
 
         public ApiAccessService() : this(AutoDealerConnectionString.Resolve()) { }
@@ -14,6 +15,41 @@ namespace autodealer.dev.Services {
         }
 
         public ApiAccessResult BeginRequest(ApiAccessRequest request) {
+            return BeginRequest(request,null);
+        }
+
+        public ApiAccessResult BeginClientResearch(ApiAccessRequest request, string verifiedEmail) {
+            if(string.IsNullOrWhiteSpace(verifiedEmail)) return Result("client_research_denied");
+            return BeginRequest(request,verifiedEmail.Trim().ToLowerInvariant());
+        }
+
+        public IList<ClientResearchKeyOption> GetClientResearchKeys(string verifiedEmail) {
+            if (string.IsNullOrWhiteSpace(verifiedEmail)) return new List<ClientResearchKeyOption>();
+            EnsureConfigured();
+            var email = verifiedEmail.Trim().ToLowerInvariant();
+            var now = DateTime.UtcNow;
+            using (var context = new AutoDealerDataContext(connectionString)) {
+                return ClientKeys(context, email, now)
+                    .Where(key => key.Subscription.CurrentPeriodEndUtc > now &&
+                        (key.Subscription.Status == "active" || key.Subscription.Status == "trialing"))
+                    .Select(key => new { key.ApiKeyId, key.Name, key.KeyPrefix, key.Scopes })
+                    .AsEnumerable()
+                    .Where(key => HasScope(key.Scopes, "vin:read"))
+                    .Select(key => new ClientResearchKeyOption { Id = key.ApiKeyId, Name = key.Name, Prefix = key.KeyPrefix })
+                    .ToList();
+            }
+        }
+
+        private static IQueryable<ApiKey> ClientKeys(AutoDealerDataContext context, string email, DateTime now) {
+            return context.ApiKeys.Where(key => key.Client.Email == email && key.Client.Status == "active"
+                && key.Status == "active" && (!key.ExpiresUtc.HasValue || key.ExpiresUtc.Value > now)
+                && key.Subscription.ClientId == key.ClientId)
+                .OrderByDescending(key => key.Name == "Primary key")
+                .ThenByDescending(key => key.CreatedUtc)
+                .ThenByDescending(key => key.ApiKeyId);
+        }
+
+        private ApiAccessResult BeginRequest(ApiAccessRequest request, string verifiedEmail) {
             if (request == null) throw new ArgumentNullException("request");
             EnsureConfigured();
 
@@ -23,10 +59,20 @@ namespace autodealer.dev.Services {
                     context.Transaction = transaction;
                     try {
                         var now = DateTime.UtcNow;
-                        var apiKey = context.ApiKeys.SingleOrDefault(x => x.KeyId == request.KeyId);
-                        if (!IsActive(apiKey, request.SecretHash, now)) {
+                        ApiKey apiKey;
+                        if(verifiedEmail==null) apiKey=context.ApiKeys.SingleOrDefault(x=>x.KeyId==request.KeyId);
+                        else if (request.ClientApiKeyId.HasValue) {
+                            apiKey = ClientKeys(context, verifiedEmail, now)
+                                .SingleOrDefault(key => key.ApiKeyId == request.ClientApiKeyId.Value);
+                        } else {
+                            var keys = ClientKeys(context, verifiedEmail, now).ToList();
+                            apiKey=keys.FirstOrDefault(x=>HasScope(x.Scopes,request.RequiredScope) && (x.Subscription.Status=="active" || x.Subscription.Status=="trialing") && x.Subscription.CurrentPeriodEndUtc>now)
+                                ?? keys.FirstOrDefault(x=>HasScope(x.Scopes,request.RequiredScope));
+                        }
+                        if (!IsActiveKey(apiKey,now) || (verifiedEmail==null && !FixedTimeEquals(apiKey.SecretHash.ToArray(),request.SecretHash))) {
                             transaction.Commit();
-                            return Result("invalid_api_key");
+                            if (verifiedEmail == null) return Result("invalid_api_key");
+                            return Result(request.ClientApiKeyId.HasValue ? "client_key_unavailable" : "client_research_denied");
                         }
 
                         if (apiKey.Subscription.Status != "trialing" && apiKey.Subscription.Status != "active") {
@@ -51,7 +97,7 @@ namespace autodealer.dev.Services {
                             .Select(x => (int?)x.RequestCount)
                             .Sum() ?? 0;
                         var quota = apiKey.Subscription.Plan.MonthlyRequestQuota;
-                        if (monthlyUsage >= quota) {
+                        if (!apiKey.IsQuotaUnlimited && monthlyUsage >= quota) {
                             transaction.Commit();
                             return Result("quota_exceeded", apiKey, monthlyUsage);
                         }
@@ -95,6 +141,7 @@ namespace autodealer.dev.Services {
                             ClientNumber = apiKey.Client.ClientNumber,
                             Scopes = apiKey.Scopes,
                             MonthlyQuota = quota,
+                            IsQuotaUnlimited = apiKey.IsQuotaUnlimited,
                             MonthlyUsage = monthlyUsage + 1
                         };
                     }
@@ -149,9 +196,8 @@ namespace autodealer.dev.Services {
                 throw new InvalidOperationException("The AutoDealer.dev database connection is not configured.");
         }
 
-        private static bool IsActive(ApiKey apiKey, byte[] secretHash, DateTime now) {
+        private static bool IsActiveKey(ApiKey apiKey, DateTime now) {
             return apiKey != null &&
-                   FixedTimeEquals(apiKey.SecretHash.ToArray(), secretHash) &&
                    apiKey.Status == "active" &&
                    (!apiKey.ExpiresUtc.HasValue || apiKey.ExpiresUtc.Value > now) &&
                    apiKey.Client.Status == "active";
@@ -176,6 +222,7 @@ namespace autodealer.dev.Services {
                 ClientNumber = apiKey == null ? null : apiKey.Client.ClientNumber,
                 Scopes = apiKey == null ? null : apiKey.Scopes,
                 MonthlyQuota = apiKey == null ? 0 : apiKey.Subscription.Plan.MonthlyRequestQuota,
+                IsQuotaUnlimited = apiKey != null && apiKey.IsQuotaUnlimited,
                 MonthlyUsage = usage
             };
         }
