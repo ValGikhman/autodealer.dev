@@ -6,6 +6,19 @@ using System.Net;
 using System.Text.RegularExpressions;
 
 namespace autodealer.dev.Models {
+    public sealed class PriceResearchReportRequest {
+        [Required, RegularExpression("^[A-HJ-NPR-Z0-9]{17}$")]
+        public string Vin { get; set; }
+        [Required, Range(0, 2000000)]
+        public int? Miles { get; set; }
+        [Newtonsoft.Json.JsonProperty(Required = Newtonsoft.Json.Required.DisallowNull)]
+        [RegularExpression("^[0-9]{5}$")]
+        public string Zip { get; set; }
+        [Newtonsoft.Json.JsonProperty(Required = Newtonsoft.Json.Required.DisallowNull)]
+        [Range(1, 500)]
+        public int? Radius { get; set; }
+    }
+
     public sealed class PriceResearchRequest {
         [Required, RegularExpression("^[A-HJ-NPR-Z0-9]{17}$", ErrorMessage="Enter a valid 17-character VIN (no I, O or Q).")]
         public string Vin { get; set; }
@@ -17,8 +30,13 @@ namespace autodealer.dev.Models {
         public int Radius { get; set; } = 100;
 
         public void NormalizeAndValidate() {
-            Vin=(Vin??string.Empty).Trim().ToUpperInvariant();Zip=(Zip??string.Empty).Trim();
+            Vin=(Vin??string.Empty).Trim().ToUpperInvariant();
             if(!Regex.IsMatch(Vin,"^[A-HJ-NPR-Z0-9]{17}$"))throw new ArgumentException("Enter a valid 17-character VIN (no I, O or Q).");
+            NormalizeSearchScope();
+        }
+
+        internal void NormalizeSearchScope() {
+            Zip = (Zip ?? string.Empty).Trim();
             if(!Miles.HasValue||Miles<0||Miles>2000000)throw new ArgumentException("Mileage must be between 0 and 2,000,000.");
             if(!Regex.IsMatch(Zip,"^[0-9]{5}$"))throw new ArgumentException("Enter a five-digit ZIP code.");
             if(Radius<1||Radius>500)throw new ArgumentException("Radius must be between 1 and 500 miles.");
