@@ -1,3 +1,8 @@
+@helper MetricHelp(string title, string explanation) {
+    <button type="button" class="btn btn-sm pr-metric-help" data-bs-toggle="popover" aria-label="About @title"
+            data-bs-title="@title" data-bs-content="@explanation">?</button>
+}
+
 @{
     ViewBag.Title = "Price research";
     ViewBag.Description = "Research a vehicle's asking-price market using mileage, location, and comparable listings.";
@@ -70,13 +75,13 @@
             <div id="pr-results" class="research-results" hidden>
                 <div class="research-summary"><h3 id="pr-vehicle-title">Vehicle price research</h3><p id="pr-request-summary"></p></div>
                 <div class="research-metrics" aria-label="Price research summary">
-                    <div class="research-metric"><span>MarketCheck estimate</span><strong id="pr-prediction">—</strong></div>
-                    <div class="research-metric"><span>Current within radius</span><strong id="pr-current-count">0</strong></div>
-                    <div class="research-metric"><span>Current asking-price mean</span><strong id="pr-local-mean">—</strong></div>
-                    <div class="research-metric"><span>Recent within radius</span><strong id="pr-recent-count">0</strong></div>
+                    <div class="research-metric"><span>MarketCheck estimate @MetricHelp("MarketCheck estimate", "Suggested retail value for this VIN using the entered mileage, ZIP code, and independent dealer setting. The estimate comes from MarketCheck’s pricing model.")</span><strong id="pr-prediction">—</strong></div>
+                    <div class="research-metric"><span>Current within radius @MetricHelp("Current within radius", "Count of active pricing comparables within the selected radius. It excludes the appraised VIN and listings with unknown distances. Select Current in the grid to see the listings.")</span><strong id="pr-current-count">0</strong></div>
+                    <div class="research-metric"><span>Current asking-price mean @MetricHelp("Current asking-price mean", "Average advertised price of priced Current comparables within the selected radius. It excludes the appraised VIN and makes no adjustment for mileage or condition.")</span><strong id="pr-local-mean">—</strong></div>
+                    <div class="research-metric"><span>Recent within radius @MetricHelp("Recent within radius", "Count of recent pricing comparables within the selected radius. It excludes the appraised VIN and listings with unknown distances. Select Recent in the grid to see earlier advertised prices. An earlier listing does not confirm a sale.")</span><strong id="pr-recent-count">0</strong></div>
                 </div>
                 <section id="pr-auction" class="pr-auction" aria-labelledby="pr-auction-heading" data-bid-url="@Url.RouteUrl(clientResearch ? "ClientPriceResearchBid" : "PriceResearchBid")" aria-busy="false" hidden>
-                    <header class="pr-auction-heading"><div><span class="pr-eyebrow">AUCTION BUDGET</span><h3 id="pr-auction-heading">Maximum hammer bid</h3></div><strong id="pr-bid-maximum">—</strong></header>
+                    <header class="pr-auction-heading"><div><span class="pr-eyebrow">AUCTION BUDGET</span><h3 id="pr-auction-heading">Maximum hammer bid @MetricHelp("Maximum hammer bid", "Highest winning bid that meets your minimum profit target at the expected resale price after auction fees and transport. Price Research rounds down to the configured bid increment.")</h3></div><strong id="pr-bid-maximum">—</strong></header>
                     <form id="pr-auction-form" class="pr-auction-form" autocomplete="off">
                         @Html.AntiForgeryToken()
                         <div class="pr-bid-inputs">
@@ -87,24 +92,24 @@
                     <p id="pr-bid-assumption" class="pr-bid-assumption">Resale starts from the MarketCheck estimate. Edit this assumption to match your expected selling price.</p>
                     <p id="pr-bid-status" class="pr-bid-status" role="status" aria-live="polite"></p>
                     <p id="pr-bid-error" class="pr-bid-error" role="alert" hidden></p>
-                    <div id="pr-bid-costs" class="pr-bid-costs" hidden><span>Auction fee <strong id="pr-bid-fee">—</strong></span><span>Transport <strong id="pr-bid-transport">—</strong></span><span>Minimum profit <strong id="pr-bid-target">—</strong></span></div>
+                    <div id="pr-bid-costs" class="pr-bid-costs" hidden><span>Auction fee @MetricHelp("Auction fee", "Configured auction charge added to the winning bid when calculating investment and profit.") <strong id="pr-bid-fee">—</strong></span><span>Transport @MetricHelp("Transport", "Configured amount to move the vehicle from the auction. It is added to the winning bid and auction fee.") <strong id="pr-bid-transport">—</strong></span><span>Minimum profit @MetricHelp("Minimum profit", "Configured profit target used to set your maximum hammer bid after auction fees and transport.") <strong id="pr-bid-target">—</strong></span></div>
                     <div id="pr-bid-at-maximum" class="pr-bid-metrics" hidden>
-                        <div><span>Total investment at maximum bid</span><strong id="pr-bid-max-investment">—</strong></div>
-                        <div><span>Profit at maximum bid</span><strong id="pr-bid-max-profit">—</strong></div>
-                        <div><span>Break-even hammer bid</span><strong id="pr-bid-break-even">—</strong></div>
+                        <div><span>Total investment at maximum bid @MetricHelp("Total investment at maximum bid", "Maximum hammer bid plus the auction fee and transport. This is how much you would have invested at that bid before other expenses.")</span><strong id="pr-bid-max-investment">—</strong></div>
+                        <div><span>Profit at maximum bid @MetricHelp("Profit at maximum bid", "Expected resale price minus the total investment at the maximum bid. Other expenses such as repairs and holding costs are excluded.")</span><strong id="pr-bid-max-profit">—</strong></div>
+                        <div><span>Break-even hammer bid @MetricHelp("Break-even hammer bid", "Expected resale price minus the auction fee and transport, with a floor of zero. At a positive break-even bid, the resale covers the winning bid and these costs with zero profit before other expenses.")</span><strong id="pr-bid-break-even">—</strong></div>
                     </div>
                     <div id="pr-bid-at-current" class="pr-bid-current" hidden>
                         <h4>At your current bid</h4><p id="pr-bid-current-verdict"></p>
-                        <div class="pr-bid-metrics"><div><span>Total investment</span><strong id="pr-bid-current-investment">—</strong></div><div><span>Estimated profit</span><strong id="pr-bid-current-profit">—</strong></div></div>
+                        <div class="pr-bid-metrics"><div><span>Total investment @MetricHelp("Total investment", "Your entered hammer bid plus the auction fee and transport.")</span><strong id="pr-bid-current-investment">—</strong></div><div><span>Estimated profit @MetricHelp("Estimated profit", "Expected resale price minus the entered hammer bid, auction fee, and transport. Other expenses are excluded.")</span><strong id="pr-bid-current-profit">—</strong></div></div>
                     </div>
                     <p id="pr-bid-scope" class="pr-bid-scope">Auction fee and transport only. Profit is before other expenses.</p>
                 </section>
                 <section id="pr-demand" class="pr-demand" aria-labelledby="pr-demand-heading">
                     <header><h3 id="pr-demand-heading">Local market demand</h3><small id="pr-demand-time"></small></header>
                     <div class="pr-bid-metrics">
-                        <div><span>Market days supply</span><strong id="pr-demand-days">—</strong></div>
-                        <div><span>Similar vehicles available</span><strong id="pr-demand-active">—</strong></div>
-                        <div><span>Sales activity · past 45 days</span><strong id="pr-demand-sales">—</strong></div>
+                        <div><span>Market days supply @MetricHelp("Market days supply", "Estimated number of days local supply would last at the recent sales pace. MarketCheck divides active listings by average daily sales activity over the past 45 days. This measures the market rather than the selling time of an individual car.")</span><strong id="pr-demand-days">—</strong></div>
+                        <div><span>Similar vehicles available @MetricHelp("Similar vehicles available", "Count of active used listings matching the VIN’s year, make, model, trim, version, and build code in your selected area. The count does not filter by mileage. The Current grid shows pricing comparables, which can differ from the listings counted here.")</span><strong id="pr-demand-active">—</strong></div>
+                        <div><span>Sales activity · past 45 days @MetricHelp("Sales activity · past 45 days", "Number of matching used vehicles estimated to have left the local market over the past 45 days. MarketCheck infers sales from dealer listings that disappear. Those listings do not confirm completed transactions.")</span><strong id="pr-demand-sales">—</strong></div>
                     </div>
                     <p id="pr-demand-message" role="status"></p>
                     <p class="pr-demand-note">Exact-build matches in your selected ZIP and radius. Sales activity is inferred from listings leaving the market. Market days supply describes the area's inventory, not how many days your particular car will take to sell.</p>
@@ -112,7 +117,10 @@
                 <p id="pr-radius-note" class="research-grid-note"></p>
                 <section class="pr-grid-section" aria-labelledby="pr-comparables-heading">
                     <header>
-                        <div><h3 id="pr-comparables-heading">Comparables within radius</h3><small id="pr-comparables-caption" aria-live="polite"></small></div>
+                        <div>
+                            <h3 id="pr-comparables-heading">Comparables within radius @MetricHelp("Comparables within radius", "Current shows vehicles advertised for sale. Recent shows earlier listings and asking prices. Switch periods to compare them and use View to open the dealer listing when a link is available.")</h3>
+                            <small id="pr-comparables-caption" aria-live="polite"></small>
+                        </div>
                         <fieldset id="pr-comparables-switch" class="pr-comparables-switch">
                             <legend>Show</legend>
                             <div class="pr-comparables-options">

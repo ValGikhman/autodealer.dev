@@ -126,6 +126,87 @@ body.price-research-page,.research-grid { --pg-color-border:#727c88;--pg-color-b
 #price-research .pr-auction { margin:20px 24px 24px; padding:22px; border:1px solid #747e89; border-top:3px solid #c41e3a; border-radius:9px; background:linear-gradient(135deg,#424b56,#353d47); }
 #price-research .pr-auction-heading { display:flex; align-items:center; justify-content:space-between; gap:18px; margin-bottom:20px; }
 #price-research .pr-auction-heading h3 { margin:7px 0 0; font-size:19px; }
+#price-research .pr-metric-help {
+    --bs-btn-color: inherit;
+    --bs-btn-hover-color: inherit;
+    --bs-btn-active-color: inherit;
+    display: inline-grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-inline-start: .25rem;
+    padding: 0;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    font-size: .75rem;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: middle;
+}
+#price-research .pr-metric-help:hover { background: rgb(255 255 255 / 12%); }
+#price-research .pr-metric-help:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+/* The site loads Bootstrap's JS without its popover stylesheet. */
+.pr-metric-popover {
+    --pr-popover-surface: #252d36;
+    --pr-popover-border: #65717e;
+    position: absolute;
+    z-index: 1080;
+    width: max-content;
+    max-width: min(20rem, calc(100vw - 2rem));
+    border: 1px solid var(--pr-popover-border);
+    border-radius: .75rem;
+    background: var(--pr-popover-surface);
+    color: #eef2f6;
+    box-shadow: 0 .65rem 1.75rem rgb(10 16 24 / 40%);
+    font: 400 .875rem/1.5 var(--sans, system-ui, sans-serif);
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.pr-metric-popover .popover-header {
+    margin: 0;
+    padding: .65rem .9rem;
+    border-bottom: 1px solid var(--pr-popover-border);
+    border-radius: .7rem .7rem 0 0;
+    background: #394451;
+    color: inherit;
+    font: 700 .875rem/1.35 var(--sans, system-ui, sans-serif);
+    letter-spacing: normal;
+}
+
+.pr-metric-popover .popover-body {
+    padding: .75rem .9rem;
+    color: #e3eaf1;
+}
+
+.pr-metric-popover .popover-arrow {
+    position: absolute;
+    width: .75rem;
+    height: .75rem;
+}
+
+.pr-metric-popover .popover-arrow::before {
+    position: absolute;
+    inset: 0;
+    background: var(--pr-popover-surface);
+    border: 1px solid var(--pr-popover-border);
+    content: '';
+    transform: rotate(45deg);
+}
+
+.pr-metric-popover[data-popper-placement^="top"] .popover-arrow { bottom: -.375rem; }
+.pr-metric-popover[data-popper-placement^="bottom"] .popover-arrow { top: -.375rem; }
+.pr-metric-popover[data-popper-placement^="left"] .popover-arrow { right: -.375rem; }
+.pr-metric-popover[data-popper-placement^="right"] .popover-arrow { left: -.375rem; }
+
+.pr-metric-popover[data-popper-placement^="top"] .popover-arrow::before { border-top: 0; border-left: 0; }
+.pr-metric-popover[data-popper-placement^="bottom"] .popover-arrow::before { background: #394451; border-right: 0; border-bottom: 0; }
+.pr-metric-popover[data-popper-placement^="left"] .popover-arrow::before { border-bottom: 0; border-left: 0; }
+.pr-metric-popover[data-popper-placement^="right"] .popover-arrow::before { border-top: 0; border-right: 0; }
 #price-research .pr-auction-heading > strong { color:#fff; font-size:clamp(27px,3vw,37px); font-weight:700; letter-spacing:-1px; font-variant-numeric:tabular-nums; text-align:right; }
 #price-research .pr-bid-inputs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px; }
 #price-research .pr-bid-inputs label { display:block; margin-bottom:7px; color:#e0e5ea; font-size:11px; }

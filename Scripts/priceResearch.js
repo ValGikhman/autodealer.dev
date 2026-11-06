@@ -16,6 +16,24 @@
     var money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
     var integer = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
     var distanceFormat = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+    if (window.bootstrap && window.bootstrap.Popover) {
+        var helpPopovers = Array.from(root.querySelectorAll('#pr-results [data-bs-toggle="popover"]'), function (button) {
+            var popover = window.bootstrap.Popover.getOrCreateInstance(button, {
+                container: 'body',
+                customClass: 'pr-metric-popover',
+                placement: 'top',
+                offset: [0, 10]
+            });
+            button.addEventListener('blur', function () { popover.hide(); });
+            button.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') popover.hide();
+            });
+            return popover;
+        });
+        root.addEventListener('pr:research-start', function () {
+            helpPopovers.forEach(function (popover) { popover.hide(); });
+        });
+    }
     function numeric(value) { if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) return null; var n = Number(value); return Number.isFinite(n) ? n : null; }
     function formatNumber(value) { return value === null ? '—' : integer.format(value); }
     function formatPrice(value) { return value === null ? '—' : money.format(value); }
