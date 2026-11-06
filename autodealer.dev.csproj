@@ -224,6 +224,8 @@
     <Compile Include="Models\PriceResearchModels.cs" />
     <Compile Include="Models\AuctionBidModels.cs" />
     <Compile Include="Services\AuctionBidService.cs" />
+    <Compile Include="Services\MarketCheckMcpClient.cs" />
+    <Compile Include="Services\AuctionAppraisalService.cs" />
     <Compile Include="Models\MarketDemandResult.cs" />
     <Compile Include="Services\MarketDemandService.cs" />
     <Compile Include="Services\ClientResearchSession.cs" />

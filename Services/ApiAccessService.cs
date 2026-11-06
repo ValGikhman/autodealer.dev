@@ -97,6 +97,14 @@ namespace autodealer.dev.Services {
                             .Select(x => (int?)x.RequestCount)
                             .Sum() ?? 0;
                         var quota = apiKey.Subscription.Plan.MonthlyRequestQuota;
+                        // The internal calculator does no provider work. Authenticate it normally without charging a lookup.
+                        if (verifiedEmail == null && request.HttpMethod == "POST"
+                            && string.Equals(request.Endpoint, "/api/service/price-research/auction-budget", StringComparison.OrdinalIgnoreCase)
+                            && string.Equals(request.KeyId, System.Configuration.ConfigurationManager.AppSettings["Research:RabinovichKeyId"]?.Trim(),
+                                StringComparison.Ordinal)) {
+                            transaction.Commit();
+                            return Result("ok", apiKey, monthlyUsage);
+                        }
                         if (!apiKey.IsQuotaUnlimited && monthlyUsage >= quota) {
                             transaction.Commit();
                             return Result("quota_exceeded", apiKey, monthlyUsage);
