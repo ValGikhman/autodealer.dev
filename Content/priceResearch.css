@@ -121,6 +121,7 @@ body.price-research-page,.research-grid { --pg-color-border:#727c88;--pg-color-b
 #pr-comparables-grid .pg-th-inner.pg-th-plain { grid-template-columns:minmax(0,1fr); }
 #pr-comparables-grid .pg-th-label { white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere; }
 #pr-comparables-grid .pg-grid-table td:first-child { font-family:var(--mono); font-size:11px; letter-spacing:0; }
+#pr-comparables-grid .pr-listing-source { text-align:center; }
 @media(max-width:600px) { #pr-comparables-grid .pg-grid-table th,#pr-comparables-grid .pg-grid-table td { padding:6px 3px; font-size:10px; } #pr-comparables-grid .pg-th-inner { display:block; } #pr-comparables-grid .pg-th-label { display:block; } #pr-comparables-grid .pg-sort-icon { justify-content:center; margin-top:4px; } #pr-comparables-grid .pg-grid-table td:first-child { font-size:10px; } }
 #price-research .pr-comparables-description { margin:0 0 16px; color:#c8cfd7; font-size:12px; line-height:1.6; }
 #price-research .pr-auction { margin:20px 24px 24px; padding:22px; border:1px solid #747e89; border-top:3px solid #c41e3a; border-radius:9px; background:linear-gradient(135deg,#424b56,#353d47); }
