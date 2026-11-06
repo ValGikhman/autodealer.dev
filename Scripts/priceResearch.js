@@ -59,7 +59,7 @@
             var miles = numeric(row.miles), price = numeric(row.price), dist = (typeof row.dist === 'number' || typeof row.dist === 'string') ? numeric(row.dist) : null, days = numeric(row.dom);
             if (dist !== null && dist < 0) dist = null;
             var own = String(row.vin || '').toUpperCase() === request.Vin, local = !own && dist !== null && dist <= request.Radius;
-            var url = safeUrl(row.vdp_url), source = url ? '<a href="' + escape(url) + '" target="_blank" rel="noopener noreferrer">View</a>' : 'No listing URL';
+            var url = safeUrl(row.vdp_url), source = url ? '<div class="pr-listing-source"><a href="' + escape(url) + '" target="_blank" rel="noopener noreferrer">View</a></div>' : 'No listing URL';
             return { Vehicle: [row.year, row.make, row.model, row.trim].filter(function (v) { return v !== null && v !== undefined && v !== ''; }).join(' '), Vin: String(row.vin || ''), Dealer: String(row.dealer_name || ''), Price: price, PriceDisplay: formatPrice(price), Mileage: miles, MileageDisplay: formatNumber(miles), Distance: dist, DistanceDisplay: dist === null ? 'Unknown' : distanceFormat.format(dist) + ' mi', Days: days, DaysDisplay: formatNumber(days), Source: source, IsSubject: own, IsLocal: local };
         });
     }
