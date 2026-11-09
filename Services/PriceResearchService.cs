@@ -30,6 +30,7 @@ namespace autodealer.dev.Services {
                 using(var request=new HttpRequestMessage(HttpMethod.Get,Endpoint+query)){
                     request.Headers.Accept.ParseAdd("application/json");
                     using(var response=await client.SendAsync(request,HttpCompletionOption.ResponseHeadersRead,requestToken).ConfigureAwait(false)){
+                        MarketCheckQuota.Capture(response.Headers);
                         if(!response.IsSuccessStatusCode)throw ProviderFailure(response.StatusCode);
                         if(response.Content.Headers.ContentLength>20000000)throw new PriceResearchException(HttpStatusCode.BadGateway,"MarketCheck returned an unexpectedly large response.");
                         string json;

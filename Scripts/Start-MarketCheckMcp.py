@@ -1,6 +1,7 @@
 """Start MarketCheck's MCP server using AutoDealer.dev's Web.config."""
 
 import argparse
+from datetime import datetime, timezone
 import logging
 from pathlib import Path
 import sys
@@ -39,12 +40,39 @@ def main():
 
     from services import base
     from server import create_mcp_server
+    from starlette.responses import Response
 
     base.MARKETCHECK_API_KEY = key
+    quota_headers = {}
+    quota_names = ("quota-remaining", "quota-limit", "quota-reset-time")
+    shared_client = base.get_shared_client
+
+    async def capture_quota(response):
+        if response.request.url.host != "api.marketcheck.com":
+            return
+        headers = {name: response.headers[name] for name in quota_names if name in response.headers}
+        if "quota-remaining" in headers or "quota-limit" in headers:
+            quota_headers.clear()
+            quota_headers.update(headers, **{"quota-observed-at": datetime.now(timezone.utc).isoformat()})
+
+    def get_shared_client():
+        client = shared_client()
+        hooks = client.event_hooks["response"]
+        if capture_quota not in hooks:
+            hooks.append(capture_quota)
+        return client
+
+    base.get_shared_client = get_shared_client
+    mcp = create_mcp_server()
+
+    @mcp.custom_route("/marketcheck-quota", methods=["GET"])
+    async def marketcheck_quota(request):
+        return Response(headers={**quota_headers, "Cache-Control": "no-store"})
+
     # The upstream HTTP client can include provider query strings in diagnostics.
     for name in ("httpx", "httpcore", "services", "mcp"):
         logging.getLogger(name).setLevel(logging.CRITICAL)
-    create_mcp_server().run(transport="streamable-http", host="127.0.0.1", port=port, stateless_http=True)
+    mcp.run(transport="streamable-http", host="127.0.0.1", port=port, stateless_http=True)
 
 
 if __name__ == "__main__":
