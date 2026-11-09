@@ -1,3 +1,4 @@
+using autodealer.dev.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -54,6 +56,10 @@ namespace autodealer.dev.Services {
                 var encoded = structured?["result"]?.Type == JTokenType.String ? (string)structured["result"] : (string)text;
                 data = encoded == null ? structured : JObject.Parse(encoded);
             }
+            if (data != null && ((string)data["status_code"] == "429" || (string)data["code"] == "429"
+                || Regex.IsMatch((string)data["message"] ?? "", @"\b429\s+Too Many Requests\b", RegexOptions.IgnoreCase)))
+                throw new PriceResearchException((HttpStatusCode)429,
+                    "MarketCheck has reached its API request limit. Check the MarketCheck account's monthly quota and rate limits.");
             if (data == null || data["error"] != null || (bool?)data["success"] == false)
                 throw new HttpRequestException("MarketCheck did not complete the lookup.");
             return data["data"] as JObject ?? data;

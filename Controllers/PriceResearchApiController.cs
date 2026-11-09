@@ -74,6 +74,11 @@ namespace autodealer.dev.Controllers {
                 cancellationToken, allowVehicleName: true);
         }
 
+        [HttpPost, Route("auction-comparables")]
+        public Task<IHttpActionResult> AuctionComparables([FromBody] JObject input, CancellationToken cancellationToken) {
+            return RunAppraisal(input, AuctionAppraisalService.GetReferenceCandidatesAsync, cancellationToken);
+        }
+
         private async Task<IHttpActionResult> RunAppraisal(JObject input, Func<PriceResearchRequest, CancellationToken, Task<JObject>> lookup,
             CancellationToken cancellationToken, bool allowVehicleName = false) {
             var accessError = CheckStaffAccess();
