@@ -27,6 +27,7 @@ namespace autodealer.dev.Services {
                     using(var request=new HttpRequestMessage(HttpMethod.Get,Endpoint+Uri.EscapeDataString(vin)+"/specs?api_key="+Uri.EscapeDataString(key))){
                         request.Headers.Accept.ParseAdd("application/json");
                         using(var response=await client.SendAsync(request,HttpCompletionOption.ResponseHeadersRead,ct).ConfigureAwait(false)){
+                            MarketCheckQuota.Capture(response.Headers);
                             if(!response.IsSuccessStatusCode)throw ProviderFailure(response.StatusCode);
                             if(response.Content.Headers.ContentLength>20000000)throw new NeoVinException(HttpStatusCode.BadGateway,"MarketCheck returned an unexpectedly large VIN specification response.");
                             string json;

@@ -33,6 +33,7 @@ namespace autodealer.dev.Services {
                     using (var request = new HttpRequestMessage(HttpMethod.Get, url)) {
                         request.Headers.Accept.ParseAdd("application/json");
                         using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token).ConfigureAwait(false)) {
+                            MarketCheckQuota.Capture(response.Headers);
                             if (!response.IsSuccessStatusCode) {
                                 var status = (int)response.StatusCode;
                                 return MarketDemandResult.Unavailable(status == 401 || status == 403 ? "MarketCheck demand access is unavailable for the configured subscription." : status == 429 ? "MarketCheck demand request limit reached. Pricing remains available." : "MarketCheck demand data is temporarily unavailable.");

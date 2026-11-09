@@ -21,6 +21,21 @@ namespace autodealer.dev.Controllers {
             ContractResolver = new CamelCasePropertyNamesContractResolver()
         };
 
+        [HttpGet, Route("marketcheck-quota")]
+        public async Task<IHttpActionResult> GetMarketCheckQuota() {
+            var accessError = CheckStaffAccess();
+            if (accessError != null) return accessError;
+
+            var snapshot = await MarketCheckQuota.GetLatestAsync();
+            var body = JObject.FromObject(new {
+                Remaining = snapshot?.Remaining,
+                Limit = snapshot?.Limit,
+                ResetAt = snapshot?.ResetAt,
+                ObservedAt = snapshot?.ObservedAt
+            });
+            return Document(body.ToString(Formatting.None), "application/json");
+        }
+
         [HttpPost, Route("")]
         public Task<IHttpActionResult> Research([FromBody] PriceResearchReportRequest input, CancellationToken cancellationToken) {
             if (input == null) return Run(null, "report", cancellationToken);
