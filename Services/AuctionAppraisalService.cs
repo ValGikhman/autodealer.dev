@@ -11,6 +11,57 @@ using System.Threading.Tasks;
 
 namespace autodealer.dev.Services {
     internal static class AuctionAppraisalService {
+        public static async Task<JObject> GetReferenceCandidatesAsync(PriceResearchRequest scope, CancellationToken cancellationToken) {
+            using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken)) {
+                deadline.CancelAfter(TimeSpan.FromSeconds(25));
+                var mcp = new MarketCheckMcpClient();
+                try {
+                    await mcp.InitializeAsync(deadline.Token);
+                    var vehicle = await DecodeAsync(mcp, scope, deadline.Token);
+                    var search = VehicleSearch(vehicle, scope);
+                    search["radius"] = 5000;
+                    search["rows"] = 50;
+                    search["sort_by"] = "dist";
+                    search["sort_order"] = "asc";
+                    search["include_dealer_object"] = true;
+                    JObject current;
+                    var radiusLimit = 5000;
+                    try {
+                        current = await mcp.CallAsync("search_active_cars", search, deadline.Token);
+                    } catch (HttpRequestException) {
+                        // Some subscriptions restrict active searches to 100 miles.
+                        radiusLimit = 100;
+                        search["radius"] = radiusLimit;
+                        current = await mcp.CallAsync("search_active_cars", search, deadline.Token);
+                    }
+                    JObject recent = null;
+                    try {
+                        search["radius"] = Math.Min(scope.Radius, 100);
+                        recent = await mcp.CallAsync("search_past_90_days", search, deadline.Token);
+                    } catch (Exception ex) when (ex is HttpRequestException || ex is Newtonsoft.Json.JsonException
+                        || (ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)) {
+                        // Preserve current candidates if recent inventory is unavailable.
+                    }
+                    return new JObject {
+                        ["vehicle"] = vehicle.VehicleTitle,
+                        ["currentRadiusLimit"] = radiusLimit,
+                        ["current"] = ReferenceListings(current),
+                        ["recent"] = recent == null ? null : ReferenceListings(recent)
+                    };
+                } finally {
+                    await mcp.CloseAsync();
+                }
+            }
+        }
+
+        private static JArray ReferenceListings(JObject result) {
+            return new JArray((result["listings"] as JArray ?? new JArray()).OfType<JObject>().Select(row => {
+                var listing = (JObject)row.DeepClone();
+                listing["dealer_name"] = DealerLabel(row);
+                return listing;
+            }));
+        }
+
         public static async Task<JObject> CountMarketInventoryAsync(PriceResearchRequest input, CancellationToken cancellationToken) {
             const int mileageWindow = 10000;
             var target = input.Miles.Value;
