@@ -184,14 +184,9 @@ namespace autodealer.dev.Services {
         public static async Task<JObject> GetMarketPriceAsync(PriceResearchRequest input, CancellationToken cancellationToken) {
             using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken)) {
                 deadline.CancelAfter(TimeSpan.FromSeconds(30));
-                var mcp = new MarketCheckMcpClient();
-                try {
-                    await mcp.InitializeAsync(deadline.Token);
-                    var estimate = await PredictAsync(mcp, input, deadline.Token);
-                    return JObject.FromObject(new { vin = input.Vin, miles = input.Miles.Value, zip = input.Zip, marketCheckRetailUsd = estimate });
-                } finally {
-                    await mcp.CloseAsync();
-                }
+                var research = await new PriceResearchService().ResearchAsync(input, deadline.Token);
+                var estimate = RequireRetailEstimate(research.PredictedPrice);
+                return JObject.FromObject(new { vin = input.Vin, miles = input.Miles.Value, zip = input.Zip, marketCheckRetailUsd = estimate });
             }
         }
 
@@ -257,7 +252,10 @@ namespace autodealer.dev.Services {
             var prediction = await mcp.CallAsync("predict_price_with_comparables", new JObject {
                 ["vin"] = input.Vin, ["miles"] = input.Miles.Value, ["zip"] = input.Zip, ["dealer_type"] = "independent"
             }, token);
-            var estimate = PriceResearchResult.Number(prediction["marketcheck_price"]);
+            return RequireRetailEstimate(PriceResearchResult.Number(prediction["marketcheck_price"]));
+        }
+
+        private static decimal RequireRetailEstimate(decimal? estimate) {
             if (!estimate.HasValue || estimate <= 0 || estimate > 2000000m)
                 throw new PriceResearchException(HttpStatusCode.BadGateway, "MarketCheck returned no usable retail estimate.");
             return estimate.Value;
