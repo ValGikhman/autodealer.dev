@@ -89,6 +89,24 @@ namespace autodealer.dev.Controllers {
                 cancellationToken, allowVehicleName: true);
         }
 
+        [HttpPost, Route("retail-listings")]
+        public async Task<IHttpActionResult> RetailListings([FromBody] JObject input, CancellationToken cancellationToken) {
+            var accessError = CheckStaffAccess();
+            if (accessError != null) return accessError;
+            if (!ModelState.IsValid) return Error(HttpStatusCode.BadRequest, "Enter valid retail search filters.");
+
+            try {
+                var result = await RetailInventoryService.SearchAsync(input, cancellationToken);
+                return Document(result.ToString(Formatting.None), "application/json");
+            } catch (PriceResearchException ex) {
+                return Error(ex.StatusCode, ex.Message);
+            } catch (OperationCanceledException) {
+                return Error(HttpStatusCode.GatewayTimeout, "The retail search timed out.");
+            } catch (Exception ex) when (ex is HttpRequestException || ex is JsonException) {
+                return Error(HttpStatusCode.BadGateway, "MarketCheck could not complete the retail search.");
+            }
+        }
+
         [HttpPost, Route("auction-comparables")]
         public Task<IHttpActionResult> AuctionComparables([FromBody] JObject input, CancellationToken cancellationToken) {
             return RunAppraisal(input, AuctionAppraisalService.GetReferenceCandidatesAsync, cancellationToken);
