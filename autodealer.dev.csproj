@@ -234,6 +234,7 @@
     <Compile Include="Data\ApiKeyQuota.cs" />
     <Compile Include="Models\PriceResearchHtmlRenderer.cs" />
     <Compile Include="Services\PriceResearchService.cs" />
+    <Compile Include="Services\RetailInventoryService.cs" />
     <Compile Include="Services\MarketCheckQuota.cs" />
     <Compile Include="Controllers\PriceResearchController.cs" />
     <Compile Include="Controllers\PriceResearchApiController.cs" />
