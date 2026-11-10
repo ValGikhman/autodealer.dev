@@ -198,27 +198,47 @@ namespace autodealer.dev.Services {
             using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken)) {
                 deadline.CancelAfter(TimeSpan.FromSeconds(30));
                 var token = deadline.Token;
-                var mcp = new MarketCheckMcpClient();
+                string title;
+                decimal estimate;
+                bool trimMatched;
+                JArray comparables;
                 try {
-                    await mcp.InitializeAsync(token);
-                    var vehicle = await DecodeAsync(mcp, input, token);
-                    var search = VehicleSearch(vehicle, input);
-                    var estimate = await PredictAsync(mcp, input, token);
-                    search["rows"] = 20;
-                    search["sort_by"] = "dist";
-                    search["sort_order"] = "asc";
-                    var comparables = await GetComparablesAsync(mcp, search, input, token);
-                    bid.ExpectedSellingPriceUsd = resaleUsd ?? estimate;
-                    return JObject.FromObject(new {
-                        vin = input.Vin, miles = input.Miles.Value, zip = input.Zip, radius = input.Radius,
-                        vehicle = vehicle.VehicleTitle, marketCheckRetailUsd = estimate,
-                        comparableSearchAvailable = comparables != null,
-                        trimMatched = search["trim"] != null,
-                        comparables, bid = bidCalculator.Calculate(bid)
-                    });
-                } finally {
-                    await mcp.CloseAsync();
+                    var mcp = new MarketCheckMcpClient();
+                    try {
+                        await mcp.InitializeAsync(token);
+                        var vehicle = await DecodeAsync(mcp, input, token);
+                        var search = VehicleSearch(vehicle, input);
+                        title = vehicle.VehicleTitle;
+                        trimMatched = search["trim"] != null;
+                        estimate = await PredictAsync(mcp, input, token);
+                        search["rows"] = 20;
+                        search["sort_by"] = "dist";
+                        search["sort_order"] = "asc";
+                        comparables = await GetComparablesAsync(mcp, search, input, token);
+                    } finally {
+                        await mcp.CloseAsync();
+                    }
+                } catch (Exception ex) when (ex is HttpRequestException || ex is NeoVinException
+                    || ex is Newtonsoft.Json.JsonException || ex is System.Configuration.ConfigurationErrorsException) {
+                    // The Appraisal report uses MarketCheck directly and supplies its own comparable listings.
+                    var research = await new PriceResearchService().ResearchAsync(input, token);
+                    estimate = RequireRetailEstimate(research.PredictedPrice);
+                    var listings = (research.Data["comparables"] as JObject)?["listings"] as JArray;
+                    var subject = listings?.OfType<JObject>().FirstOrDefault(research.IsSubject);
+                    title = subject == null ? input.Vin : string.Join(" ", new[] {
+                        (string)subject["year"], (string)subject["make"], (string)subject["model"], (string)subject["trim"]
+                    }.Where(value => !string.IsNullOrWhiteSpace(value)));
+                    if (string.IsNullOrWhiteSpace(title)) title = input.Vin;
+                    trimMatched = false;
+                    comparables = FormatAppraisalComparables(listings, input);
                 }
+
+                bid.ExpectedSellingPriceUsd = resaleUsd ?? estimate;
+                return JObject.FromObject(new {
+                    vin = input.Vin, miles = input.Miles.Value, zip = input.Zip, radius = input.Radius,
+                    vehicle = title, marketCheckRetailUsd = estimate, comparableSearchAvailable = comparables != null,
+                    trimMatched, comparables, bid = bidCalculator.Calculate(bid)
+                });
             }
         }
 
@@ -264,31 +284,34 @@ namespace autodealer.dev.Services {
         private static async Task<JArray> GetComparablesAsync(MarketCheckMcpClient mcp, JObject search, PriceResearchRequest input, CancellationToken token) {
             try {
                 var result = await mcp.CallAsync("search_active_cars", search, token);
-                var listings = result["listings"] as JArray;
-                if (listings == null) return null;
-                return new JArray(listings.OfType<JObject>()
-                    .Where(row => {
-                        var vin = (string)row["vin"];
-                        var price = PriceResearchResult.Number(row["price"]);
-                        var distance = PriceResearchResult.Distance(row);
-                        return vin != null && Regex.IsMatch(vin, "^[A-HJ-NPR-Z0-9]{17}$", RegexOptions.IgnoreCase)
-                            && !vin.Equals(input.Vin, StringComparison.OrdinalIgnoreCase)
-                            && price > 0 && price <= 2000000m
-                            && distance >= 0 && distance <= input.Radius;
-                    })
-                    .GroupBy(row => (string)row["vin"], StringComparer.OrdinalIgnoreCase)
-                    .Select(group => group.First())
-                    .Select(row => JObject.FromObject(new {
-                        askingPriceUsd = PriceResearchResult.Number(row["price"]),
-                        miles = PriceResearchResult.Number(row["miles"]),
-                        distanceMiles = PriceResearchResult.Distance(row)
-                    }))
-                    .OrderBy(row => {
-                        var miles = (decimal?)row["miles"];
-                        return miles >= 0 && miles <= 2000000m ? Math.Abs(miles.Value - input.Miles.Value) : decimal.MaxValue;
-                    }));
+                return FormatAppraisalComparables(result["listings"] as JArray, input);
             } catch (HttpRequestException) { return null; }
             catch (Newtonsoft.Json.JsonException) { return null; }
+        }
+
+        private static JArray FormatAppraisalComparables(JArray listings, PriceResearchRequest input) {
+            if (listings == null) return null;
+            return new JArray(listings.OfType<JObject>()
+                .Where(row => {
+                    var vin = (string)row["vin"];
+                    var price = PriceResearchResult.Number(row["price"]);
+                    var distance = PriceResearchResult.Distance(row);
+                    return vin != null && Regex.IsMatch(vin, "^[A-HJ-NPR-Z0-9]{17}$", RegexOptions.IgnoreCase)
+                        && !vin.Equals(input.Vin, StringComparison.OrdinalIgnoreCase)
+                        && price > 0 && price <= 2000000m
+                        && distance >= 0 && distance <= input.Radius;
+                })
+                .GroupBy(row => (string)row["vin"], StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
+                .Select(row => JObject.FromObject(new {
+                    askingPriceUsd = PriceResearchResult.Number(row["price"]),
+                    miles = PriceResearchResult.Number(row["miles"]),
+                    distanceMiles = PriceResearchResult.Distance(row)
+                }))
+                .OrderBy(row => {
+                    var miles = (decimal?)row["miles"];
+                    return miles >= 0 && miles <= 2000000m ? Math.Abs(miles.Value - input.Miles.Value) : decimal.MaxValue;
+                }));
         }
     }
 }
