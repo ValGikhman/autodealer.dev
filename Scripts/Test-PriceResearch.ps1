@@ -15,11 +15,16 @@ try {
  & $compiler /nologo /langversion:7.3 /target:library ('/out:'+$assembly) @references @sources
  if($LASTEXITCODE -ne 0){throw 'Application compilation failed.'}
  $site=[xml](Get-Content -LiteralPath (Join-Path $repoRoot 'Web.config') -Raw)
- foreach($test in @('PriceResearchRegression','PriceResearchHttpRegression','NeoVinRegression','NeoVinHttpRegression','ResearchMajordomeRegression','AuctionBidRegression','ResearchDefaultApiKeyRegression','MarketDemandRegression','ClientResearchRegression')){
+ foreach($test in @('PriceResearchRegression','PriceResearchHttpRegression','NeoVinRegression','NeoVinHttpRegression','VinReportRegression','ResearchMajordomeRegression','AuctionBidRegression','ResearchDefaultApiKeyRegression','MarketDemandRegression','ClientResearchRegression')){
   $exe=Join-Path $temporary ($test+'.exe')
   & $compiler /nologo /langversion:7.3 /target:exe ('/out:'+$exe) @references ('/r:'+$assembly) (Join-Path $repoRoot ('Tests\'+$test+'.cs'))
   if($LASTEXITCODE -ne 0){throw ($test+' compilation failed.')}
   $config=[xml]'<configuration><appSettings><add key="ApiSecurity:Enabled" value="true" /></appSettings></configuration>'
+  if($test -eq 'VinReportRegression'){
+   foreach($entry in @{'DemoApi:Key'='ad_reportfixture.demo-secret';'DataOne:AccessKey'='fixture-access';'DataOne:SecretAccessKey'='fixture-secret'}.GetEnumerator()){
+    $setting=$config.CreateElement('add');$setting.SetAttribute('key',$entry.Key);$setting.SetAttribute('value',$entry.Value);[void]$config.configuration.appSettings.AppendChild($setting)
+   }
+  }
   if($site.configuration.runtime){[void]$config.configuration.AppendChild($config.ImportNode($site.configuration.runtime,$true))}
   $config.Save($exe+'.config')
   if(($Live -and $test -eq 'PriceResearchHttpRegression') -or ($LiveNeoVin -and $test -eq 'NeoVinHttpRegression')){

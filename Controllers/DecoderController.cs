@@ -88,6 +88,14 @@ namespace autodealer.dev.Controllers {
             return GetStructuredResponse(vin, "xml");
         }
 
+        /// <summary>
+        /// Returns the raw DataOne XML and its HTML report from one provider decode.
+        /// </summary>
+        [HttpGet, Route("vin/{vin}/report")]
+        public IHttpActionResult GetReport([FromUri] string vin) {
+            return GetStructuredResponse(vin, "report");
+        }
+
         private IHttpActionResult GetStructuredResponse(string vin, string format) {
             if (VinDecoderService == null)
                 return CreateApiError(format, HttpStatusCode.InternalServerError, "VinDecoderService is not configured.", null);
@@ -104,10 +112,18 @@ namespace autodealer.dev.Controllers {
 
                 var dataOneXml = VinDecoderService.DecodeVin(normalizedVin, dataOneApiKey, dataOneSecretApiKey);
                 var result = VinDecodeApiResponse.Create(normalizedVin, dataOneXml);
-                var isJson = string.Equals(format, "json", StringComparison.OrdinalIgnoreCase);
-                var body = isJson
-                    ? result.ToJsonObject().ToString(Newtonsoft.Json.Formatting.Indented)
-                    : result.ToXmlDocument().ToString();
+                var isReport = string.Equals(format, "report", StringComparison.OrdinalIgnoreCase);
+                var isJson = isReport || string.Equals(format, "json", StringComparison.OrdinalIgnoreCase);
+                var body = isReport
+                    ? new Newtonsoft.Json.Linq.JObject {
+                        ["vin"] = result.Vin,
+                        ["decodedAtUtc"] = result.DecodedAtUtc.ToString("o"),
+                        ["rawXml"] = dataOneXml,
+                        ["html"] = VinDecodeHtmlRenderer.Render(dataOneXml, normalizedVin)
+                    }.ToString(Newtonsoft.Json.Formatting.Indented)
+                    : isJson
+                        ? result.ToJsonObject().ToString(Newtonsoft.Json.Formatting.Indented)
+                        : result.ToXmlDocument().ToString();
                 var response = new HttpResponseMessage(HttpStatusCode.OK) {
                     Content = new StringContent(body, Encoding.UTF8, isJson ? "application/json" : "application/xml")
                 };
@@ -124,7 +140,8 @@ namespace autodealer.dev.Controllers {
         }
 
         private IHttpActionResult CreateApiError(string format, HttpStatusCode statusCode, string message, DemoQuotaResult demoQuota) {
-            var isJson = string.Equals(format, "json", StringComparison.OrdinalIgnoreCase);
+            var isJson = string.Equals(format, "json", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(format, "report", StringComparison.OrdinalIgnoreCase);
             var body = isJson
                 ? new Newtonsoft.Json.Linq.JObject { ["message"] = message }.ToString(Newtonsoft.Json.Formatting.Indented)
                 : new System.Xml.Linq.XDocument(

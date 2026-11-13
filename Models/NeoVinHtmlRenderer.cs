@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -7,22 +8,166 @@ using System.Text;
 
 namespace autodealer.dev.Models {
     public static class NeoVinHtmlRenderer {
-        private static string E(object value){return WebUtility.HtmlEncode(Convert.ToString(value,CultureInfo.InvariantCulture)??"");}
-        private static string S(JObject data,string key){var token=data[key];return token==null||token.Type==JTokenType.Null?"":token is JValue?token.ToString():token.ToString(Newtonsoft.Json.Formatting.None);}
-        public static string Render(NeoVinResult result){
-            if(result==null)throw new ArgumentNullException("result");var b=new StringBuilder(65536);b.Append(Styles);
-            b.Append("<section class=\"neovin-report\" aria-label=\"MarketCheck VIN specifications\"><header class=\"neovin-report__hero\"><div><p class=\"neovin-report__eyebrow\">MARKETCHECK NEOVIN · VEHICLE SPECIFICATIONS</p><h1>").Append(E(string.IsNullOrWhiteSpace(result.VehicleTitle)?"VIN specification report":result.VehicleTitle)).Append("</h1><code>").Append(E(result.Vin)).Append("</code></div><span class=\"neovin-report__count\">").Append(result.Specifications.Count.ToString("N0",CultureInfo.GetCultureInfo("en-US"))).Append(" specifications</span></header>");
-            b.Append("<div class=\"neovin-report__metrics\">");
-            foreach(var key in new[]{"engine","transmission","drivetrain","fuel_type"}){var value=S(result.Data,key);if(value.Length>0)b.Append("<div><span>").Append(E(NeoVinResult.Label(key))).Append("</span><strong>").Append(E(value)).Append("</strong></div>");}b.Append("</div>");
-            foreach(var group in result.Specifications.GroupBy(r=>r.Category)){
-                b.Append("<details class=\"neovin-report__group\"").Append(group.Key=="Vehicle"?" open":"").Append("><summary>").Append(E(group.Key)).Append("<small>").Append(group.Count()).Append(" fields</small></summary><div class=\"neovin-report__table\"><table><thead><tr><th scope=\"col\">Specification</th><th scope=\"col\">Value</th></tr></thead><tbody>");
-                foreach(var row in group)b.Append("<tr><th scope=\"row\">").Append(E(row.Field)).Append("</th><td>").Append(string.IsNullOrWhiteSpace(row.Value)?"—":E(row.Value)).Append("</td></tr>");
-                b.Append("</tbody></table></div></details>");
-            }
-            b.Append("<details class=\"neovin-report__raw\"><summary>Complete MarketCheck response</summary><pre>").Append(E(result.RawJson)).Append("</pre></details><footer>MarketCheck NeoVIN · Decoded ").Append(E(result.DecodedAtUtc.ToString("yyyy-MM-dd HH:mm 'UTC'",CultureInfo.InvariantCulture))).Append(" · Specifications and confidence values are shown as returned by the provider.</footer></section>");return b.ToString();
+        public static string Render(NeoVinResult result) {
+            if (result == null) throw new ArgumentNullException("result");
+
+            var output = new StringBuilder(65536);
+            VinReportStyles.AppendTo(output);
+            output.Append("<section class=\"avd-report neovin-report\" aria-label=\"MarketCheck VIN specifications\"><div class=\"avd-report__body\">");
+            VinReportMarkup.OpenStyle(output, string.IsNullOrWhiteSpace(result.VehicleTitle) ? "VIN specification report" : result.VehicleTitle);
+            AppendSummary(output, result);
+
+            foreach (var category in GroupCategories(result.Specifications))
+                AppendCategory(output, category, 0, result.Data);
+
+            VinReportMarkup.OpenPanel(output, "Complete MarketCheck response");
+            output.Append("<pre class=\"avd-report__raw\">").Append(Encode(result.RawJson)).Append("</pre>");
+            VinReportMarkup.ClosePanel(output);
+            output.Append("</div></details></div><footer>MarketCheck NeoVIN · Decoded ")
+                .Append(Encode(result.DecodedAtUtc.ToString("yyyy-MM-dd HH:mm 'UTC'", CultureInfo.InvariantCulture)))
+                .Append(" · Specifications and confidence values are shown as returned by the provider.</footer></section>");
+            return output.ToString();
         }
-        private const string Styles=@"<style>
-.neovin-report{--neo-bg:#484e57;--neo-panel:#30343a;--neo-line:#626972;--neo-text:#eef0f2;--neo-muted:#bcc3cb;--neo-red:#c41e3a;background:var(--neo-bg);color:var(--neo-text);font:14px/1.55 'Segoe UI',Arial,sans-serif;padding:22px;box-sizing:border-box;border-radius:12px;max-width:100%}.neovin-report *{box-sizing:border-box}.neovin-report__hero{background:linear-gradient(145deg,#1e2228,#353a42);border:1px solid #606771;border-top:3px solid var(--neo-red);border-radius:10px;padding:26px;display:flex;align-items:center;justify-content:space-between;gap:20px}.neovin-report__eyebrow{font-size:10px;letter-spacing:.15em;font-weight:700;color:#c3c9d0;margin:0 0 8px}.neovin-report h1{color:#fff;font-size:27px;line-height:1.2;margin:0 0 12px}.neovin-report code{font:12px Consolas,monospace;color:#cbd1d8;overflow-wrap:anywhere}.neovin-report__count{padding:8px 12px;border:1px solid #707780;background:#454c56;border-radius:5px;font-size:12px;white-space:nowrap}.neovin-report__metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:15px 0}.neovin-report__metrics>div{padding:15px;border:1px solid #646b75;border-radius:8px;background:var(--neo-panel)}.neovin-report__metrics span{display:block;color:var(--neo-muted);font-size:10px;letter-spacing:.04em;text-transform:uppercase}.neovin-report__metrics strong{display:block;margin-top:5px;font-size:17px;font-weight:600}.neovin-report__group,.neovin-report__raw{margin:12px 0;background:var(--neo-panel);border:1px solid #656d77;border-radius:8px;overflow:hidden}.neovin-report summary{padding:14px 17px;font-weight:600;cursor:pointer;list-style-position:inside;color:#f5f6f7}.neovin-report summary small{font-weight:400;color:var(--neo-muted);margin-left:10px;font-size:10px}.neovin-report__table{overflow:auto;border-top:1px solid #5d6570}.neovin-report table{width:100%;border-collapse:collapse;min-width:400px;font-size:12px}.neovin-report th,.neovin-report td{text-align:left;padding:11px 16px;vertical-align:top;border-bottom:1px solid #4e5661;overflow-wrap:anywhere}.neovin-report thead th{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#e1e5e9;background:linear-gradient(#626a75,#4b535e)}.neovin-report tbody th{width:40%;color:#d5dbe2;font-weight:500}.neovin-report tbody tr:nth-child(even){background:#383e47}.neovin-report tbody tr:last-child>*{border-bottom:0}.neovin-report__raw pre{margin:0;padding:16px;max-height:450px;overflow:auto;border-top:1px solid #5d6570;background:#23282f;color:#d6dce4;font:11px/1.5 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}.neovin-report footer{font-size:10px;color:#c4cbd3;margin-top:15px}@media(max-width:650px){.neovin-report{padding:12px}.neovin-report__hero{padding:19px;display:block}.neovin-report__count{display:inline-block;margin-top:16px}.neovin-report h1{font-size:23px}.neovin-report__metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.neovin-report__metrics strong{font-size:14px}.neovin-report summary small{display:block;margin:4px 0 0 17px}}
-</style>";
+
+        private static void AppendSummary(StringBuilder output, NeoVinResult result) {
+            VinReportMarkup.OpenPanel(output, "Basic summary");
+            OpenTable(output);
+            AppendRow(output, "VIN#", result.Vin);
+            AppendRow(output, "Provider", "MarketCheck NeoVIN");
+            foreach (var key in new[] { "engine", "transmission", "drivetrain", "fuel_type" }) {
+                var token = result.Data[key];
+                if (token == null || token.Type == JTokenType.Null) continue;
+                var value = token is JValue ? token.ToString() : token.ToString(Newtonsoft.Json.Formatting.None);
+                if (value.Length > 0) AppendRow(output, NeoVinResult.Label(key), value);
+            }
+            output.Append("</tbody></table></div>");
+            VinReportMarkup.ClosePanel(output);
+        }
+
+        private static IEnumerable<Category> GroupCategories(IEnumerable<NeoVinSpecification> rows) {
+            var root = new Category(string.Empty);
+            foreach (var row in rows) {
+                var parent = root;
+                foreach (var name in row.Category.Split(new[] { " / " }, StringSplitOptions.None)) {
+                    var category = parent.Children.FirstOrDefault(child => child.Name == name);
+                    if (category == null) {
+                        category = new Category(name);
+                        parent.Children.Add(category);
+                    }
+                    parent = category;
+                }
+                parent.Rows.Add(row);
+            }
+            return root.Children;
+        }
+
+        private static void AppendCategory(StringBuilder output, Category category, int depth, JObject data) {
+            if (depth == 0) {
+                VinReportMarkup.OpenPanel(output, category.Name, category.Name == "Vehicle");
+            } else {
+                output.Append("<details class=\"avd-tree").Append(depth > 1 ? " avd-tree--nested" : string.Empty)
+                    .Append("\"><summary><span class=\"avd-tree__pm\"></span>").Append(Encode(category.Name))
+                    .Append("</summary><div class=\"avd-tree__content\">");
+            }
+            AppendCategoryRows(output, category.Rows, data);
+            foreach (var child in category.Children) AppendCategory(output, child, depth + 1, data);
+            output.Append("</div></details>");
+        }
+
+        private static void AppendCategoryRows(StringBuilder output, IEnumerable<NeoVinSpecification> rows, JObject data) {
+            var groups = new List<ItemGroup>();
+            foreach (var row in rows) {
+                var record = SourceRecord(data, row.Path);
+                ItemGroup group = null;
+                if (record != null) {
+                    var feature = record["feature_type"] != null && record["description"] != null;
+                    var item = Text(record[feature ? "feature_type" : "item"]);
+                    var attribute = feature ? string.Empty : Text(record["attribute"]);
+                    if (!string.IsNullOrWhiteSpace(item)) {
+                        group = groups.FirstOrDefault(candidate => candidate.Feature == feature && candidate.Item == item && candidate.Attribute == attribute);
+                        if (group == null) {
+                            group = new ItemGroup { Feature = feature, Item = item, Attribute = attribute };
+                            groups.Add(group);
+                        }
+                        group.RecordPaths.Add(record.Path);
+                    }
+                }
+                if (group == null) {
+                    group = new ItemGroup();
+                    groups.Add(group);
+                }
+                group.Rows.Add(row);
+            }
+
+            var ordinary = new List<NeoVinSpecification>();
+            foreach (var group in groups) {
+                if (group.RecordPaths.Count < 2) {
+                    ordinary.AddRange(group.Rows);
+                    continue;
+                }
+                AppendRows(output, ordinary);
+                ordinary.Clear();
+                var title = group.Feature || string.Equals(group.Item, group.Attribute, StringComparison.OrdinalIgnoreCase)
+                    ? group.Item : group.Item + " · " + group.Attribute;
+                output.Append("<details class=\"avd-tree avd-tree--nested avd-item-group\"><summary><span class=\"avd-tree__pm\"></span>")
+                    .Append(Encode(title)).Append("</summary><div class=\"avd-tree__content\">");
+                AppendRows(output, group.Rows);
+                output.Append("</div></details>");
+            }
+            AppendRows(output, ordinary);
+        }
+
+        private static bool IsItemRecord(JObject value) {
+            return value["feature_type"] != null && value["description"] != null
+                || value["item"] != null && value["attribute"] != null && value["value"] != null;
+        }
+
+        private static JObject SourceRecord(JObject data, string path) {
+            if (data == null || string.IsNullOrEmpty(path)) return null;
+            try {
+                var source = data.SelectToken(path, false);
+                return source == null ? null : source.AncestorsAndSelf().OfType<JObject>().FirstOrDefault(IsItemRecord);
+            } catch (Newtonsoft.Json.JsonException) {
+                return null;
+            }
+        }
+
+        private static string Text(JToken token) {
+            return token == null || token.Type == JTokenType.Null ? string.Empty
+                : token is JValue ? token.ToString() : token.ToString(Newtonsoft.Json.Formatting.None);
+        }
+
+        private static void AppendRows(StringBuilder output, ICollection<NeoVinSpecification> rows) {
+            if (rows.Count == 0) return;
+            OpenTable(output);
+            foreach (var row in rows)
+                AppendRow(output, row.Field, string.IsNullOrWhiteSpace(row.Value) ? "—" : row.Value);
+            output.Append("</tbody></table></div>");
+        }
+
+        private sealed class ItemGroup {
+            internal bool Feature;
+            internal string Item;
+            internal string Attribute;
+            internal readonly List<NeoVinSpecification> Rows = new List<NeoVinSpecification>();
+            internal readonly HashSet<string> RecordPaths = new HashSet<string>(StringComparer.Ordinal);
+        }
+
+        private sealed class Category {
+            internal readonly string Name;
+            internal readonly List<Category> Children = new List<Category>();
+            internal readonly List<NeoVinSpecification> Rows = new List<NeoVinSpecification>();
+            internal Category(string name) { Name = name; }
+        }
+
+        private static void OpenTable(StringBuilder output) {
+            output.Append("<div class=\"avd-table-wrap\"><table class=\"avd-table avd-table--keyvalue\"><thead><tr><th scope=\"col\">Specification</th><th scope=\"col\">Value</th></tr></thead><tbody>");
+        }
+
+        private static void AppendRow(StringBuilder output, string field, string value) {
+            output.Append("<tr><th scope=\"row\">").Append(Encode(field)).Append("</th><td>").Append(Encode(value)).Append("</td></tr>");
+        }
+
+        private static string Encode(string value) { return WebUtility.HtmlEncode(value ?? string.Empty); }
     }
 }
