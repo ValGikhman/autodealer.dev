@@ -89,6 +89,23 @@ Both endpoints use the same response object and include:
 - The complete DataOne response, including every style, repeated record,
   element, and attribute.
 
+### Saveable report in one decode
+
+Use this endpoint when an application needs both the complete provider payload
+and the displayed report:
+
+```http
+GET /api/service/vin/{vin}/report
+Accept: application/json
+Authorization: Bearer ad_live_KEY_ID.SECRET
+```
+
+The JSON response contains `vin`, `decodedAtUtc`, `rawXml`, and `html`. `rawXml`
+preserves the full DataOne XML string; `html` is the same scoped report generated
+by the HTML endpoint. Both come from one DataOne decode. Saving that response
+does not require a second provider request. The existing authentication, demo
+limits, response headers, and `Cache-Control: no-store` also apply to this endpoint.
+
 ### JSON request
 
 ```bash

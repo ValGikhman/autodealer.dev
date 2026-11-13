@@ -33,6 +33,9 @@ namespace autodealer.dev.Models {
         public string VehicleTitle {get{return string.Join(" ",new[]{Text(Data["year"]),Text(Data["make"]),Text(Data["model"]),Text(Data["trim"])}.Where(s=>!string.IsNullOrWhiteSpace(s)));}}
 
         public static NeoVinResult Create(string vin,string json){
+            return Create(vin,json,DateTime.UtcNow);
+        }
+        public static NeoVinResult Create(string vin,string json,DateTime decodedUtc){
             vin=NeoVinRequest.NormalizeVin(vin);JObject data;
             try{data=JObject.Parse(json??"");}catch(JsonException){throw new NeoVinException(HttpStatusCode.BadGateway,"MarketCheck returned an invalid VIN specification response.");}
             var responseVin=Text(data["vin"]);
@@ -43,7 +46,7 @@ namespace autodealer.dev.Models {
                 var category=property.Value is JContainer?Label(property.Name):"Vehicle";
                 Flatten(property.Value,category,property.Value is JContainer?"":Label(property.Name),rows);
             }
-            return new NeoVinResult{Vin=vin,DecodedAtUtc=DateTime.UtcNow,RawJson=json,Data=data,Specifications=rows};
+            return new NeoVinResult{Vin=vin,DecodedAtUtc=decodedUtc.Kind==DateTimeKind.Unspecified?DateTime.SpecifyKind(decodedUtc,DateTimeKind.Utc):decodedUtc.ToUniversalTime(),RawJson=json,Data=data,Specifications=rows};
         }
         public JObject ToJsonObject(){return new JObject{["vin"]=Vin,["decodedAtUtc"]=DecodedAtUtc.ToString("o"),["data"]=Data.DeepClone(),["specifications"]=JArray.FromObject(Specifications)};}
         public static string Label(string name){

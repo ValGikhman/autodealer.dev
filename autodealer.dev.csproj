@@ -220,6 +220,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\VinDecodeHtmlRenderer.cs" />
+    <Compile Include="Models\VinReportStyles.cs" />
     <Compile Include="Models\VinDecodeApiResponse.cs" />
     <Compile Include="Models\PriceResearchModels.cs" />
     <Compile Include="Models\AuctionBidModels.cs" />
