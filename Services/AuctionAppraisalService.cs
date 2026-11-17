@@ -1,6 +1,7 @@
 using autodealer.dev.Models;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -190,6 +191,173 @@ namespace autodealer.dev.Services {
             }
         }
 
+        public static Task<JObject> MarketAppraisalAsync(PriceResearchRequest scope, JObject input, CancellationToken cancellationToken) {
+            return MarketAppraisalAsync(scope, input, cancellationToken, null);
+        }
+
+        internal static async Task<JObject> MarketAppraisalAsync(PriceResearchRequest scope, JObject input,
+            CancellationToken cancellationToken, Func<string, JObject, CancellationToken, Task<JObject>> call) {
+            if (scope == null || input == null) throw new ArgumentException("Enter a VIN or vehicle year, make and model.");
+            var countToken = input["comparableCount"];
+            if (countToken != null && (countToken.Type != JTokenType.Integer || (long)countToken < 1 || (long)countToken > 10))
+                throw new ArgumentException("Choose between one and ten comparables.");
+            var count = countToken == null ? 10 : (int)countToken;
+            var reference = string.IsNullOrWhiteSpace(scope.Vin);
+            if (reference) scope.NormalizeSearchScope(); else scope.NormalizeAndValidate();
+            var namedSearch = reference ? NamedVehicle(input, scope) : null;
+
+            using (var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken)) {
+                deadline.CancelAfter(TimeSpan.FromSeconds(30));
+                if (call != null) return await MarketAppraisalCoreAsync(scope, namedSearch, count, call, deadline.Token);
+                var mcp = new MarketCheckMcpClient();
+                try {
+                    await mcp.InitializeAsync(deadline.Token);
+                    return await MarketAppraisalCoreAsync(scope, namedSearch, count, mcp.CallAsync, deadline.Token);
+                } finally { await mcp.CloseAsync(); }
+            }
+        }
+
+        private static async Task<JObject> MarketAppraisalCoreAsync(PriceResearchRequest scope, JObject namedSearch, int count,
+            Func<string, JObject, CancellationToken, Task<JObject>> call, CancellationToken token) {
+            var reference = namedSearch != null;
+            string vin;
+            JObject search;
+            if (reference) {
+                search = (JObject)namedSearch.DeepClone();
+                var seedSearch = (JObject)search.DeepClone();
+                seedSearch["rows"] = 5;
+                seedSearch["include_build_object"] = true;
+                var candidates = await call("search_active_cars", seedSearch, token);
+                var seed = (candidates["listings"] as JArray ?? new JArray()).OfType<JObject>().Take(5)
+                    .FirstOrDefault(row => ValidVin(StringValue(row["vin"], 17)) && MatchesVehicle(row, search));
+                if (seed == null)
+                    throw new PriceResearchException(HttpStatusCode.NotFound, "No matching vehicle with a usable reference VIN was found.");
+                vin = StringValue(seed["vin"], 17).ToUpperInvariant();
+            } else {
+                vin = scope.Vin;
+                var decoded = await call("decode_vin_neovin", new JObject { ["vin"] = vin }, token);
+                search = VehicleSearch(NeoVinResult.Create(vin, decoded.ToString()), scope, invariantNumbers: true);
+            }
+
+            var title = string.Join(" ", new[] { (string)search["year"], (string)search["make"], (string)search["model"], (string)search["trim"] }
+                .Where(value => !string.IsNullOrWhiteSpace(value)));
+            search["rows"] = 50;
+            search["miles_range"] = string.Format(CultureInfo.InvariantCulture, "{0}-{1}",
+                Math.Max(0, scope.Miles.Value - 10000), Math.Min(2000000, scope.Miles.Value + 10000));
+            search["sort_by"] = "dist";
+            search["sort_order"] = "asc";
+            search["include_dealer_object"] = true;
+
+            // The official MCP tool strips build data by default. Vehicle validation
+            // requires those returned specifications for both seed and comparable rows.
+            search["include_build_object"] = true;
+
+            var predictionTask = call("predict_price_with_comparables", new JObject {
+                ["vin"] = vin, ["miles"] = scope.Miles.Value, ["zip"] = scope.Zip, ["dealer_type"] = "independent"
+            }, token);
+            var listingsTask = call("search_active_cars", search, token);
+            await Task.WhenAll(predictionTask, listingsTask);
+            var prediction = await predictionTask;
+            var market = await listingsTask;
+            var estimate = RequireRetailEstimate(AppraisalNumber(prediction["marketcheck_price"]));
+            var matched = market["num_found"];
+            if (matched?.Type != JTokenType.Integer || (long)matched < 0 || !(market["listings"] is JArray))
+                throw new PriceResearchException(HttpStatusCode.BadGateway, "MarketCheck did not return a valid comparable search.");
+
+            var sample = ((JArray)market["listings"]).OfType<JObject>().Take(50)
+                .Where(row => ValidVin(StringValue(row["vin"], 17)) && MatchesVehicle(row, search)
+                    && (reference || !string.Equals(StringValue(row["vin"], 17), vin, StringComparison.OrdinalIgnoreCase))
+                    && InRange(AppraisalNumber(row["dist"]), 0, scope.Radius)
+                    && InRange(AppraisalNumber(row["miles"]), Math.Max(0, scope.Miles.Value - 10000), Math.Min(2000000, scope.Miles.Value + 10000)))
+                .GroupBy(row => StringValue(row["vin"], 17), StringComparer.OrdinalIgnoreCase).Select(group => group.First())
+                .Select(row => AppraisalListing(row, title))
+                .OrderBy(row => Math.Abs((decimal)row["miles"] - scope.Miles.Value))
+                .ThenBy(row => (decimal)row["distanceMiles"]).ToList();
+            return new JObject {
+                ["vehicle"] = title, ["vin"] = vin, ["usedReferenceVin"] = reference,
+                ["miles"] = scope.Miles.Value, ["zip"] = scope.Zip, ["radius"] = scope.Radius,
+                ["marketCheckRetailUsd"] = estimate,
+                ["msrpUsd"] = OptionalNumber(prediction["msrp"] ?? prediction["original_msrp"], 1, 2000000),
+                ["listingCount"] = (long)matched,
+                ["statistics"] = SampleStatistics(sample),
+                ["comparables"] = new JArray(sample.Take(count))
+            };
+        }
+
+        private static JObject AppraisalListing(JObject row, string title) {
+            var dealer = row["dealer"] as JObject;
+            var url = SafeListingUrl(row["vdp_url"]);
+            return new JObject {
+                ["vin"] = StringValue(row["vin"], 17).ToUpperInvariant(), ["vehicle"] = title,
+                ["miles"] = AppraisalNumber(row["miles"]),
+                ["askingPriceUsd"] = OptionalNumber(row["price"], 1, 2000000),
+                ["daysListed"] = OptionalNumber(row["dom"] ?? row["days_on_market"] ?? row["dos_active"], 0, 100000),
+                ["dealerName"] = StringValue(dealer?["name"] ?? row["dealer_name"], 200),
+                ["city"] = StringValue(dealer?["city"] ?? row["city"], 80),
+                ["state"] = StringValue(dealer?["state"] ?? row["state"], 40),
+                ["distanceMiles"] = AppraisalNumber(row["dist"]), ["url"] = url == null ? JValue.CreateNull() : new JValue(url)
+            };
+        }
+
+        private static JObject SampleStatistics(IList<JObject> sample) {
+            var prices = sample.Select(row => (decimal?)row["askingPriceUsd"]).Where(value => value.HasValue).Select(value => value.Value).OrderBy(value => value).ToList();
+            var miles = sample.Select(row => (decimal)row["miles"]).OrderBy(value => value).ToList();
+            var days = sample.Select(row => (decimal?)row["daysListed"]).Where(value => value.HasValue).Select(value => value.Value).OrderBy(value => value).ToList();
+            return JObject.FromObject(new {
+                sampledListingCount = sample.Count, pricedSampleCount = prices.Count,
+                minPriceUsd = prices.Count == 0 ? (decimal?)null : prices.First(),
+                maxPriceUsd = prices.Count == 0 ? (decimal?)null : prices.Last(),
+                meanPriceUsd = prices.Count == 0 ? (decimal?)null : prices.Average(), medianPriceUsd = Percentile(prices, .5m),
+                p25PriceUsd = Percentile(prices, .25m), p75PriceUsd = Percentile(prices, .75m),
+                meanMiles = miles.Count == 0 ? (decimal?)null : miles.Average(), medianMiles = Percentile(miles, .5m),
+                medianDaysListed = Percentile(days, .5m)
+            });
+        }
+
+        private static decimal? Percentile(IList<decimal> sorted, decimal fraction) {
+            if (sorted.Count == 0) return null;
+            var position = (sorted.Count - 1) * fraction;
+            var lower = (int)decimal.Floor(position);
+            var upper = (int)decimal.Ceiling(position);
+            return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
+        }
+
+        private static bool MatchesVehicle(JObject row, JObject search) {
+            var build = row["build"] as JObject;
+            if (AppraisalNumber(build?["year"] ?? row["year"]) != (decimal?)search["year"]) return false;
+            foreach (var key in new[] { "make", "model", "trim" }) {
+                var expected = StringValue(search[key], 120);
+                if (expected != null && !string.Equals(expected, StringValue(build?[key] ?? row[key], 120), StringComparison.OrdinalIgnoreCase)) return false;
+            }
+            return true;
+        }
+
+        private static bool ValidVin(string vin) => vin != null && Regex.IsMatch(vin, "^[A-HJ-NPR-Z0-9]{17}$", RegexOptions.IgnoreCase);
+        private static bool InRange(decimal? value, decimal minimum, decimal maximum) => value.HasValue && value >= minimum && value <= maximum;
+        private static decimal? AppraisalNumber(JToken token) {
+            if (token == null || (token.Type != JTokenType.String && token.Type != JTokenType.Integer && token.Type != JTokenType.Float)) return null;
+            // JValue.ToString() uses the request culture for typed numbers. Read the
+            // scalar with invariant culture before parsing so 9.5 never becomes 95.
+            var text = token.Type == JTokenType.String ? (string)token : Convert.ToString(((JValue)token).Value, CultureInfo.InvariantCulture);
+            decimal number;
+            return decimal.TryParse(text, NumberStyles.Number | NumberStyles.AllowExponent, CultureInfo.InvariantCulture, out number) ? (decimal?)number : null;
+        }
+        private static JToken OptionalNumber(JToken value, decimal minimum, decimal maximum) {
+            var number = AppraisalNumber(value);
+            return InRange(number, minimum, maximum) ? new JValue(number.Value) : JValue.CreateNull();
+        }
+        private static string StringValue(JToken value, int maximum) {
+            if (value?.Type != JTokenType.String) return null;
+            var text = ((string)value).Trim();
+            return text.Length == 0 || text.Length > maximum ? null : text;
+        }
+        private static string SafeListingUrl(JToken token) {
+            var text = StringValue(token, 2048);
+            if (!Uri.TryCreate(text, UriKind.Absolute, out var url) || (url.Scheme != Uri.UriSchemeHttps && url.Scheme != Uri.UriSchemeHttp)
+                || !string.IsNullOrEmpty(url.UserInfo) || Regex.IsMatch(url.Query, @"(?:^|[?&])(?:api_key|access_token|token|key)=", RegexOptions.IgnoreCase)) return null;
+            return url.AbsoluteUri;
+        }
+
         public static async Task<JObject> AppraiseAsync(PriceResearchRequest input, decimal? resaleUsd, decimal? hammerBidUsd, CancellationToken cancellationToken) {
             var bidCalculator = new AuctionBidService();
             var bid = new AuctionBidRequest { ExpectedSellingPriceUsd = resaleUsd ?? 1m, CurrentHammerBidUsd = hammerBidUsd };
@@ -247,8 +415,8 @@ namespace autodealer.dev.Services {
             return NeoVinResult.Create(input.Vin, decode.ToString());
         }
 
-        private static JObject VehicleSearch(NeoVinResult vehicle, PriceResearchRequest input) {
-            var year = PriceResearchResult.Number(vehicle.Data["year"]);
+        private static JObject VehicleSearch(NeoVinResult vehicle, PriceResearchRequest input, bool invariantNumbers = false) {
+            var year = invariantNumbers ? AppraisalNumber(vehicle.Data["year"]) : PriceResearchResult.Number(vehicle.Data["year"]);
             var make = (string)vehicle.Data["make"];
             var model = (string)vehicle.Data["model"];
             var trim = (string)vehicle.Data["trim"];

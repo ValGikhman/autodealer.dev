@@ -70,7 +70,7 @@ def main():
         return Response(headers={**quota_headers, "Cache-Control": "no-store"})
 
     # The upstream HTTP client can include provider query strings in diagnostics.
-    for name in ("httpx", "httpcore", "services", "mcp"):
+    for name in ("httpx", "httpcore", "services", "mcp", "fastmcp"):
         logging.getLogger(name).setLevel(logging.CRITICAL)
     mcp.run(transport="streamable-http", host="127.0.0.1", port=port, stateless_http=True)
 

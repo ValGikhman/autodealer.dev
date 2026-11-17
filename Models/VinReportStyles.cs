@@ -16,6 +16,20 @@ namespace autodealer.dev.Models {
 .avd-table th,.avd-table td{border-color:#d5d8db}.avd-table thead th{background:#eceeef}.avd-table tbody tr:nth-child(even){background:#f7f7f8}.avd-tree>summary,.avd-tree--complete>summary{color:#3f454b}.avd-tree>summary:hover{background:linear-gradient(180deg,#f1f2f3,#e3e5e7)}.avd-tree__content,.avd-tree--complete>.avd-tree__content{border-left-color:#d1d4d7}.avd-subheading{border-left-color:#555c63;background:#eceeef}
 .avd-style{border-color:#d0d3d6;background:linear-gradient(145deg,rgba(255,255,255,.9),rgba(226,228,230,.75));box-shadow:0 10px 28px rgba(30,34,38,.1)}.avd-style__toggle{border-color:#c1c5c9;background:linear-gradient(120deg,#fafafa 0,#e7e9eb 52%,#dce0e3 100%);box-shadow:0 4px 14px rgba(30,34,38,.12),inset 0 1px rgba(255,255,255,.9);color:#30363c}.avd-style__toggle:hover{border-color:#aeb3b8;background:linear-gradient(120deg,#f4f5f6 0,#dde0e2 52%,#d1d5d8 100%);box-shadow:0 4px 12px rgba(30,34,38,.14)}.avd-style__toggle::after{background:linear-gradient(90deg,transparent,#8c939a,transparent)}.avd-style__toggle .avd-toggle-icons{color:#555c63}.avd-style__icon{border-color:#c1c5c9;background:linear-gradient(145deg,#fff,#dfe2e5);color:#4c535a;box-shadow:0 3px 9px rgba(30,34,38,.13)}.avd-style__content{border-left-color:#cfd2d5}.avd-style__content>.avd-panel::before{background:#cfd2d5}.avd-style__content>.avd-panel::after{border-color:#aeb3b8;background:#f5f6f7}.avd-style__content>.avd-panel>.avd-panel__toggle{border-color:#ced1d4;background:linear-gradient(180deg,#fff,#e9ebed);color:#3f464d}.avd-style__content>.avd-panel>.avd-panel__toggle:hover{border-color:#b5b9bd;background:linear-gradient(180deg,#f7f8f8,#dde0e2)}
 .avd-report__raw{margin:0;padding:10px;max-height:450px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;background:#f7f7f8;color:#252a30;font:12px/1.5 Consolas,monospace}
+/* MarketCheck keeps two specification/value pairs in every table row. */
+.neovin-report .avd-table--neovin{min-width:34rem;table-layout:fixed;line-height:1.45}
+.neovin-report .avd-table--neovin th,.neovin-report .avd-table--neovin td{vertical-align:top;white-space:normal;overflow-wrap:anywhere}
+.neovin-report .avd-table--neovin tr>:nth-child(odd){width:37.5%}
+.neovin-report .avd-table--neovin tr>:nth-child(even){width:12.5%}
+.neovin-report .avd-table--neovin tbody th{font-weight:600}
+.neovin-report .avd-table--neovin .avd-numeric{text-align:right;font-variant-numeric:tabular-nums}
+.neovin-report .avd-table-wrap:focus-visible{outline:3px solid rgba(72,78,84,.28);outline-offset:2px}
+.neovin-report .avd-description-list{margin:0;padding:0;list-style:none}
+.neovin-report .avd-description-list>li{padding:8px 10px;border-bottom:1px solid #d5d8db;overflow-wrap:anywhere}
+.neovin-report .avd-description-list>li:last-child{border-bottom:0}
+.neovin-report .avd-description-item{margin:0}
+.neovin-report .avd-repeated-values .avd-numeric{text-align:right;font-variant-numeric:tabular-nums;flex:1}
+@media(max-width:640px){.neovin-report .avd-tree__content{margin-left:4px;padding-left:5px}}
 </style>");
         }
     }
