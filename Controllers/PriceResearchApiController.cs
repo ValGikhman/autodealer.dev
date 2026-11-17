@@ -78,6 +78,12 @@ namespace autodealer.dev.Controllers {
             return RunAppraisal(input, AuctionAppraisalService.GetMarketPriceAsync, cancellationToken);
         }
 
+        [HttpPost, Route("market-appraisal")]
+        public Task<IHttpActionResult> MarketAppraisal([FromBody] JObject input, CancellationToken cancellationToken) {
+            return RunAppraisal(input, (scope, token) => AuctionAppraisalService.MarketAppraisalAsync(scope, input, token),
+                cancellationToken, allowVehicleName: true);
+        }
+
         [HttpPost, Route("market-inventory")]
         public Task<IHttpActionResult> MarketInventory([FromBody] JObject input, CancellationToken cancellationToken) {
             return RunAppraisal(input, AuctionAppraisalService.CountMarketInventoryAsync, cancellationToken);

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -32,15 +33,30 @@ namespace autodealer.dev.Services {
         }
 
         public async Task InitializeAsync(CancellationToken token) {
-            var result = await SendAsync("initialize", new JObject {
-                ["protocolVersion"] = RequestedVersion,
-                ["capabilities"] = new JObject(),
-                ["clientInfo"] = new JObject { ["name"] = "AutoDealer.dev", ["version"] = "1.0" }
-            }, token);
-            version = (string)result["protocolVersion"];
-            if (version != RequestedVersion && version != "2025-03-26" && version != "2025-11-25")
-                throw new HttpRequestException("Unsupported MarketCheck MCP protocol version.");
-            await SendAsync("notifications/initialized", null, token, notification: true);
+            try {
+                var result = await SendAsync("initialize", new JObject {
+                    ["protocolVersion"] = RequestedVersion,
+                    ["capabilities"] = new JObject(),
+                    ["clientInfo"] = new JObject { ["name"] = "AutoDealer.dev", ["version"] = "1.0" }
+                }, token);
+                version = (string)result["protocolVersion"];
+                if (version != RequestedVersion && version != "2025-03-26" && version != "2025-11-25")
+                    throw new HttpRequestException("Unsupported MarketCheck MCP protocol version.");
+                await SendAsync("notifications/initialized", null, token, notification: true);
+            } catch (HttpRequestException ex) when (IsConnectionFailure(ex)) {
+                throw new PriceResearchException(HttpStatusCode.ServiceUnavailable,
+                    "The MarketCheck MCP service is not running or cannot be reached. Start the configured local MCP service and try again.");
+            }
+        }
+
+        private static bool IsConnectionFailure(Exception error) {
+            for (var current = error; current != null; current = current.InnerException) {
+                var socket = current as SocketException;
+                if (socket?.SocketErrorCode == SocketError.ConnectionRefused) return true;
+                var web = current as WebException;
+                if (web?.Status == WebExceptionStatus.ConnectFailure) return true;
+            }
+            return false;
         }
 
         public async Task<JObject> CallAsync(string name, JObject arguments, CancellationToken token) {
