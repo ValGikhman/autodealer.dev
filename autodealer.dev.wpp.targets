@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- The root Web.config belongs to the server, not to a publish package. -->
+  <PropertyGroup>
+    <AutoParameterizationWebConfigConnectionStrings>false</AutoParameterizationWebConfigConnectionStrings>
+    <DeleteExistingFiles Condition="'$(DeleteExistingFiles)' == ''">false</DeleteExistingFiles>
+  </PropertyGroup>
+  <ItemGroup>
+    <ExcludeFromPackageFiles Include="Web.config">
+      <FromTarget>PreserveAutoDealerServerConfiguration</FromTarget>
+    </ExcludeFromPackageFiles>
+    <!-- Also protects a package whose destination is changed after creation.
+         Nested Web.config files still add/update; obsolete ones remain on the server. -->
+    <MsDeploySkipRules Include="PreserveServerWebConfigsOnDelete">
+      <SkipAction>Delete</SkipAction>
+      <ObjectName>filePath</ObjectName>
+      <AbsolutePath>(?i)[\\/]Web\.config$</AbsolutePath>
+    </MsDeploySkipRules>
+  </ItemGroup>
+
+  <!-- Follow WPP's source/destination App_Data rules, but only for the root file. -->
+  <Target Name="PreserveAutoDealerServerConfiguration" AfterTargets="AddDeclareParametersItemsForContentPath">
+    <Error Condition="'$(_DestinationContentPath)' == ''"
+           Text="The publish destination root must be specified so the server Web.config can be preserved." />
+    <EscapeTextForRegularExpressions Text="$(_MSDeployDirPath_FullPath)">
+      <Output TaskParameter="Result" PropertyName="_AutoDealerEscapedPublishRoot" />
+    </EscapeTextForRegularExpressions>
+    <EscapeTextForRegularExpressions Text="$(_DestinationContentPath)">
+      <Output TaskParameter="Result" PropertyName="_AutoDealerEscapedDestinationRoot" />
+    </EscapeTextForRegularExpressions>
+    <ItemGroup>
+      <MsDeploySkipRules Include="PreserveAutoDealerSourceWebConfig">
+        <ObjectName>filePath</ObjectName>
+        <AbsolutePath>(?i)^$(_AutoDealerEscapedPublishRoot)[\\/]Web\.config$</AbsolutePath>
+        <Apply>Source</Apply>
+      </MsDeploySkipRules>
+      <MsDeploySkipRules Include="PreserveAutoDealerDestinationWebConfig">
+        <ObjectName>filePath</ObjectName>
+        <AbsolutePath>(?i)^$(_AutoDealerEscapedDestinationRoot)[\\/]Web\.config$</AbsolutePath>
+        <Apply>Destination</Apply>
+      </MsDeploySkipRules>
+    </ItemGroup>
+  </Target>
+
+  <!-- Folder/FTP publishing cannot apply a per-file deletion skip rule. -->
+  <Target Name="PreventDeletingAutoDealerServerConfiguration"
+          BeforeTargets="WebFileSystemPublish;WebFTPPublish"
+          Condition="'$(DeleteExistingFiles)' == 'true'">
+    <Error Text="Turn off Delete existing files before publishing AutoDealer.dev; the destination Web.config is maintained on the server." />
+  </Target>
+</Project>

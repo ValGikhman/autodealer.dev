@@ -15,8 +15,8 @@ credentials, subscriptions, and the client inside one serializable transaction.
 The same migration also grants permission to delete dealer demo opportunities.
 
 For local development, the `AutoDealer.dev` connection targets the
-`AUTODEALER.DEV` catalog on `VALS-PC`. Set deployment-specific connection strings through a release
-transform or a protected configuration provider. Do not commit production
+`AUTODEALER.DEV` catalog on `VALS-PC`. Set deployment-specific connection strings in the server's
+private `Web.config` or a protected configuration provider. Do not commit production
 credentials.
 
 The application data model is `Data/autodealer_dev.dbml`. Its generated
@@ -71,9 +71,37 @@ them to activate, renew, pause, or cancel subscriptions.
   audit logging, monitoring, backups, and an incident-response process.
 - Put rate limiting at the edge as well as enforcing plan quota in the API access service.
 
+## Preserve server configuration when publishing
+
+`autodealer.dev.wpp.targets` excludes the root `Web.config` from publish output
+and adds Web Deploy rules that preserve the destination root file. The nested
+`Views/Web.config` still publishes normally. Connection-string parameterization
+is disabled because the server owns those values.
+
+For Folder and FTP publishing, leave **Delete existing files prior to publish**
+off. Publishing stops before deletion if that option is enabled. Initialize a
+new server's private `Web.config` separately before the first application publish;
+later publishes keep it intact. Package deletion rules also preserve existing
+`Web.config` files when a package is deployed to another IIS application path.
+Nested configuration files can still be added or updated; obsolete nested
+`Web.config` files are retained instead of deleted.
+
+The published `Scripts` directory includes `Start-MarketCheckMcp.ps1` and
+`Start-MarketCheckMcp.py`. To install dependencies and start MCP on the AutoDealer
+API host, run from that website directory:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Start-MarketCheckMcp.ps1 -Setup
+```
+
+Git must already be on PATH. Installation is a one-time step; later starts omit
+`-Setup`. This launches a process, not an automatically restarting Windows service.
+Production needs a supervisor to start MCP after reboot and restart it on failure.
+GTX sandbox and Demo can share that process when both use the same API host.
+
 ## Search, sitemap, and Google measurement setup
 
-The application uses a single production-ready `Web.config`; no Debug or Release
+The server keeps its own private `Web.config`; no Debug or Release
 configuration transform is required. Confirm these deployment values rather than
 putting environment-specific IDs directly in a Razor view:
 
@@ -84,7 +112,7 @@ putting environment-specific IDs directly in a Razor view:
 <add key="GoogleSearchConsole:VerificationToken" value="verification-token" />
 ```
 
-The checked-in configuration sets `Seo:AllowIndexing=true` for the public site.
+Set `Seo:AllowIndexing=true` in the public site's server configuration.
 After GitHub deployment, the application serves the public sitemap at
 `https://autodealer.dev/sitemap.xml` and references it from
 `https://autodealer.dev/robots.txt`. If this repository is ever deployed to a

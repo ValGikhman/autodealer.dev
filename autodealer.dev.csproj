@@ -277,6 +277,8 @@
     <Content Include="Scripts\accountCredentialValidation.js" />
     <Content Include="Scripts\passwordVisibility.js" />
     <Content Include="Scripts\Invoke-TrialExpiration.ps1" />
+    <Content Include="Scripts\Start-MarketCheckMcp.ps1" />
+    <Content Include="Scripts\Start-MarketCheckMcp.py" />
     <Content Include="Scripts\autodealer-vin-report.js" />
     <Content Include="Scripts\pepTools\pepEdit.js" />
     <Content Include="Scripts\pepTools\pepGrid.js" />
@@ -352,6 +354,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="autodealer.dev.wpp.targets" />
     <None Include="Docs\VinDecoderApi.md" />
     <None Include="Docs\PriceResearchApi.md" />
     <None Include="Database\013_ApiKeyMonthlyQuota.sql" />
